@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ArticlePlatform {
     struct Article {
         uint256 id;
-        address payable author;
+        address author;
         string content; // IPFS hash
         uint256 donationsReceived;
     }
@@ -78,14 +78,14 @@ contract ArticlePlatform {
 
     function postArticle(string memory _content) public returns (uint256) {
         Article memory newArticle = Article({
-            id: authorArticles[msg.sender].length - 1,
+            id: authorArticles[msg.sender].length,
             author: payable(msg.sender),
             content: _content,
             donationsReceived: 0
         });
 
         authorArticles[msg.sender].push(newArticle);
-        uint256 articleId = authorArticles[msg.sender].length - 1;
+        uint256 articleId = authorArticles[msg.sender].length;
 
         emit ArticlePosted(msg.sender, _content, articleId);
 
@@ -181,12 +181,12 @@ contract ArticlePlatform {
         uint256 _startDate,
         uint256 _endDate
     ) external onlyOwner returns (Round memory) {
-        // require(_startDate < _endDate, "Start date must be before end date");
-        // require(
-        //     _startDate > block.timestamp,
-        //     "Start date must be in the future"
-        // );
-        // require(_endDate > block.timestamp, "End date must be in the future");
+        require(_startDate < _endDate, "Start date must be before end date");
+        require(
+            _startDate > block.timestamp,
+            "Start date must be in the future"
+        );
+        require(_endDate > block.timestamp, "End date must be in the future");
 
         address pool = _createPool(_token, _name, _startDate, _endDate);
         Round memory newRound = Round({
@@ -207,18 +207,28 @@ contract ArticlePlatform {
     function getAuthorArticle(
         address _author,
         uint256 _articleId
-    ) public view returns (string memory) {
-        return authorArticles[_author][_articleId].content;
+    ) public view returns (Article memory) {
+        return authorArticles[_author][_articleId];
     }
 
     function getRoundArticle(
-        uint256 _roundId,
         uint256 _articleId
-    ) public view returns (Article memory) {
-        return roundArticles[_roundId][_articleId];
+    ) public view returns (Round memory) {
+        return authorToArticleIdToRound[msg.sender][_articleId];
+    }
+
+    function getRoundLength() public view returns (uint256) {
+        return rounds.length;
     }
 
     function getRound(uint256 _roundId) public view returns (Round memory) {
         return rounds[_roundId];
+    }
+
+    function getDonatedAmount(
+        address _author,
+        uint256 _articleId
+    ) public view returns (uint256) {
+        return authorArticles[_author][_articleId].donationsReceived;
     }
 }
