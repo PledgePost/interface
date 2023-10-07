@@ -9,7 +9,6 @@ describe("ArticlePlatform", () => {
   async function deployContract() {
     const ContractFactory = await ethers.getContractFactory("ArticlePlatform");
     const contract = await ContractFactory.deploy();
-
     return contract;
   }
   async function deployTokenContract() {
