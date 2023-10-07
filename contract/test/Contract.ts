@@ -1,6 +1,14 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
-
+function sqrt(x: number) {
+  let z = x / 2 + 1;
+  let y = x;
+  while (z < y) {
+    y = z;
+    z = (x / z + z) / 2;
+  }
+  return y;
+}
 describe("Contract Test", () => {
   let owner: any;
   let addr1: any;
@@ -74,7 +82,8 @@ describe("Contract Test", () => {
         1702101663
       );
       await contract.postArticle("test");
-      await token.approve(contract, 200);
+      await token.mint(owner.address, 100);
+      await token.approve(contract, 100);
       await contract.donateToArticle(owner.address, 0, token, 100);
       expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(100);
     });
@@ -86,7 +95,8 @@ describe("Contract Test", () => {
         1702101663
       );
       await contract.postArticle("test");
-      await token.approve(contract, 300);
+      await token.mint(owner.address, 200);
+      await token.approve(contract, 200);
       await token.connect(addr1).mint(addr1.address, 100);
       await token.connect(addr1).approve(contract, 100);
       await contract.donateToArticle(owner.address, 0, token, 100);
@@ -95,14 +105,14 @@ describe("Contract Test", () => {
       expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(200);
       expect(
         await contract.getRecievedDonationsWithinRound(owner.address, 0, 0)
-      ).to.equal(100);
+      ).to.equal(sqrt(100));
       await contract
         .connect(addr1)
         .donateToArticle(owner.address, 0, token, 100);
       expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(300);
       expect(
         await contract.getRecievedDonationsWithinRound(owner.address, 0, 0)
-      ).to.equal(200);
+      ).to.equal(sqrt(100) + sqrt(100));
     });
   });
 });

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import {PoolContract} from "./PoolContract.sol";
+import {QF} from "./libraries/QF.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -20,6 +21,7 @@ contract ArticlePlatform {
         uint256 id;
         address owner;
         address poolAddress;
+        IERC20 poolToken;
         uint256 poolAmount;
         uint256 startDate;
         uint256 endDate;
@@ -136,9 +138,8 @@ contract ArticlePlatform {
         // if yes, add amount
         Round storage round = authorToArticleIdToRound[_author][_articleId];
         if (round.id >= 0 && round.isActive) {
-            recievedDonationsWithinRound[_author][_articleId][
-                round.id
-            ] += _amount;
+            recievedDonationsWithinRound[_author][_articleId][round.id] += QF
+                .sqrt(_amount);
         }
         emit ArticleDonated(_author, msg.sender, _articleId, _amount);
     }
@@ -193,6 +194,7 @@ contract ArticlePlatform {
             id: rounds.length,
             owner: owner,
             poolAddress: pool,
+            poolToken: _token,
             poolAmount: 0,
             startDate: _startDate,
             endDate: _endDate,
@@ -202,6 +204,31 @@ contract ArticlePlatform {
         emit RoundCreated(msg.sender, pool, _startDate, _endDate);
         rounds.push(newRound);
         return newRound;
+    }
+
+    function Allocate(uint256 _roundId) external onlyOwner {
+        Round storage round = rounds[_roundId];
+        uint256 totalSquareSqrtSum = 0;
+        for (uint256 i = 0; i < roundArticles[_roundId].length; i++) {
+            Article storage article = roundArticles[_roundId][i];
+            uint256 sqrtSum = recievedDonationsWithinRound[article.author][
+                article.id
+            ][_roundId];
+            totalSquareSqrtSum += sqrtSum ** 2;
+        }
+        for (uint256 i = 0; i < roundArticles[_roundId].length; i++) {
+            Article storage article = roundArticles[_roundId][i];
+            uint256 suquareSqrtSum = recievedDonationsWithinRound[
+                article.author
+            ][article.id][_roundId] ** 2;
+            uint256 matching = (round.poolAmount * suquareSqrtSum) /
+                totalSquareSqrtSum;
+            // transfer matching to author address
+            PoolContract(round.poolAddress).poolTransfer(
+                article.author,
+                matching
+            );
+        }
     }
 
     function getAuthorArticle(
@@ -230,5 +257,13 @@ contract ArticlePlatform {
         uint256 _articleId
     ) public view returns (uint256) {
         return authorArticles[_author][_articleId].donationsReceived;
+    }
+
+    function getRecievedDonationsWithinRound(
+        address _author,
+        uint256 _articleId,
+        uint256 _roundId
+    ) public view returns (uint256) {
+        return recievedDonationsWithinRound[_author][_articleId][_roundId];
     }
 }
