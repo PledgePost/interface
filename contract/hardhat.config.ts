@@ -45,6 +45,9 @@ const config: HardhatUserConfig = {
       url: "https://polygonzkevm-testnet.g.alchemy.com/v2/demo",
       accounts: [deployerPrivateKey],
     },
+		scrollSepolia: {
+			url:'https://sepolia-rpc.scroll.io',
+			accounts: [deployerPrivateKey],
   },
   etherscan: {
     apiKey: etherscanApiKey,

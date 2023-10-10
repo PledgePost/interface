@@ -12,7 +12,7 @@ describe("Contract Test", () => {
   let token: any;
 
   async function deployContract() {
-    const ContractFactory = await ethers.getContractFactory("ArticlePlatform");
+    const ContractFactory = await ethers.getContractFactory("PledgePost");
     const contract = await ContractFactory.deploy();
     return contract;
   }
