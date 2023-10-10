@@ -207,11 +207,26 @@ contract PledgePost {
             startDate: _startDate,
             endDate: _endDate,
             createdTimestamp: block.timestamp,
-            isActive: true
+            isActive: true //TODO: change to false, only owner can activate
         });
         emit RoundCreated(msg.sender, pool, _startDate, _endDate);
         rounds.push(newRound);
         return newRound;
+    }
+
+    function activateRound(uint256 _roundId) external onlyOwner {
+        require(_roundId < rounds.length, "Round does not exist");
+        Round storage round = rounds[_roundId];
+        require(!round.isActive, "Round is already active");
+        require(round.endDate > block.timestamp, "Round has ended");
+        round.isActive = true;
+    }
+
+    function deactivateRound(uint256 _roundId) external onlyOwner {
+        require(_roundId < rounds.length, "Round does not exist");
+        Round storage round = rounds[_roundId];
+        require(round.isActive, "Round is not active");
+        round.isActive = false;
     }
 
     function Allocate(uint256 _roundId) external onlyOwner {
