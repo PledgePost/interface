@@ -22,9 +22,12 @@ import {
   zora,
   polygonZkEvm,
   sepolia,
+  goerli,
   optimismGoerli,
   base,
   polygonZkEvmTestnet,
+  scrollSepolia,
+  polygonMumbai,
 } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 const { chains, publicClient, webSocketPublicClient } = configureChains(
@@ -32,16 +35,17 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
     mainnet,
     polygon,
     optimism,
-    base,
-    zora,
     polygonZkEvm,
     sepolia,
+    goerli,
+    polygonMumbai,
     optimismGoerli,
     polygonZkEvmTestnet,
+    scrollSepolia,
   ],
   [publicProvider()]
 );
-const appName: string = "RainbowKit scaffolding";
+const appName: string = "PledgePost";
 const AppInfo = { appName: appName, appURL: "" };
 const projectId: string = process.env.NEXT_PUBLIC_PROJECT_ID as string;
 const { wallets } = getDefaultWallets({

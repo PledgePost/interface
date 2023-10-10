@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 import { useSafeAA } from "@/hooks/AccountAbstractionContext";
 
 const Header = () => {
-  const { loginWeb3Auth, logoutWeb3Auth, ownerAddress } = useSafeAA();
+  const { loginWeb3Auth, logoutWeb3Auth, address } = useSafeAA();
   // 0xa6Fd859Eff69aE7EB5EfcC7e2576f39fed87B1b4
   return (
     <div>
@@ -35,7 +35,7 @@ const Header = () => {
                   className="block py-2 pr-4 pl-3 text-gray-700 bg-primary-700 lg:bg-transparent lg:text-primary-700 lg:p-0 dark:text-white"
                   aria-current="page"
                 >
-                  Home
+                  DashBoard
                 </Link>
               </li>
               <li>
@@ -43,12 +43,12 @@ const Header = () => {
                   href="/user"
                   className="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
                 >
-                  Account
+                  Explore
                 </Link>
               </li>
               <li>
                 <a
-                  href="https://github.com/tnkshuuhei"
+                  href="https://github.com/tnkshuuhei/EthGlonalOnline2023"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
@@ -59,15 +59,15 @@ const Header = () => {
             </ul>
           </div>
           <div className="flex items-center lg:order-2 gap-4">
-            {/* <ConnectButton
+            <ConnectButton
               showBalance={false}
               accountStatus={{ smallScreen: "address", largeScreen: "full" }}
-            /> */}
-            {ownerAddress ? (
-              <Button onClick={logoutWeb3Auth}>Disconnect</Button>
+            />
+            {/* {address ? (
+              <Button onClick={logoutWeb3Auth}>{address}</Button>
             ) : (
               <Button onClick={loginWeb3Auth}>Connect</Button>
-            )}
+            )} */}
             <ModeToggle />
           </div>
         </div>

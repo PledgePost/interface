@@ -122,12 +122,17 @@ export const AccountAbstractionProvider = ({
     }
   }, [web3AuthModalPack, loginWeb3Auth]);
   const logoutWeb3Auth = () => {
-    web3AuthModalPack?.signOut();
-    setAddress("");
-    setSafes([]);
-    setChainId(chain?.id);
-    setWeb3Provider(undefined);
-    setSigner(undefined);
+    if (!web3AuthModalPack) return;
+    try {
+      web3AuthModalPack?.signOut();
+      setAddress("");
+      setSafes([]);
+      setChainId(chain?.id);
+      setWeb3Provider(undefined);
+      setSigner(undefined);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
