@@ -1,21 +1,16 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
-function sqrt(x: number) {
-  let z = x / 2 + 1;
-  let y = x;
-  while (z < y) {
-    y = z;
-    z = (x / z + z) / 2;
-  }
-  return y;
-}
+
 describe("Contract Test", () => {
   let owner: any;
   let addr1: any;
   let addr2: any;
+  let addr3: any;
+  let addr4: any;
 
   let contract: any;
   let token: any;
+
   async function deployContract() {
     const ContractFactory = await ethers.getContractFactory("ArticlePlatform");
     const contract = await ContractFactory.deploy();
@@ -26,8 +21,9 @@ describe("Contract Test", () => {
     const token = await TokenFactory.deploy();
     return token;
   }
+
   beforeEach(async () => {
-    [owner, addr1, addr2] = await ethers.getSigners();
+    [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
     contract = await deployContract();
     token = await deployTokenContract();
   });
@@ -102,17 +98,180 @@ describe("Contract Test", () => {
       await contract.donateToArticle(owner.address, 0, token, 100);
       await contract.applyForRound(0, 0);
       await contract.donateToArticle(owner.address, 0, token, 100);
+      const sqrt100 = await contract.getSquareRoot(100);
+
       expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(200);
       expect(
         await contract.getRecievedDonationsWithinRound(owner.address, 0, 0)
-      ).to.equal(sqrt(100));
+      ).to.equal(sqrt100);
       await contract
         .connect(addr1)
         .donateToArticle(owner.address, 0, token, 100);
       expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(300);
       expect(
         await contract.getRecievedDonationsWithinRound(owner.address, 0, 0)
-      ).to.equal(sqrt(100) + sqrt(100));
+      ).to.equal(sqrt100 + sqrt100);
+    });
+
+    it("should Allocate", async () => {
+      const contract = await deployContract();
+      const token = await deployTokenContract();
+      await contract.createRound(
+        token,
+        "Initial Round",
+        1699509663,
+        1702101663
+      );
+      await contract.postArticle("test");
+      await token.connect(addr1).mint(addr1.address, ethers.parseEther("300"));
+      await token.connect(addr1).approve(contract, ethers.parseEther("300"));
+      await contract
+        .connect(addr1)
+        .donateToArticle(owner.address, 0, token, ethers.parseEther("100"));
+      await contract.applyForRound(0, 0);
+      await contract
+        .connect(addr1)
+        .donateToArticle(owner.address, 0, token, ethers.parseEther("100"));
+      expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(
+        ethers.parseEther("200")
+      );
+      const sqrt100 = await contract.getSquareRoot(ethers.parseEther("100"));
+      expect(
+        await contract.getRecievedDonationsWithinRound(owner.address, 0, 0)
+      ).to.equal(sqrt100);
+      await contract
+        .connect(addr1)
+        .donateToArticle(owner.address, 0, token, ethers.parseEther("100"));
+      expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(
+        ethers.parseEther("300")
+      );
+      expect(
+        await contract.getRecievedDonationsWithinRound(owner.address, 0, 0)
+      ).to.equal(sqrt100 + sqrt100);
+      const round = await contract.getRound(0);
+      await token.mint(owner.address, ethers.parseEther("100"));
+      await token.approve(contract, ethers.parseEther("100"));
+      await contract.deposit(0, ethers.parseEther("100"));
+      await contract.Allocate(0);
+      expect(await token.balanceOf(round.poolAddress)).to.equal(0);
+      expect(await token.balanceOf(owner.address)).to.equal(
+        ethers.parseEther("400")
+      );
+    });
+    it("should allocate multiple article", async () => {
+      const contract = await deployContract();
+      const token = await deployTokenContract();
+      await contract.createRound(
+        token,
+        "Initial Round",
+        1699509663,
+        1702101663
+      );
+      // post articles
+      await contract.postArticle("test");
+      await contract.connect(addr1).postArticle("addr1");
+      await contract.connect(addr2).postArticle("addr2");
+      await contract.connect(addr3).postArticle("addr3");
+      await contract.connect(addr3).postArticle("addr3 again");
+
+      // donate to article
+      await token.mint(addr4.address, ethers.parseEther("10000"));
+      await token.connect(addr4).approve(contract, ethers.parseEther("10000"));
+      await contract
+        .connect(addr4)
+        .donateToArticle(owner.address, 0, token, ethers.parseEther("100"));
+      await contract
+        .connect(addr4)
+        .donateToArticle(addr1.address, 0, token, ethers.parseEther("100"));
+      await contract
+        .connect(addr4)
+        .donateToArticle(addr2.address, 0, token, ethers.parseEther("100"));
+      await contract
+        .connect(addr4)
+        .donateToArticle(addr3.address, 0, token, ethers.parseEther("100"));
+
+      // apply for round
+      await contract.connect(addr1).applyForRound(0, 0);
+      await contract.connect(addr2).applyForRound(0, 0);
+      await contract.connect(addr3).applyForRound(0, 0);
+      await contract.connect(addr3).applyForRound(0, 1);
+      await contract.applyForRound(0, 0);
+
+      await contract
+        .connect(addr4)
+        .donateToArticle(addr1.address, 0, token, ethers.parseEther("1000"));
+      await contract
+        .connect(addr4)
+        .donateToArticle(addr2.address, 0, token, ethers.parseEther("500"));
+      await contract
+        .connect(addr4)
+        .donateToArticle(addr2.address, 0, token, ethers.parseEther("500"));
+      await contract
+        .connect(addr4)
+        .donateToArticle(addr3.address, 0, token, ethers.parseEther("250"));
+      await contract
+        .connect(addr4)
+        .donateToArticle(addr3.address, 0, token, ethers.parseEther("250"));
+      await contract
+        .connect(addr4)
+        .donateToArticle(addr3.address, 1, token, ethers.parseEther("250"));
+      await contract
+        .connect(addr4)
+        .donateToArticle(addr3.address, 1, token, ethers.parseEther("250"));
+
+      const round = await contract.getRound(0);
+      await contract.connect(addr4).deposit(0, ethers.parseEther("1000"));
+      const ownerbalance = await token.balanceOf(owner.address);
+      const addr1balance = await token.balanceOf(addr1.address);
+      const addr2balance = await token.balanceOf(addr2.address);
+      const addr3balance = await token.balanceOf(addr3.address);
+      const addr4balance = await token.balanceOf(addr4.address);
+      const poolbalance = await token.balanceOf(round.poolAddress);
+      console.log("before owner balance: ", ownerbalance);
+      console.log("before addr1 balance: ", addr1balance);
+      console.log("before addr2 balance: ", addr2balance);
+      console.log("before addr3 balance: ", addr3balance);
+      console.log("before addr4 balance: ", addr4balance);
+      console.log("before pool balance: ", poolbalance);
+      await contract.Allocate(0);
+      expect(await token.balanceOf(addr1.address)).to.equal(
+        addr1balance + (await contract.getAllocation(0, addr1.address, 0))
+      );
+      expect(await token.balanceOf(addr2.address)).to.equal(
+        addr2balance + (await contract.getAllocation(0, addr2.address, 0))
+      );
+      expect(await token.balanceOf(addr3.address)).to.equal(
+        addr3balance +
+          (await contract.getAllocation(0, addr3.address, 0)) +
+          (await contract.getAllocation(0, addr3.address, 1))
+      );
+
+      console.log(
+        "Allocation: ",
+        await contract.getAllocation(0, owner.address, 0)
+      );
+      console.log(
+        "Allocation1: ",
+        await contract.getAllocation(0, addr1.address, 0)
+      );
+      console.log(
+        "Allocation2: ",
+        await contract.getAllocation(0, addr2.address, 0)
+      );
+      console.log(
+        "Allocation3: ",
+        await contract.getAllocation(0, addr3.address, 0)
+      );
+      console.log(
+        "Allocation3: ",
+        await contract.getAllocation(0, addr3.address, 1)
+      );
+      console.log("owner balance: ", await token.balanceOf(owner.address));
+      console.log("addr1 balance: ", await token.balanceOf(addr1.address));
+      console.log("addr2 balance: ", await token.balanceOf(addr2.address));
+      console.log("addr3 balance: ", await token.balanceOf(addr3.address));
+      console.log("addr4 balance: ", await token.balanceOf(addr4.address));
+      console.log("pool balance: ", await token.balanceOf(round.poolAddress));
     });
   });
 });

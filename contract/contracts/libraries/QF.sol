@@ -17,15 +17,4 @@ library QF {
             z = (x / z + z) / 2;
         }
     }
-
-    // Calculates the sum of the square roots of the values in the array
-    function calculateSqrtSum(
-        uint256[] memory x_values
-    ) internal pure returns (uint256) {
-        uint256 sqrtSum = 0;
-        for (uint256 i = 0; i < x_values.length; i++) {
-            sqrtSum += sqrt(x_values[i]);
-        }
-        return sqrtSum;
-    }
 }

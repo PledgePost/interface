@@ -22,8 +22,10 @@ contract PoolContract {
         token = _token;
     }
 
-    function poolTransfer(address _to, uint256 _amount) external onlyOwner {
-        require(_amount > 0, "Amount must be greater than 0");
+    function poolTransfer(
+        address _to,
+        uint256 _amount
+    ) external onlyOwner returns (bool) {
         require(
             token.balanceOf(address(this)) >= _amount,
             "Not enough balance"
@@ -31,5 +33,6 @@ contract PoolContract {
         require(_to != address(0), "Invalid address");
         bool sent = token.transfer(_to, _amount);
         require(sent, "Failed to transfer token");
+        return sent;
     }
 }

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import {PoolContract} from "./PoolContract.sol";
+import {IPoolContract} from "./interface/IPoolContract.sol";
 import {QF} from "./libraries/QF.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -44,6 +45,11 @@ contract ArticlePlatform {
     // author => Article.id => Round.id => uint256
     mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
         public recievedDonationsWithinRound;
+
+    // round.id => author => article.id => amount
+    mapping(uint256 => mapping(address => mapping(uint256 => uint256)))
+        public matchingAmounts;
+
     // TODO: add support for multiple tokens
     // Token addresses(temp)
     // address public constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
@@ -66,6 +72,7 @@ contract ArticlePlatform {
         uint256 startDate,
         uint256 endDate
     );
+    event Allocated(uint256 indexed roundId, address recipient, uint256 amount);
 
     address public owner;
 
@@ -159,6 +166,7 @@ contract ArticlePlatform {
             "Article does not exist"
         );
         authorToArticleIdToRound[msg.sender][_articleId] = round;
+        roundArticles[_roundId].push(article);
     }
 
     function _createPool(
@@ -183,10 +191,10 @@ contract ArticlePlatform {
         uint256 _endDate
     ) external onlyOwner returns (Round memory) {
         require(_startDate < _endDate, "Start date must be before end date");
-        require(
-            _startDate > block.timestamp,
-            "Start date must be in the future"
-        );
+        // require(
+        //     _startDate > block.timestamp,
+        //     "Start date must be in the future"
+        // );
         require(_endDate > block.timestamp, "End date must be in the future");
 
         address pool = _createPool(_token, _name, _startDate, _endDate);
@@ -207,15 +215,13 @@ contract ArticlePlatform {
     }
 
     function Allocate(uint256 _roundId) external onlyOwner {
+        require(_roundId < rounds.length, "Round does not exist");
         Round storage round = rounds[_roundId];
         uint256 totalSquareSqrtSum = 0;
-        for (uint256 i = 0; i < roundArticles[_roundId].length; i++) {
-            Article storage article = roundArticles[_roundId][i];
-            uint256 sqrtSum = recievedDonationsWithinRound[article.author][
-                article.id
-            ][_roundId];
-            totalSquareSqrtSum += sqrtSum ** 2;
-        }
+        // calculate totalSquareSqrtSum
+        totalSquareSqrtSum = getTotalSquareSqrtSum(_roundId);
+        // calculate matching for each article
+        require(roundArticles[_roundId].length > 0, "No articles in round");
         for (uint256 i = 0; i < roundArticles[_roundId].length; i++) {
             Article storage article = roundArticles[_roundId][i];
             uint256 suquareSqrtSum = recievedDonationsWithinRound[
@@ -223,12 +229,58 @@ contract ArticlePlatform {
             ][article.id][_roundId] ** 2;
             uint256 matching = (round.poolAmount * suquareSqrtSum) /
                 totalSquareSqrtSum;
+            matchingAmounts[_roundId][article.author][article.id] = matching;
             // transfer matching to author address
-            PoolContract(round.poolAddress).poolTransfer(
+            // TODO: check if contract(this) can transfer tokens
+            IPoolContract(round.poolAddress).poolTransfer(
                 article.author,
                 matching
             );
+            emit Allocated(_roundId, article.author, matching);
         }
+    }
+
+    // add access control
+    function deposit(
+        uint256 _roundId,
+        uint256 _amount
+    ) external returns (bool success) {
+        require(_roundId < rounds.length, "Round does not exist");
+        Round storage round = rounds[_roundId];
+        success = IERC20(address(round.poolToken)).transferFrom(
+            msg.sender,
+            round.poolAddress,
+            _amount
+        );
+        round.poolAmount += _amount;
+        return success;
+    }
+
+    function getTotalSquareSqrtSum(
+        uint256 _roundId
+    ) public view returns (uint256) {
+        uint256 totalSquareSqrtSum = 0;
+        for (uint256 i = 0; i < roundArticles[_roundId].length; i++) {
+            require(roundArticles[_roundId].length > 0, "No articles in round");
+            Article storage article = roundArticles[_roundId][i];
+            uint256 sqrtSum = recievedDonationsWithinRound[article.author][
+                article.id
+            ][_roundId];
+            totalSquareSqrtSum += sqrtSum ** 2;
+        }
+        return totalSquareSqrtSum;
+    }
+
+    function getAllocation(
+        uint256 _roundId,
+        address _author,
+        uint256 _articleId
+    ) public view returns (uint256) {
+        return matchingAmounts[_roundId][_author][_articleId];
+    }
+
+    function getSquareRoot(uint256 x) public pure returns (uint256) {
+        return QF.sqrt(x);
     }
 
     function getAuthorArticle(
