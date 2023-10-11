@@ -14,7 +14,7 @@ export default function RichEditor({
   handleSubmit,
 }: any) {
   return (
-    <div className="w-full md:w-3/4 lg:w-1/2 xl:w-3/4 bg-white shadow-lg rounded-lg overflow-hidden p-4">
+    <div className="w-full mx-4 md:w-3/4 bg-white shadow-lg rounded-lg overflow-hidden md:px-16 md:py-12">
       <div className="justify-start p-4">
         <input
           value={title}
@@ -26,14 +26,16 @@ export default function RichEditor({
       </div>
       <div>
         <ReactQuill
-          className="w-full h-full text-gray-600 dark:text-gray-200 text-md"
+          className="w-full h-full text-gray-600 dark:text-gray-200 "
           theme="bubble"
           value={value}
           onChange={setValue}
           placeholder="Write something awesome..."
         />
         <div className="flex justify-between p-4">
-          <Button className="bg-gray-200 text-black">Cancel</Button>
+          <Button className="bg-gray-200 hover:bg-gray-400 text-black">
+            Cancel
+          </Button>
           <Button onClick={() => handleSubmit()}>Submit</Button>
         </div>
       </div>
