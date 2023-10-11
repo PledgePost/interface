@@ -12,23 +12,18 @@ export function makeStorageClient() {
   return new Web3Storage({ token: getAccessToken() });
 }
 
-export function makeFileObjects(obj: JSON, address: string) {
-  // You can create File objects from a Buffer of binary data
-  // see: https://nodejs.org/api/buffer.html
-  // Here we're just storing a JSON object, but you can store images,
-  // audio, or whatever you want!
+export function makeFileObjects(obj: any, address: any) {
   const buffer = Buffer.from(JSON.stringify(obj));
 
-  // just create a folder for each address
-  const files = [
-    new File([buffer], "plain-utf8.txt"),
-    new File([buffer], `${address}/${uuid}.json`),
-  ];
+  // Organize files within a folder named after the user's address
+  const files = [new File([buffer], `pledgepost:${address}/${uuid}.json`)];
+
   return files;
 }
 
 export async function storeFiles(files: File[]) {
   const client: Web3Storage = makeStorageClient();
+  if (!client) return;
   try {
     const cid = await client.put(files);
     console.log("✅ stored files with cid:", cid);

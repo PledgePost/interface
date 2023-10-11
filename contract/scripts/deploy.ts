@@ -2,11 +2,9 @@ import { ethers, run } from "hardhat";
 
 async function main() {
   // Hardcoded deploying nonce
-  const deployNonce = 0; // Adjust this to your needs
+  const deployNonce = 1; // Adjust this to your needs
 
   const signer = (await ethers.getSigners())[0];
-
-  console.log(`Deploying contracts with account: ${signer.address}`);
 
   // Check if signer nonce matches desired nonce
   const nonce = await ethers.provider.getTransactionCount(signer.address);
@@ -32,7 +30,14 @@ main()
 /*
 npx hardhat run scripts/deploy.ts --network polygonMumbai
 npx hardhat run scripts/deploy.ts --network goerli
-npx hardhat run scripts/deploy.ts --network sepoplia
+npx hardhat run scripts/deploy.ts --network sepolia
 npx hardhat run scripts/deploy.ts --network optimismGoerli
 npx hardhat run scripts/deploy.ts --network scrollSepolia
+*/
+/*
+npx hardhat verify --network polygonMumbai
+npx hardhat verify --network goerli
+npx hardhat verify --network sepolia
+npx hardhat verify --network optimismGoerli
+npx hardhat verify --network scrollSepolia
 */
