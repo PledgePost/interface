@@ -26,8 +26,8 @@ export const showSuccessToast = (url: string, message?: string) => {
   });
 };
 
-export const showDefaultToast = () => {
-  toast.info("Sending Transaction...", {
+export const showDefaultToast = (message?: string) => {
+  toast.info(displaydefault(message), {
     position: "top-right",
     autoClose: 7500,
     hideProgressBar: false,
@@ -37,6 +37,14 @@ export const showDefaultToast = () => {
     progress: undefined,
     theme: "light",
   });
+};
+
+const displaydefault = (message?: string) => {
+  return (
+    <div>
+      <a>{message ? message : "Waiting confirmation..."}</a>
+    </div>
+  );
 };
 const displayLink = (url: string, message?: string) => {
   return (
