@@ -15,8 +15,7 @@ import {
 } from "@/hooks/useNotification";
 import useExplore from "@/hooks/useExplore";
 import dynamic from "next/dynamic";
-const ABI =
-  require("../../contract/artifacts/contracts/PledgePost.sol/PledgePost.json").abi;
+const ABI = require("../../abis/PledgePost.json").abi;
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
