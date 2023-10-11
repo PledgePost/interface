@@ -51,7 +51,13 @@ const config: HardhatUserConfig = {
     },
   },
   etherscan: {
-    apiKey: etherscanApiKey,
+    apiKey: {
+      mainnet: etherscanApiKey,
+      sepolia: etherscanApiKey,
+      goerli: etherscanApiKey,
+      optimism: process.env.ETHERSCAN_OPTIMISM_API_KEY as string,
+      optimismGoerli: process.env.ETHERSCAN_OPTIMISM_API_KEY as string,
+    },
     customChains: [
       {
         network: "goerli",
@@ -59,6 +65,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-goerli.etherscan.io/api",
           browserURL: "https://goerli.etherscan.io",
+        },
+      },
+      {
+        network: "optimismGoerli",
+        chainId: 420,
+        urls: {
+          apiURL: "https://api-goerli-optimistic.etherscan.io/api",
+          browserURL: "https://goerli-optimistic.etherscan.io",
         },
       },
     ],
