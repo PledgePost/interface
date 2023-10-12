@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import Image from "next/image";
 import vercel from "../public/vercel.svg";
@@ -7,14 +6,11 @@ const CardLists = ({
   Title,
   Description,
   ImageUrl,
-  handleClick,
+  author,
   matchingAmount,
 }: any) => {
   return (
-    <div
-      className="sm:w-[400px] w-full rounded-[15px] bg-white cursor-pointer shadow-lg"
-      onClick={handleClick}
-    >
+    <div className="sm:w-[400px] w-full rounded-[15px] bg-white cursor-pointer shadow-lg">
       <Image
         src={vercel}
         alt="fund"
@@ -51,7 +47,7 @@ const CardLists = ({
           </Avatar>
           <p className="flex-1 font-epilogue font-semibold text-[14px] truncate">
             <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-500 to-green-600">
-              shutanaka.eth
+              {author}
             </span>
           </p>
         </div>
