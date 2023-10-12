@@ -1,5 +1,5 @@
 import React from "react";
-
+import Messages from "@/components/Comment/messages";
 const ArticlePage = async ({ params }: any) => {
   const res = await fetch(
     "https://bafybeic2p6ymcseqnpnvcibfrakp2qgze5echsj2lcavbyhlr27hdjzrsy.ipfs.dweb.link/pledgepost:0x06aa005386F53Ba7b980c61e0D067CaBc7602a62/efefa7f6-043d-400b-8b71-dbc2b9e86456.json"
@@ -20,7 +20,7 @@ const ArticlePage = async ({ params }: any) => {
         />
 
         <div className="w-1/4 bg-white p-5 rounded shadow ">
-          Comment Components
+          <Messages />
         </div>
       </div>
     </div>
