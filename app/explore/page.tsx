@@ -18,7 +18,6 @@ const GET_ARTICLE_POSTED = gql`
   }
 `;
 export default async function Explore() {
-  if (!client) return <div>loading...</div>;
   // const { data: posts } = await client.query({
   //   query: GET_ARTICLE_POSTED,
   // });
@@ -59,7 +58,7 @@ async function getData() {
     const { data } = await client.query({
       query: GET_ARTICLE_POSTED,
     });
-    return data?.articlePosteds;
+    return data?.articlePosteds || [];
   } catch (error) {
     console.error("getData error :>> ", error);
     throw error;
