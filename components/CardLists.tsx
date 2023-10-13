@@ -20,10 +20,10 @@ const CardLists = ({
       <div className="flex flex-col p-4">
         <div className="block">
           <h3 className="font-epilogue font-semibold text-[16px] text-black text-left leading-[26px] truncate">
-            {Title}
+            {Title || "Title"}
           </h3>
           <p className="mt-[5px] font-epilogue font-normal text-[#808191] text-left leading-[18px] truncate">
-            {Description}
+            {Description || "Description"}
           </p>
         </div>
         <div className="flex justify-between flex-wrap mt-[10px] gap-2">

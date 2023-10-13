@@ -34,15 +34,15 @@ export default async function Explore() {
 
   return (
     <div className="flex flex-wrap gap-[26px] p-12 justify-center">
-      {posts.map((post: any) => (
+      {posts.map((post?: any) => (
         <Link
-          key={post.articleId}
+          key={post?.articleId}
           href={`/post/${post.author}/${post.articleId}`}
         >
           <CardLists
-            Title={post.articleId}
-            author={post.author}
-            Description={post.content}
+            Title={post?.articleId}
+            author={post?.author}
+            Description={post?.content}
             ImageUrl="https://picsum.photos/200/300"
             matchingAmount="1000"
           />
@@ -59,8 +59,7 @@ async function getData() {
     const { data } = await client.query({
       query: GET_ARTICLE_POSTED,
     });
-    console.log("data :>> ", data);
-    return data.articlePosteds;
+    return data?.articlePosteds;
   } catch (error) {
     console.error("getData error :>> ", error);
     throw error;
