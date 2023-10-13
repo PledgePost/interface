@@ -13,6 +13,8 @@ import {
 } from "@/hooks/useNotification";
 
 async function getContent() {
+  // TODO: add draft article
+  // TODO: add uuid to smart contract or change path on IPFS
   const data = await fetch(
     "https://bafybeic2p6ymcseqnpnvcibfrakp2qgze5echsj2lcavbyhlr27hdjzrsy.ipfs.dweb.link/pledgepost:0x06aa005386F53Ba7b980c61e0D067CaBc7602a62/efefa7f6-043d-400b-8b71-dbc2b9e86456.json"
   ).then((res) => res.json());
