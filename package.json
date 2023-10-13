@@ -33,7 +33,7 @@
     "encoding": "^0.1.13",
     "eslint": "8.47.0",
     "eslint-config-next": "13.4.16",
-    "ethers": "^5.7.0",
+    "ethers": "^5.7.2",
     "graphql": "^16.8.1",
     "lokijs": "^1.5.12",
     "lucide-react": "^0.279.0",
