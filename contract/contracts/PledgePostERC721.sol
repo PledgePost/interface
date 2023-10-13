@@ -7,44 +7,71 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
+import {IPledgePostERC721} from "./interface/IPledgePostERC721.sol";
 
-contract WorkCredentialNFT is ERC721, ERC721Enumerable, Ownable {
+contract PledgePostERC721 is
+    ERC721,
+    ERC721Enumerable,
+    Ownable,
+    IPledgePostERC721
+{
     using Counters for Counters.Counter;
     using Strings for uint256;
     Counters.Counter private _tokenIdCounter;
+    address private _owner;
 
     struct TokenData {
         address minterAddress;
+        address authorAddress;
+        uint256 articleId;
         string description;
         string imageUrl;
     }
 
     mapping(uint256 => TokenData) private _tokenData;
     string private _defaultImageUrl;
-
+    event Minted(
+        address indexed recipient,
+        uint256 tokenId,
+        address indexed author,
+        uint256 indexed articleId,
+        uint256 timestamp
+    );
     event Burned(address indexed oparator, uint256 indexed tokenId);
 
-    function setImageUrl(uint256 tokenId, string memory imageUrl) public {
+    constructor(
+        address owner,
+        string memory defaultImageUrl
+    ) ERC721("PledgePost Donation NFT", "PLPDNFT") {
+        _defaultImageUrl = defaultImageUrl;
+        _owner = owner;
+    }
+
+    function setImageUrl(
+        uint256 tokenId,
+        string memory imageUrl
+    ) external onlyOwner {
         require(_exists(tokenId), "URI query for nonexistent token");
         require(ownerOf(tokenId) != address(0), "Token does not exist");
         TokenData storage tokenData = _tokenData[tokenId];
         tokenData.imageUrl = imageUrl;
     }
 
-    constructor(
+    function setDefaultImageUrl(
         string memory defaultImageUrl
-    ) ERC721("ArticleSupporter NFT", "AST") {
-        _defaultImageUrl = defaultImageUrl;
-    }
-
-    function setDefaultImageUrl(string memory defaultImageUrl) public {
+    ) external onlyOwner {
         _defaultImageUrl = defaultImageUrl;
     }
 
     function mint(
         address minterAddress,
+        address authorAddress,
+        uint256 articleId,
         string memory description
-    ) public payable onlyOwner {
+    ) external onlyOwner returns (uint256) {
+        require(minterAddress != address(0), "Minter address is zero");
+        require(authorAddress != address(0), "Author address is zero");
+        require(bytes(description).length > 0, "Description is empty");
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(minterAddress, tokenId);
@@ -52,15 +79,25 @@ contract WorkCredentialNFT is ERC721, ERC721Enumerable, Ownable {
         TokenData storage tokenData = _tokenData[tokenId];
         tokenData.minterAddress = minterAddress;
         tokenData.description = description;
+        tokenData.authorAddress = authorAddress;
+        tokenData.articleId = articleId;
 
         if (bytes(tokenData.imageUrl).length == 0) {
             tokenData.imageUrl = _defaultImageUrl;
         }
+        emit Minted(
+            minterAddress,
+            tokenId,
+            authorAddress,
+            articleId,
+            block.timestamp
+        );
+        return tokenId;
     }
 
     function tokenURI(
         uint256 tokenId
-    ) public view override returns (string memory) {
+    ) public view override(ERC721, IPledgePostERC721) returns (string memory) {
         require(_exists(tokenId), "URI query for nonexistent token");
 
         TokenData memory tokenData = _tokenData[tokenId];
@@ -70,7 +107,13 @@ contract WorkCredentialNFT is ERC721, ERC721Enumerable, Ownable {
             tokenId.toString(),
             '"},',
             '{"trait_type": "name", "value": "',
-            "D-Work Credential NFT 2023",
+            "PledgePost Donation NFT",
+            '"}',
+            '{"trait_type": "author", "value": "',
+            tokenData.authorAddress,
+            '"}'
+            '{"trait_type": "articleId", "value": "',
+            tokenData.articleId.toString(),
             '"}'
         );
 
@@ -79,7 +122,7 @@ contract WorkCredentialNFT is ERC721, ERC721Enumerable, Ownable {
             : _defaultImageUrl;
 
         bytes memory metadata = abi.encodePacked(
-            '{"name": "D-Work Credential NFT 2023 #',
+            '{"name": "PledgePost Donation NFT #',
             tokenId.toString(),
             '", "description": "',
             tokenData.description,
@@ -120,7 +163,13 @@ contract WorkCredentialNFT is ERC721, ERC721Enumerable, Ownable {
 
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC721, ERC721Enumerable) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(ERC721, ERC721Enumerable, IPledgePostERC721)
+        returns (bool)
+    {
         return
             interfaceId == type(IERC721).interfaceId ||
             super.supportsInterface(interfaceId);
@@ -133,5 +182,24 @@ contract WorkCredentialNFT is ERC721, ERC721Enumerable, Ownable {
             bytes(tokenData.imageUrl).length > 0
                 ? tokenData.imageUrl
                 : _defaultImageUrl;
+    }
+
+    function checkOwner(
+        address _sender,
+        address _author,
+        uint256 _articleId
+    ) public view returns (bool) {
+        uint256 totalSupply = totalSupply();
+        for (uint256 i = 0; i < totalSupply; i++) {
+            TokenData memory tokenData = _tokenData[i];
+            if (
+                tokenData.authorAddress == _author &&
+                tokenData.articleId == _articleId &&
+                ownerOf(i) == _sender
+            ) {
+                return true;
+            }
+        }
+        return false;
     }
 }

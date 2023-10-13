@@ -4,6 +4,8 @@ pragma solidity ^0.8.18;
 import {PoolContract} from "./PoolContract.sol";
 import {IPoolContract} from "./interface/IPoolContract.sol";
 import {QF} from "./libraries/QF.sol";
+import {IPledgePostERC721} from "./interface/IPledgePostERC721.sol";
+import {PledgePostERC721} from "./PledgePostERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -75,9 +77,11 @@ contract PledgePost {
     event Allocated(uint256 indexed roundId, address recipient, uint256 amount);
 
     address public owner;
+    IPledgePostERC721 public nft;
 
     constructor() {
         owner = msg.sender;
+        nft = new PledgePostERC721(address(this), "https://pledgepost.io/");
     }
 
     modifier onlyOwner() {
@@ -107,7 +111,6 @@ contract PledgePost {
         IERC20 _token,
         uint256 _amount
     ) external {
-        // TODO: Add support for multiple tokens
         // require(
         //     address(_token) == DAI || address(_token) == USDC,
         //     "Token not supported"
@@ -149,6 +152,7 @@ contract PledgePost {
                 .sqrt(_amount);
         }
         emit ArticleDonated(_author, msg.sender, _articleId, _amount);
+        nft.mint(msg.sender, _author, _articleId, article.content);
     }
 
     function applyForRound(uint256 _roundId, uint256 _articleId) external {
@@ -207,7 +211,7 @@ contract PledgePost {
             startDate: _startDate,
             endDate: _endDate,
             createdTimestamp: block.timestamp,
-            isActive: true //TODO: change to false, only owner can activate
+            isActive: false //TODO: change to false, only owner can activate
         });
         emit RoundCreated(msg.sender, pool, _startDate, _endDate);
         rounds.push(newRound);
@@ -246,7 +250,6 @@ contract PledgePost {
                 totalSquareSqrtSum;
             matchingAmounts[_roundId][article.author][article.id] = matching;
             // transfer matching to author address
-            // TODO: check if contract(this) can transfer tokens
             IPoolContract(round.poolAddress).poolTransfer(
                 article.author,
                 matching
@@ -255,7 +258,7 @@ contract PledgePost {
         }
     }
 
-    // add access control
+    // TODO: add access control
     function deposit(
         uint256 _roundId,
         uint256 _amount
@@ -332,5 +335,13 @@ contract PledgePost {
         uint256 _roundId
     ) public view returns (uint256) {
         return recievedDonationsWithinRound[_author][_articleId][_roundId];
+    }
+
+    function checkOwner(
+        address _sender,
+        address _author,
+        uint256 _articleId
+    ) public view returns (bool) {
+        return nft.checkOwner(_sender, _author, _articleId);
     }
 }
