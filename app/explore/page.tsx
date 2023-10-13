@@ -18,12 +18,13 @@ const GET_ARTICLE_POSTED = gql`
   }
 `;
 export default async function Explore() {
-  const { data: posts } = await client.query({
-    query: GET_ARTICLE_POSTED,
-  });
+  if (!client) return <div>loading...</div>;
+  // const { data: posts } = await client.query({
+  //   query: GET_ARTICLE_POSTED,
+  // });
+  const posts: any = await getData();
   console.log("posts :>> ", posts);
-  console.log(posts.articlePosteds);
-  console.log("posts.length :>> ", posts.articlePosteds.length);
+  console.log("posts.length :>> ", posts.length);
 
   const res = await fetch(
     "https://bafybeiak2wcun3uyzfk3oin6bo7qbkhrdbcrxirhryrha3z6g7x2qptwaq.ipfs.dweb.link/pledgepost:0x06aa005386F53Ba7b980c61e0D067CaBc7602a62/da2da2b1-82c9-4f1f-b6ce-05b32f82d5dc.json"
@@ -33,7 +34,7 @@ export default async function Explore() {
 
   return (
     <div className="flex flex-wrap gap-[26px] p-12 justify-center">
-      {posts.articlePosteds.map((post: any) => (
+      {posts.map((post: any) => (
         <Link
           key={post.articleId}
           href={`/post/${post.author}/${post.articleId}`}
@@ -49,4 +50,19 @@ export default async function Explore() {
       ))}
     </div>
   );
+}
+
+async function getData() {
+  if (!client) throw new Error("Client not available");
+
+  try {
+    const { data } = await client.query({
+      query: GET_ARTICLE_POSTED,
+    });
+    console.log("data :>> ", data);
+    return data.articlePosteds;
+  } catch (error) {
+    console.error("getData error :>> ", error);
+    throw error;
+  }
 }
