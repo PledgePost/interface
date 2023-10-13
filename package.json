@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/client": "^3.8.5",
     "@hookform/resolvers": "^3.3.1",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -32,6 +33,7 @@
     "eslint": "8.47.0",
     "eslint-config-next": "13.4.16",
     "ethers": "^6.7.1",
+    "graphql": "^16.8.1",
     "lokijs": "^1.5.12",
     "lucide-react": "^0.279.0",
     "next": "^13.5.4",

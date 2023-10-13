@@ -25,11 +25,11 @@ export default function RootLayout({
         <AccountAbstractionProvider>
           <RainbowProviders>
             <ThemeProvider attribute="class" defaultTheme="system">
+              <ToastContainer newestOnTop />
               <Header />
               {children}
             </ThemeProvider>
           </RainbowProviders>
-          <ToastContainer newestOnTop />
         </AccountAbstractionProvider>
       </body>
     </html>
