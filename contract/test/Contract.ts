@@ -40,10 +40,15 @@ describe("Contract Test", () => {
 
     it("should donate", async () => {
       await contract.postArticle("test");
-      await token.mint(owner.address, 100);
-      await token.approve(contract, 100);
-      await contract.donateToArticle(owner.address, 0, token, 100);
+      await token.mint(addr1.address, 100);
+      await token.connect(addr1).approve(contract, 100);
+      await contract
+        .connect(addr1)
+        .donateToArticle(owner.address, 0, token, 100);
       expect(await contract.getDonatedAmount(owner.address, 0)).to.equal(100);
+      expect(
+        await contract.checkOwner(addr1.address, owner.address, 0)
+      ).to.equal(true);
     });
 
     it("should create round", async () => {
@@ -64,9 +69,12 @@ describe("Contract Test", () => {
         1702101663
       );
       await contract.postArticle("test");
+      await contract.activateRound(0);
       await contract.applyForRound(0, 0);
       const round0 = await contract.getRound(0);
-      expect(await contract.getRoundArticle(0)).to.deep.equal(round0);
+      expect(await contract.getAppliedRound(owner.address, 0)).to.deep.equal(
+        round0
+      );
     });
   });
   describe("QF related tests", () => {
@@ -77,6 +85,7 @@ describe("Contract Test", () => {
         1699509663,
         1702101663
       );
+      await contract.activateRound(0);
       await contract.postArticle("test");
       await token.mint(owner.address, 100);
       await token.approve(contract, 100);
@@ -96,6 +105,7 @@ describe("Contract Test", () => {
       await token.connect(addr1).mint(addr1.address, 100);
       await token.connect(addr1).approve(contract, 100);
       await contract.donateToArticle(owner.address, 0, token, 100);
+      await contract.activateRound(0);
       await contract.applyForRound(0, 0);
       await contract.donateToArticle(owner.address, 0, token, 100);
       const sqrt100 = await contract.getSquareRoot(100);
@@ -122,6 +132,7 @@ describe("Contract Test", () => {
         1699509663,
         1702101663
       );
+      await contract.activateRound(0);
       await contract.postArticle("test");
       await token.connect(addr1).mint(addr1.address, ethers.parseEther("300"));
       await token.connect(addr1).approve(contract, ethers.parseEther("300"));
@@ -167,6 +178,7 @@ describe("Contract Test", () => {
         1699509663,
         1702101663
       );
+      await contract.activateRound(0);
       // post articles
       await contract.postArticle("test");
       await contract.connect(addr1).postArticle("addr1");
@@ -272,6 +284,19 @@ describe("Contract Test", () => {
       console.log("addr3 balance: ", await token.balanceOf(addr3.address));
       console.log("addr4 balance: ", await token.balanceOf(addr4.address));
       console.log("pool balance: ", await token.balanceOf(round.poolAddress));
+      // console.log(
+      //   "getMatchingAmount",
+      //   await contract.getMatchingAmount(0, addr1.address, 0)
+      // );
+      // console.log(
+      //   "estimated Amount: ",
+      //   await contract.getEstimatedAmount(
+      //     0,
+      //     addr1.address,
+      //     0,
+      //     ethers.parseEther("1000")
+      //   )
+      // );
     });
   });
 });

@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 // TODO: add on-chain verification of Gitcoin passport with EAS Attestation
 // schema UID(OP): 0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89
 // https://docs.passport.gitcoin.co/building-with-passport/contract-reference
-
+// TODO: accept/ reject grant application
 contract PledgePost {
     struct Article {
         uint256 id;
@@ -59,18 +59,18 @@ contract PledgePost {
 
     event ArticlePosted(
         address indexed author,
-        string content,
+        string indexed content,
         uint256 articleId
     );
     event ArticleDonated(
         address indexed author,
-        address from,
+        address indexed from,
         uint256 articleId,
         uint256 amount
     );
     event RoundCreated(
         address indexed owner,
-        address poolAddress,
+        address ipoolAddress,
         uint256 startDate,
         uint256 endDate
     );
@@ -211,7 +211,7 @@ contract PledgePost {
             startDate: _startDate,
             endDate: _endDate,
             createdTimestamp: block.timestamp,
-            isActive: false //TODO: change to false, only owner can activate
+            isActive: false
         });
         emit RoundCreated(msg.sender, pool, _startDate, _endDate);
         rounds.push(newRound);
@@ -289,6 +289,40 @@ contract PledgePost {
         return totalSquareSqrtSum;
     }
 
+    function getMatchingAmount(
+        uint256 _roundId,
+        address _author,
+        uint256 _articleId
+    ) public view returns (uint256) {
+        uint256 totalSquareSqrtSum = getTotalSquareSqrtSum(_roundId);
+        uint256 suquareSqrtSum = recievedDonationsWithinRound[_author][
+            _articleId
+        ][_roundId] ** 2;
+        Round storage round = rounds[_roundId];
+        uint256 matching = (round.poolAmount * suquareSqrtSum) /
+            totalSquareSqrtSum;
+        return matching;
+    }
+
+    function getEstimatedAmount(
+        uint256 _roundId,
+        address _author,
+        uint256 _articleId,
+        uint256 _amount
+    ) public view returns (uint256) {
+        Round storage round = rounds[_roundId];
+        uint256 totalSquareSqrtSum = getTotalSquareSqrtSum(_roundId);
+        uint256 sqrtSum = recievedDonationsWithinRound[_author][_articleId][
+            _roundId
+        ];
+        uint256 newSquareSqrtSum = (sqrtSum + QF.sqrt(_amount)) ** 2;
+        uint256 oldMatching = getMatchingAmount(_roundId, _author, _articleId);
+
+        uint256 newMatching = (round.poolAmount * newSquareSqrtSum) /
+            totalSquareSqrtSum;
+        return newMatching - oldMatching;
+    }
+
     function getAllocation(
         uint256 _roundId,
         address _author,
@@ -301,6 +335,14 @@ contract PledgePost {
         return QF.sqrt(x);
     }
 
+    function getArticle(
+        uint256 _roundId,
+        uint256 _index
+    ) public view returns (Article memory) {
+        require(roundArticles[_roundId].length > 0, "No articles in round");
+        return roundArticles[_roundId][_index];
+    }
+
     function getAuthorArticle(
         address _author,
         uint256 _articleId
@@ -308,10 +350,11 @@ contract PledgePost {
         return authorArticles[_author][_articleId];
     }
 
-    function getRoundArticle(
+    function getAppliedRound(
+        address _author,
         uint256 _articleId
     ) public view returns (Round memory) {
-        return authorToArticleIdToRound[msg.sender][_articleId];
+        return authorToArticleIdToRound[_author][_articleId];
     }
 
     function getRoundLength() public view returns (uint256) {
@@ -342,6 +385,10 @@ contract PledgePost {
         address _author,
         uint256 _articleId
     ) public view returns (bool) {
+        require(
+            _articleId < authorArticles[_author].length,
+            "Article does not exist"
+        );
         return nft.checkOwner(_sender, _author, _articleId);
     }
 }
