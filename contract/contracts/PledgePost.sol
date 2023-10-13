@@ -44,6 +44,15 @@ contract PledgePost {
     // author => Article.id => Round
     mapping(address => mapping(uint256 => Round))
         public authorToArticleIdToRound;
+    enum ApplicationStatus {
+        Pending,
+        Accepted,
+        Denied
+    }
+    // author => Article.id => Round.id => ApplicationStatus
+    mapping(address => mapping(uint256 => mapping(uint256 => ApplicationStatus)))
+        public applicationStatusForRound;
+
     // author => Article.id => Round.id => uint256
     mapping(address => mapping(uint256 => mapping(uint256 => uint256)))
         public recievedDonationsWithinRound;
@@ -171,6 +180,36 @@ contract PledgePost {
         );
         authorToArticleIdToRound[msg.sender][_articleId] = round;
         roundArticles[_roundId].push(article);
+    }
+
+    function acceptApplication(
+        uint256 _roundId,
+        address _author,
+        uint256 _articleId
+    ) external onlyOwner {
+        require(
+            applicationStatusForRound[_author][_articleId][_roundId] ==
+                ApplicationStatus.Pending,
+            "Application status is not Pending"
+        );
+        applicationStatusForRound[_author][_articleId][
+            _roundId
+        ] = ApplicationStatus.Accepted;
+    }
+
+    function denyApplication(
+        uint256 _roundId,
+        address _author,
+        uint256 _articleId
+    ) external onlyOwner {
+        require(
+            applicationStatusForRound[_author][_articleId][_roundId] ==
+                ApplicationStatus.Pending,
+            "Application status is not Pending"
+        );
+        applicationStatusForRound[_author][_articleId][
+            _roundId
+        ] = ApplicationStatus.Denied;
     }
 
     function _createPool(
@@ -378,6 +417,23 @@ contract PledgePost {
         uint256 _roundId
     ) public view returns (uint256) {
         return recievedDonationsWithinRound[_author][_articleId][_roundId];
+    }
+
+    function getApplicationStatus(
+        uint256 _roundId,
+        address _author,
+        uint256 _articleId
+    ) public view returns (ApplicationStatus) {
+        require(_roundId < rounds.length, "Round does not exist");
+        require(
+            _articleId < authorArticles[_author].length,
+            "Article does not exist"
+        );
+        require(
+            authorToArticleIdToRound[_author][_articleId].id == _roundId,
+            "Author has not applied for this round"
+        );
+        return applicationStatusForRound[_author][_articleId][_roundId];
     }
 
     function checkOwner(
