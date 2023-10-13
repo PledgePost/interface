@@ -7,7 +7,16 @@ const deployerPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY as string;
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.19",
+  solidity: {
+    version: "0.8.19",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+  },
+
   networks: {
     mainnet: {
       url: `https://mainnet.infura.io/v3/{providerApiKey}`,
