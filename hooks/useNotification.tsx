@@ -13,7 +13,7 @@ export const showErrorToast = (message: string) => {
     theme: "light",
   });
 };
-export const showSuccessToast = (url: string, message?: string) => {
+export const showSuccessToast = (url?: string, message?: string) => {
   toast.success(displayLink(url, message), {
     position: "top-right",
     autoClose: 5000,
@@ -46,7 +46,7 @@ const displaydefault = (message?: string) => {
     </div>
   );
 };
-const displayLink = (url: string, message?: string) => {
+const displayLink = (url?: string, message?: string) => {
   return (
     <div>
       <a href={url} target="_blank" rel="noreferrer">
