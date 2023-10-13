@@ -31,7 +31,8 @@ export const AccountAbstractionProvider = ({
   // chainId should be selected by the user
   const [chainId, setChainId] = useState<any>("");
 
-  const [web3Provider, setWeb3Provider] = useState<ethers.BrowserProvider>();
+  const [web3Provider, setWeb3Provider] =
+    useState<ethers.providers.Web3Provider>();
   const [signer, setSigner] = useState<any>(undefined);
 
   useEffect(() => {
@@ -96,7 +97,7 @@ export const AccountAbstractionProvider = ({
 
     try {
       const { safe, eoa } = await web3AuthModalPack.signIn();
-      const provider = new ethers.BrowserProvider(
+      const provider = new ethers.providers.Web3Provider(
         web3AuthModalPack.getProvider()
       );
       const signer = provider.getSigner();
