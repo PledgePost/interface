@@ -56,7 +56,7 @@ export default async function Explore() {
         {AllPost.map((post?: any) => (
           <Link
             key={post?.articleId}
-            href={`/post/${post.author}/${post.articleId}`}
+            href={`/post/${post.author}/${post.articleId}/${post.content}`}
           >
             <CardLists
               Title={post.ipfsData?.title}

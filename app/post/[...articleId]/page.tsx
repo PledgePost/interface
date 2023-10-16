@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Messages from "@/components/Comment/messages";
 import MessageInput from "@/components/Comment/messageInput";
-import { useAccount } from "wagmi";
+import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { readComments, writeComment, Comment } from "@/hooks/useTableland";
 import { Button } from "@/components/ui/button";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
@@ -11,23 +11,28 @@ import {
   showErrorToast,
   showSuccessToast,
 } from "@/hooks/useNotification";
+import { toChecksumAddress } from "ethereumjs-util";
+const ABI = require("../../../abis/PledgePost.json").abi;
+const TOKEN_ABI = require("../../../abis/Token.json").abi;
 
-
-async function getContent() {
-  // TODO: add draft article
-  //"https://${cid}.ipfs.dweb.link/pledgepost:${address}"
-  const data = await fetch(
-    // "https://bafybeic2p6ymcseqnpnvcibfrakp2qgze5echsj2lcavbyhlr27hdjzrsy.ipfs.dweb.link/pledgepost:0x06aa005386F53Ba7b980c61e0D067CaBc7602a62/efefa7f6-043d-400b-8b71-dbc2b9e86456.json"
-    "https://bafybeibbzyufq5emesamm76hcdtw4oabsg5w52xwkyu2ihnbqyoyjmjrh4.ipfs.dweb.link/pledgepost:0x06aa005386F53Ba7b980c61e0D067CaBc7602a62"
-  ).then((res) => res.json());
-  return data;
+async function fetchData(address: any, cid: string) {
+  const checksumAddress = toChecksumAddress(address);
+  const url = `https://${cid}.ipfs.dweb.link/pledgepost:${checksumAddress}`;
+  const res = await fetch(url, {
+    cache: "force-cache",
+  });
+  const content = await res.json();
+  return content;
 }
 
 export default function ArticlePage({ params }: any) {
   const { openConnectModal } = useConnectModal();
   const [content, setContent] = useState<any>(null);
   const [messages, setMessages] = useState<string>("");
+  const [amount, setAmount] = useState<number>(0);
+  const [token, setToken] = useState<string>(""); //erc20 token address
   const { address } = useAccount();
+
   const [comments, setComments] = useState<Comment[] | undefined>(undefined);
   let timestamp = new Date();
   let unix = timestamp.getTime();
@@ -52,14 +57,59 @@ export default function ArticlePage({ params }: any) {
       showErrorToast("Error posting comment");
     }
   }
+
+  // TODO: create Tx context API
+  const {
+    data,
+    isLoading,
+    write: donate,
+  } = useContractWrite({
+    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
+    abi: ABI,
+    functionName: "donateToArticle",
+    args: [params.articleId[0], params.articleId[1], token, amount],
+  });
+  const { write: approve } = useContractWrite({
+    address: process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as any,
+    abi: TOKEN_ABI,
+    functionName: "approve",
+    args: [process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any, amount],
+  });
+  const { data: history } = useContractRead({
+    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
+    abi: ABI,
+    functionName: "checkOwner",
+    args: [address, params.articleId[0], params.articleId[1]],
+  });
+  const { data: Allowance } = useContractRead({
+    address: process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as any,
+    abi: TOKEN_ABI,
+    functionName: "allowance",
+    args: [address, process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any],
+  });
+
+  async function handleClick() {
+    if (!address || amount === 0 || token === "") return;
+    try {
+      showDefaultToast("Approving for Contract...");
+      await approve();
+
+      await donate();
+      // console.log("result :>> ", result);
+      // showSuccessToast("Donation succeeded");
+    } catch (e) {
+      console.log("error: ", e);
+      showErrorToast("Error posting donation");
+    }
+  }
   useEffect(() => {
     async function fetchContent() {
-      const result = await getContent();
+      const result = await fetchData(params.articleId[0], params.articleId[2]);
       setContent(result);
       return result;
     }
     fetchContent();
-  }, []);
+  }, [params.articleId]);
   useEffect(() => {
     async function getComments() {
       const result = await readComments(
@@ -70,7 +120,7 @@ export default function ArticlePage({ params }: any) {
       return result;
     }
     getComments();
-  }, [comments, params.articleId]);
+  }, [params.articleId]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
@@ -104,7 +154,11 @@ export default function ArticlePage({ params }: any) {
               <MessageInput
                 messages={messages}
                 setMessages={setMessages}
+                setToken={setToken}
+                setAmount={setAmount}
                 handleSend={handleSend}
+                handleClick={handleClick}
+                isDonated={history}
               />
             )}
           </div>
