@@ -19,6 +19,8 @@ const ABI = require("../../abis/PledgePost.json").abi;
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
+const contract_address: any = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+
 export default function Post() {
   const [value, setValue] = useState(
     "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ad itaque vitae a illo in molestias adipisci tenetur officiis molestiae earum veniam, harum non doloribus error voluptates dignissimos necessitatibus quos sit!"
@@ -31,9 +33,8 @@ export default function Post() {
   let timestamp = new Date();
   let unix = timestamp.getTime();
   let UNIXtimestamp = Math.floor(unix / 1000);
-
   const { data, write: post } = useContractWrite({
-    address: "0x7b1a9e6ef902E737530eD823deBAFB98421A3d4b",
+    address: contract_address,
     abi: ABI,
     functionName: "postArticle",
     chainId: chain?.id,

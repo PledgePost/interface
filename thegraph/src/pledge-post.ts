@@ -47,7 +47,7 @@ export function handleArticlePosted(event: ArticlePostedEvent): void {
     event.transaction.hash.concatI32(event.logIndex.toI32())
   );
   entity.author = event.params.author;
-  entity.content = event.params.content;
+  entity.content = event.params.content.toString(); //MEMO: Type 'Bytes' is not assignable to type 'string'. I added toString()
   entity.articleId = event.params.articleId;
 
   entity.blockNumber = event.block.number;
@@ -62,7 +62,7 @@ export function handleRoundCreated(event: RoundCreatedEvent): void {
     event.transaction.hash.concatI32(event.logIndex.toI32())
   );
   entity.owner = event.params.owner;
-  entity.poolAddress = event.params.poolAddress;
+  entity.ipoolAddress = event.params.ipoolAddress;
   entity.startDate = event.params.startDate;
   entity.endDate = event.params.endDate;
 
