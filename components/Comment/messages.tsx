@@ -2,12 +2,10 @@ import React from "react";
 import { Avatar } from "../ui/avatar";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { dateConvert } from "@/lib/dateConvert";
+import sliceAddress from "@/lib/sliceAddress";
 
 export default function Messages({ params }: any) {
   const ImageUrl = "https://picsum.photos/200/";
-  function sliceAddress(address: string) {
-    return address.slice(0, 6) + "..." + address.slice(-4);
-  }
   const address = sliceAddress(params.user);
   const timestamp = dateConvert(params.timestamp);
   return (

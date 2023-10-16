@@ -8,7 +8,7 @@ import {
   store,
   Bytes,
   BigInt,
-  BigDecimal,
+  BigDecimal
 } from "@graphprotocol/graph-ts";
 
 export class Allocated extends Entity {
@@ -446,8 +446,8 @@ export class RoundCreated extends Entity {
     this.set("owner", Value.fromBytes(value));
   }
 
-  get poolAddress(): Bytes {
-    let value = this.get("poolAddress");
+  get ipoolAddress(): Bytes {
+    let value = this.get("ipoolAddress");
     if (!value || value.kind == ValueKind.NULL) {
       throw new Error("Cannot return null for a required field.");
     } else {
@@ -455,8 +455,8 @@ export class RoundCreated extends Entity {
     }
   }
 
-  set poolAddress(value: Bytes) {
-    this.set("poolAddress", Value.fromBytes(value));
+  set ipoolAddress(value: Bytes) {
+    this.set("ipoolAddress", Value.fromBytes(value));
   }
 
   get startDate(): BigInt {

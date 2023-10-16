@@ -1,8 +1,12 @@
 import React from "react";
 import CardLists from "@/components/CardLists";
+import { toChecksumAddress } from "ethereumjs-util";
+const ABI = require("../../abis/PledgePost.json").abi;
 import { gql } from "@apollo/client";
 import client from "@/lib/apolloClient";
 import Link from "next/link";
+import { ethers } from "ethers";
+import { Input } from "@/components/ui/input";
 
 const GET_ARTICLE_POSTED = gql`
   query GetArticlePosted {
@@ -18,52 +22,78 @@ const GET_ARTICLE_POSTED = gql`
   }
 `;
 export default async function Explore() {
-  // const { data: posts } = await client.query({
-  //   query: GET_ARTICLE_POSTED,
-  // });
-
   const posts: any = await getData();
-  console.log("posts :>> ", posts);
-  console.log("posts.length :>> ", posts.length);
+  // const provider = new ethers.providers.JsonRpcProvider();
+  // const contract = new ethers.Contract(
+  //   process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
+  //   ABI,
+  //   provider
+  // );
 
-  const res = await fetch(
-    "https://bafybeiak2wcun3uyzfk3oin6bo7qbkhrdbcrxirhryrha3z6g7x2qptwaq.ipfs.dweb.link/pledgepost:0x06aa005386F53Ba7b980c61e0D067CaBc7602a62/da2da2b1-82c9-4f1f-b6ce-05b32f82d5dc.json"
+  const AllPost = await Promise.all(
+    posts.map(async (post: any) => {
+      const ipfsData = await fetchData(post.author, post.content);
+
+      // TODO: get matching amount, should apply before getMatchingAmount function
+      // const matchingAmount = await contract.getMatchingAmount(
+      //   0,
+      //   post.author,
+      //   post.articleId
+      // );
+      return { ...post, ipfsData };
+    })
   );
-  const content = await res.json();
-  console.log("content :>> ", content);
+
+  console.log("AllPost :>> ", AllPost);
 
   return (
-    <div className="flex flex-wrap gap-[26px] p-12 justify-center">
-      {posts.map((post?: any) => (
-        <Link
-          key={post?.articleId}
-          href={`/post/${post.author}/${post.articleId}`}
-        >
-          <CardLists
-            Title={post?.articleId}
-            author={post?.author}
-            Description={post?.content}
-            ImageUrl="https://picsum.photos/200/300"
-            matchingAmount="1000"
-          />
-        </Link>
-      ))}
-    </div>
+    <>
+      <Input
+        placeholder="Search"
+        className="w-[500px] h-[44px] flex justify-center items-center mx-auto mt-12 rounded-full"
+      />
+      <div className="flex flex-wrap gap-[26px] p-12 justify-center">
+        {AllPost.map((post?: any) => (
+          <Link
+            key={post?.articleId}
+            href={`/post/${post.author}/${post.articleId}/${post.content}`}
+          >
+            <CardLists
+              Title={post.ipfsData?.title}
+              author={post?.author}
+              Description={post?.ipfsData?.value}
+              ImageUrl="https://picsum.photos/200/300"
+              matchingAmount="1000"
+            />
+          </Link>
+        ))}
+      </div>
+    </>
   );
 }
 
 async function getData() {
   if (!client) throw new Error("Client not available");
-
   try {
     const { data } = await client.query({
       query: GET_ARTICLE_POSTED,
       fetchPolicy: "no-cache",
     });
-    console.log("data :>> ", data);
-    return data?.articlePosteds || [];
+    return data.articlePosteds;
   } catch (error) {
     console.error("getData error :>> ", error);
     throw error;
   }
+}
+
+async function fetchData(address: string, cid: string) {
+  const checksumAddress = toChecksumAddress(address);
+
+  const url = `https://${cid}.ipfs.dweb.link/pledgepost:${checksumAddress}`;
+
+  console.log("url :>> ", url);
+  const res = await fetch(url);
+  const content = await res.json();
+  console.log("content :>> ", content);
+  return content;
 }

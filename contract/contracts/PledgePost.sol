@@ -64,7 +64,7 @@ contract PledgePost {
 
     event ArticlePosted(
         address indexed author,
-        string indexed content,
+        string content,
         uint256 articleId
     );
     event ArticleDonated(
@@ -98,15 +98,16 @@ contract PledgePost {
     }
 
     function postArticle(string memory _content) public returns (uint256) {
+        require(bytes(_content).length > 0, "Content cannot be empty");
+        uint articleId = authorArticles[msg.sender].length;
         Article memory newArticle = Article({
-            id: authorArticles[msg.sender].length,
-            author: payable(msg.sender),
+            id: articleId,
+            author: msg.sender,
             content: _content,
             donationsReceived: 0
         });
 
         authorArticles[msg.sender].push(newArticle);
-        uint256 articleId = authorArticles[msg.sender].length;
 
         emit ArticlePosted(msg.sender, _content, articleId);
 

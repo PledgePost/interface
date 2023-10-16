@@ -1,11 +1,15 @@
 import React from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-
+import DonationModal from "@/components/Comment/donationModal";
 export default function MessageInput({
   messages,
   setMessages,
   handleSend,
+  isDonated,
+  handleClick,
+  setToken,
+	setAmount
 }: any) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessages(e.target.value);
@@ -17,7 +21,11 @@ export default function MessageInput({
         value={messages}
         onChange={(e) => handleChange(e)}
       />
-      <Button onClick={() => handleSend()}>Submit Comment</Button>
+      {!isDonated ? (
+        <DonationModal handleClick={handleClick} setToken={setToken} setAmount={setAmount}/>
+      ) : (
+        <Button onClick={() => handleSend()}>Submit Comment</Button>
+      )}
     </div>
   );
 }

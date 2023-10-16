@@ -32,7 +32,7 @@ type ArticlePosted @entity(immutable: true) {
 type RoundCreated @entity(immutable: true) {
   id: Bytes!
   owner: Bytes! # address
-  poolAddress: Bytes! # address
+  ipoolAddress: Bytes! # address
   startDate: BigInt! # uint256
   endDate: BigInt! # uint256
   blockNumber: BigInt!

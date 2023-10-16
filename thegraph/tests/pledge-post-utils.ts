@@ -88,7 +88,7 @@ export function createArticlePostedEvent(
 
 export function createRoundCreatedEvent(
   owner: Address,
-  poolAddress: Address,
+  ipoolAddress: Address,
   startDate: BigInt,
   endDate: BigInt
 ): RoundCreated {
@@ -101,8 +101,8 @@ export function createRoundCreatedEvent(
   )
   roundCreatedEvent.parameters.push(
     new ethereum.EventParam(
-      "poolAddress",
-      ethereum.Value.fromAddress(poolAddress)
+      "ipoolAddress",
+      ethereum.Value.fromAddress(ipoolAddress)
     )
   )
   roundCreatedEvent.parameters.push(

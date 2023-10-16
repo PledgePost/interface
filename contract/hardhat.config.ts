@@ -51,7 +51,7 @@ const config: HardhatUserConfig = {
       accounts: [deployerPrivateKey],
     },
     polygonZkEvmTestnet: {
-      url: "https://polygonzkevm-testnet.g.alchemy.com/v2/demo",
+      url: "https://rpc.public.zkevm-test.net",
       accounts: [deployerPrivateKey],
     },
     scrollSepolia: {
@@ -66,6 +66,11 @@ const config: HardhatUserConfig = {
       goerli: etherscanApiKey,
       optimism: process.env.ETHERSCAN_OPTIMISM_API_KEY as string,
       optimismGoerli: process.env.ETHERSCAN_OPTIMISM_API_KEY as string,
+      polygon: process.env.ETHERSCAN_POLYGON_API_KEY as string,
+      polygonMumbai: process.env.ETHERSCAN_POLYGON_API_KEY as string,
+      polygonZkEvm: process.env.ETHERSCAN_POLYGON_ZKEVM_API_KEY as string,
+      polygonZkEvmTestnet: process.env
+        .ETHERSCAN_POLYGON_ZKEVM_API_KEY as string,
     },
     customChains: [
       {
@@ -82,6 +87,30 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-goerli-optimistic.etherscan.io/api",
           browserURL: "https://goerli-optimistic.etherscan.io",
+        },
+      },
+      {
+        network: "polygonMumbai",
+        chainId: 80001,
+        urls: {
+          apiURL: "https://api-mumbai.polygonscan.com/api",
+          browserURL: "https://mumbai.polygonscan.com",
+        },
+      },
+      {
+        network: "polygonZkEvmTestnet",
+        chainId: 1442,
+        urls: {
+          apiURL: "https://api-testnet-zkevm.polygonscan.com/api",
+          browserURL: "https://rpc.public.zkevm-test.net",
+        },
+      },
+      {
+        network: "scrollSepolia",
+        chainId: 1337,
+        urls: {
+          apiURL: "https://api-sepolia.scroll.io/api",
+          browserURL: "https://sepolia.scroll.io",
         },
       },
     ],
