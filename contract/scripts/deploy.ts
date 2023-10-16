@@ -1,8 +1,8 @@
-import { ethers, run } from "hardhat";
+import { ethers } from "hardhat";
 
 async function main() {
   // Hardcoded deploying nonce
-  const deployNonce = 3; // Adjust this to your needs
+  const deployNonce = 5;
 
   const signer = (await ethers.getSigners())[0];
 
@@ -36,10 +36,10 @@ npx hardhat run scripts/deploy.ts --network polygonZkEvmTestnet
 npx hardhat run scripts/deploy.ts --network scrollSepolia
 */
 /*
-npx hardhat verify --network goerli 0x44CA47095F1E18548CB5Fb04499c8A0d4199a30a
-npx hardhat verify --network sepolia 0x44CA47095F1E18548CB5Fb04499c8A0d4199a30a
-npx hardhat verify --network optimismGoerli 0x44CA47095F1E18548CB5Fb04499c8A0d4199a30a
-npx hardhat verify --network polygonMumbai 0x44CA47095F1E18548CB5Fb04499c8A0d4199a30a
-npx hardhat verify --network polygonZkEvmTestnet 0x44CA47095F1E18548CB5Fb04499c8A0d4199a30a
+npx hardhat verify --network goerli 0xF4Fb31B1D7e3e4Ecf188052E89Fc29300AE1277A
+npx hardhat verify --network sepolia 0xF4Fb31B1D7e3e4Ecf188052E89Fc29300AE1277A
+npx hardhat verify --network optimismGoerli 0xF4Fb31B1D7e3e4Ecf188052E89Fc29300AE1277A
+npx hardhat verify --network polygonMumbai 0xF4Fb31B1D7e3e4Ecf188052E89Fc29300AE1277A
+npx hardhat verify --network polygonZkEvmTestnet 0xF4Fb31B1D7e3e4Ecf188052E89Fc29300AE1277A
 npx hardhat verify --network scrollSepolia
 */
