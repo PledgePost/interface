@@ -20,8 +20,10 @@ const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
 export default function Post() {
-  const [value, setValue] = useState("");
-  const [title, setTitle] = useState("");
+  const [value, setValue] = useState(
+    "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ad itaque vitae a illo in molestias adipisci tenetur officiis molestiae earum veniam, harum non doloribus error voluptates dignissimos necessitatibus quos sit!"
+  );
+  const [title, setTitle] = useState("Lorem ipsum dolor sit amet consectetur");
   const [obj, setObj] = useState({});
   const { chain } = useNetwork();
   const { address } = useAccount();

@@ -32,7 +32,6 @@ export async function writeComment({ author, article_id, user, message }: any) {
 }
 
 export async function readComments(author: string, article_id: string) {
-  console.log("tableName :>> ", tableName);
   if (tableName) {
     try {
       const db = new Database<Comment>();

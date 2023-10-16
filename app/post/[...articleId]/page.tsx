@@ -14,9 +14,10 @@ import {
 
 async function getContent() {
   // TODO: add draft article
-  // TODO: add uuid to smart contract or change path on IPFS
+  //"https://${cid}.ipfs.dweb.link/pledgepost:${address}"
   const data = await fetch(
-    "https://bafybeic2p6ymcseqnpnvcibfrakp2qgze5echsj2lcavbyhlr27hdjzrsy.ipfs.dweb.link/pledgepost:0x06aa005386F53Ba7b980c61e0D067CaBc7602a62/efefa7f6-043d-400b-8b71-dbc2b9e86456.json"
+    // "https://bafybeic2p6ymcseqnpnvcibfrakp2qgze5echsj2lcavbyhlr27hdjzrsy.ipfs.dweb.link/pledgepost:0x06aa005386F53Ba7b980c61e0D067CaBc7602a62/efefa7f6-043d-400b-8b71-dbc2b9e86456.json"
+    "https://bafybeibbzyufq5emesamm76hcdtw4oabsg5w52xwkyu2ihnbqyoyjmjrh4.ipfs.dweb.link/pledgepost:0x06aa005386F53Ba7b980c61e0D067CaBc7602a62"
   ).then((res) => res.json());
   return data;
 }
@@ -27,11 +28,7 @@ export default function ArticlePage({ params }: any) {
   const [messages, setMessages] = useState<string>("");
   const { address } = useAccount();
   const [comments, setComments] = useState<Comment[] | undefined>(undefined);
-  useEffect(() => {
-    getContent().then((data) => {
-      setContent(data);
-    });
-  }, []);
+
   async function handleSend() {
     if (!address || messages === "") return;
     try {
@@ -50,6 +47,14 @@ export default function ArticlePage({ params }: any) {
       showErrorToast("Error posting comment");
     }
   }
+  useEffect(() => {
+    async function fetchContent() {
+      const result = await getContent();
+      setContent(result);
+      return result;
+    }
+    fetchContent();
+  }, []);
   useEffect(() => {
     async function getComments() {
       const result = await readComments(
@@ -81,8 +86,8 @@ export default function ArticlePage({ params }: any) {
               </div>
             ) : (
               <>
-                {comments?.map((comment) => (
-                  <Messages key={comment} params={comment} />
+                {comments?.map((comment, index) => (
+                  <Messages key={index} params={comment} />
                 ))}
               </>
             )}

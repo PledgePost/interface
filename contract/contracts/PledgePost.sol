@@ -12,7 +12,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 // TODO: add on-chain verification of Gitcoin passport with EAS Attestation
 // schema UID(OP): 0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89
 // https://docs.passport.gitcoin.co/building-with-passport/contract-reference
-// TODO: accept/ reject grant application
 contract PledgePost {
     struct Article {
         uint256 id;

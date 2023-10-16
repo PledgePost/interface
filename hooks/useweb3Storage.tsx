@@ -16,7 +16,7 @@ export function makeFileObjects(obj: any, address: any) {
   const buffer = Buffer.from(JSON.stringify(obj));
 
   // Organize files within a folder named after the user's address
-  const files = [new File([buffer], `pledgepost:${address}/${uuid}.json`)];
+  const files = [new File([buffer], `pledgepost:${address}`)];
 
   return files;
 }
