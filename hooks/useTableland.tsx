@@ -1,8 +1,8 @@
 import { Database } from "@tableland/sdk";
-const tableName: string = "article_comment_v2_420_17";
+const commentTable: string = "article_comment_v3_0_1_420_19";
 const draftTable: string = "draft_article_v1_420_18";
 // TODO: use env variable, fix error
-// const tableName = process.env.TABLE_NAME;
+// const commentTable = process.env.TABLE_NAME;
 
 // TODO: add UNIX timestamp
 export interface Comment {
@@ -11,6 +11,7 @@ export interface Comment {
   article_id: string;
   user: `0x${string}` | undefined;
   message: string;
+  timestamp: number;
 }
 interface Draft {
   id: number;
@@ -18,26 +19,32 @@ interface Draft {
   content: string;
 }
 
-export async function writeComment({ author, article_id, user, message }: any) {
+export async function writeComment({
+  author,
+  article_id,
+  user,
+  message,
+  timestamp,
+}: any) {
   const db = new Database<Comment>();
   const { meta: insert } = await db
     .prepare(
-      `INSERT INTO ${tableName} (author, article_id, user, message) VALUES (?, ?, ?, ?)`
+      `INSERT INTO ${commentTable} (author, article_id, user, message, timestamp) VALUES (?, ?, ?, ?, ?)`
     )
-    .bind(author, article_id, user, message)
+    .bind(author, article_id, user, message, timestamp)
     .run();
   await insert.txn?.wait();
-  const { results } = await db.prepare(`SELECT * FROM ${tableName}`).all();
+  const { results } = await db.prepare(`SELECT * FROM ${commentTable}`).all();
   return results;
 }
 
 export async function readComments(author: string, article_id: string) {
-  if (tableName) {
+  if (commentTable) {
     try {
       const db = new Database<Comment>();
       const { results } = await db
         .prepare(
-          `SELECT * FROM ${tableName} WHERE author = ? AND article_id = ?`
+          `SELECT * FROM ${commentTable} WHERE author = ? AND article_id = ?`
         )
         .bind(author, article_id)
         .all();

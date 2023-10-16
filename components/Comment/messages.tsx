@@ -1,6 +1,7 @@
 import React from "react";
 import { Avatar } from "../ui/avatar";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { dateConvert } from "@/lib/dateConvert";
 
 export default function Messages({ params }: any) {
   const ImageUrl = "https://picsum.photos/200/";
@@ -8,7 +9,7 @@ export default function Messages({ params }: any) {
     return address.slice(0, 6) + "..." + address.slice(-4);
   }
   const address = sliceAddress(params.user);
-
+  const timestamp = dateConvert(params.timestamp);
   return (
     <div className="mb-6">
       <div className="flex flex-row items-center justify-between">
@@ -25,7 +26,7 @@ export default function Messages({ params }: any) {
           </div>
         </div>
         <div className="flex flex-row items-center">
-          <span className="text-xs text-gray-500">2h</span>
+          <span className="text-xs text-gray-500">{timestamp}</span>
         </div>
       </div>
       <div className="flex flex-col mt-2">

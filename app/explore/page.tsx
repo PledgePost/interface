@@ -21,6 +21,7 @@ export default async function Explore() {
   // const { data: posts } = await client.query({
   //   query: GET_ARTICLE_POSTED,
   // });
+
   const posts: any = await getData();
   console.log("posts :>> ", posts);
   console.log("posts.length :>> ", posts.length);
@@ -57,7 +58,9 @@ async function getData() {
   try {
     const { data } = await client.query({
       query: GET_ARTICLE_POSTED,
+      fetchPolicy: "no-cache",
     });
+    console.log("data :>> ", data);
     return data?.articlePosteds || [];
   } catch (error) {
     console.error("getData error :>> ", error);

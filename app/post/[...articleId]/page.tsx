@@ -12,6 +12,7 @@ import {
   showSuccessToast,
 } from "@/hooks/useNotification";
 
+
 async function getContent() {
   // TODO: add draft article
   //"https://${cid}.ipfs.dweb.link/pledgepost:${address}"
@@ -28,6 +29,9 @@ export default function ArticlePage({ params }: any) {
   const [messages, setMessages] = useState<string>("");
   const { address } = useAccount();
   const [comments, setComments] = useState<Comment[] | undefined>(undefined);
+  let timestamp = new Date();
+  let unix = timestamp.getTime();
+  let UNIXtimestamp = Math.floor(unix / 1000);
 
   async function handleSend() {
     if (!address || messages === "") return;
@@ -38,6 +42,7 @@ export default function ArticlePage({ params }: any) {
         article_id: params.articleId[1],
         message: messages,
         user: address,
+        timestamp: UNIXtimestamp,
       });
       console.log("result :>> ", result);
       showSuccessToast("Comment successfully posted");

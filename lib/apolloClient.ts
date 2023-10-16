@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 const client = new ApolloClient({
-  uri: process.env.GRAPHQL_API_URL as string,
+  uri: "https://api.studio.thegraph.com/query/52298/pledgepost/version/latest",
   cache: new InMemoryCache(),
 });
 

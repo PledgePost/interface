@@ -60,10 +60,7 @@ contract PledgePost {
     mapping(uint256 => mapping(address => mapping(uint256 => uint256)))
         public matchingAmounts;
 
-    // TODO: add support for multiple tokens
-    // Token addresses(temp)
-    // address public constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-    // address public constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    // TODO: initialize token
 
     event ArticlePosted(
         address indexed author,
@@ -87,8 +84,11 @@ contract PledgePost {
     address public owner;
     IPledgePostERC721 public nft;
 
+    // IERC20 public token;
+
     constructor() {
         owner = msg.sender;
+        // TODO: change token URI
         nft = new PledgePostERC721(address(this), "https://pledgepost.io/");
     }
 
@@ -119,10 +119,7 @@ contract PledgePost {
         IERC20 _token,
         uint256 _amount
     ) external {
-        // require(
-        //     address(_token) == DAI || address(_token) == USDC,
-        //     "Token not supported"
-        // );
+        // require(_token == token, "Token not supported");
 
         // check if amount of token is approved for this contract
         require(
