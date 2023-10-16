@@ -47,23 +47,28 @@ export default async function Explore() {
   console.log("AllPost :>> ", AllPost);
 
   return (
-    <div className="flex flex-wrap gap-[26px] p-12 justify-center">
-      <Input placeholder="Search" className="w-[400px]" />
-      {AllPost.map((post?: any) => (
-        <Link
-          key={post?.articleId}
-          href={`/post/${post.author}/${post.articleId}`}
-        >
-          <CardLists
-            Title={post.ipfsData?.title}
-            author={post?.author}
-            Description={post?.ipfsData?.value}
-            ImageUrl="https://picsum.photos/200/300"
-            matchingAmount="1000"
-          />
-        </Link>
-      ))}
-    </div>
+    <>
+      <Input
+        placeholder="Search"
+        className="w-[500px] h-[44px] flex justify-center items-center mx-auto mt-12 rounded-full"
+      />
+      <div className="flex flex-wrap gap-[26px] p-12 justify-center">
+        {AllPost.map((post?: any) => (
+          <Link
+            key={post?.articleId}
+            href={`/post/${post.author}/${post.articleId}`}
+          >
+            <CardLists
+              Title={post.ipfsData?.title}
+              author={post?.author}
+              Description={post?.ipfsData?.value}
+              ImageUrl="https://picsum.photos/200/300"
+              matchingAmount="1000"
+            />
+          </Link>
+        ))}
+      </div>
+    </>
   );
 }
 
