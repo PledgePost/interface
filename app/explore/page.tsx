@@ -54,7 +54,6 @@ export default async function Explore() {
 
 async function getData() {
   if (!client) throw new Error("Client not available");
-
   try {
     const { data } = await client.query({
       query: GET_ARTICLE_POSTED,
