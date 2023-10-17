@@ -9,10 +9,12 @@ const ABI = require("../../abis/PledgePost.json").abi;
 import { getAllData } from "@/lib/fetchData";
 import { useNetwork } from "wagmi";
 import { useEthersProvider } from "@/hooks/useEthers";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Explore() {
   const posts: any = use(getAllData());
   const [allPosts, setAllPosts] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const { chain } = useNetwork();
   const provider = useEthersProvider({ chainId: chain?.id });
 
@@ -30,12 +32,14 @@ export default function Explore() {
         const donation = await contract.getDonatedAmount(address, articleId);
         const donationAmount = ethers.utils.formatUnits(donation, 18);
         const round = await contract.getAppliedRound(address, articleId);
-        const roundId = ethers.utils.parseEther(round.toString());
+        const roundId = ethers.utils.formatUnits(round.id, 18);
+				const roundName  = round.name
+        console.log("roundId", roundId);
         return {
           author: address,
           articleId,
           donation: donationAmount,
-          roundId: roundId,
+          // roundId: roundId,
         };
       } catch (error) {
         console.error("Error fetching donation for", articleId, ":", error);
@@ -52,42 +56,57 @@ export default function Explore() {
         const donationData = donations.find(
           (d) => d.articleId === post.articleId
         );
+
         return {
           ...post,
           donation: donationData.donation,
-          roundId: donationData.roundId,
         };
       });
-      setAllPosts(updatedPosts);
-      console.log(updatedPosts);
-    };
 
+      setAllPosts(updatedPosts);
+      setIsLoading(false);
+      console.log("updatedPosts", updatedPosts);
+    };
     fetchAllDonations();
   }, [posts, provider]);
 
   return (
-    <>
+    <div>
       <Input
         placeholder="Search"
         className="md:w-[500px] h-[44px] flex justify-center items-center mx-auto md:mt-10 rounded-full"
       />
-      <div className="flex flex-wrap gap-[26px] md:p-12 p-4 justify-center ">
-        {allPosts.map((post: any, index: number) => (
-          <Link
-            key={index}
-            href={`/post/${post.author}/${post.articleId}/${post.content}`}
-          >
-            <CardLists
-              Title={post.title}
-              author={post?.author}
-              Description={post.value}
-              ImageUrl="https://picsum.photos/200/300"
-              donation={post.donation}
-              roundId={post.roundId}
-            />
-          </Link>
-        ))}
-      </div>
-    </>
+      {isLoading ? (
+        <div className="flex flex-wrap gap-[26px] md:p-12 p-4 justify-center">
+          {Array(8)
+            .fill(0)
+            .map((_, idx) => (
+              <Skeleton
+                key={idx}
+                className="w-[400px] h-[350px] rounded-[15px] shadow-lg my-2"
+              />
+            ))}
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-[26px] md:p-12 p-4 justify-center ">
+          {allPosts.map((post: any, index: number) => (
+            <Link
+              key={index}
+              href={`/post/${post.author}/${post.articleId}/${post.content}`}
+            >
+              <CardLists
+                Title={post.title}
+                author={post?.author}
+                Description={post.value}
+                ImageUrl="https://picsum.photos/200/300"
+                donation={post.donation}
+                roundId={post?.roundId}
+                isLoading={isLoading}
+              />
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

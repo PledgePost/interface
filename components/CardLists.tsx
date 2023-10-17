@@ -12,6 +12,7 @@ const CardLists = ({
   author,
   donation,
   roundId,
+  isLoading,
 }: any) => {
   const addr = sliceAddress(author);
   return (
@@ -24,7 +25,7 @@ const CardLists = ({
       {roundId && (
         <div className="px-4 mt-2">
           <Badge className="rounded-sm" variant="secondary">
-            Round
+            {roundId}
           </Badge>
         </div>
       )}
