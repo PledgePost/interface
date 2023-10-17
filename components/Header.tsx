@@ -24,7 +24,7 @@ const Header = () => {
             />
           </Link>
           <div
-            className="hidden justify-between items-center w-full lg:flex lg:w-auto lg:order-1"
+            className="hidden justify-between items-center w-full lg:flex lg:w-auto "
             id="mobile-menu-2"
           >
             <ul className="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0">
@@ -58,7 +58,11 @@ const Header = () => {
             </ul>
           </div>
           <div className="flex items-center lg:order-2 gap-4">
+            <Button asChild variant="default">
+              <Link href="/post">New Post</Link>
+            </Button>
             <ConnectButton
+              chainStatus="icon"
               showBalance={false}
               accountStatus={{ smallScreen: "address", largeScreen: "full" }}
             />
