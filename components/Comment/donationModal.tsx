@@ -20,7 +20,8 @@ import {
 import { Button } from "../ui/button";
 
 import React from "react";
-const contract_address: any = process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS;
+import { TokenConfig, TokenType } from "@/lib/Token/token";
+
 export default function DonationModal({
   handleClick,
   amount,
@@ -31,7 +32,11 @@ export default function DonationModal({
     setAmount(Number(e.target.value));
     // setAmount(e.target.value);
   };
-  const handleToken = (token: any) => {
+  const handleToken = (token_address: string) => {
+    const token: TokenType | undefined = TokenConfig.find(
+      (token) => token.address === token_address
+    );
+    if (!token) return;
     console.log("token :>> ", token);
     setToken(token);
   };
@@ -62,8 +67,11 @@ export default function DonationModal({
                 <SelectValue placeholder="Token" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={contract_address}>USDC</SelectItem>
-                <SelectItem value="0x11111111">DAI</SelectItem>
+                {TokenConfig.map((token, index) => (
+                  <SelectItem key={index} value={token.address}>
+                    {token.symbol}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

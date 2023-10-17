@@ -2,7 +2,12 @@
 import React, { useState, useEffect } from "react";
 import Messages from "@/components/Comment/messages";
 import MessageInput from "@/components/Comment/messageInput";
-import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import {
+  useAccount,
+  useContractRead,
+  useContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
 import { readComments, writeComment, Comment } from "@/hooks/useTableland";
 import { Button } from "@/components/ui/button";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
@@ -12,6 +17,8 @@ import {
   showSuccessToast,
 } from "@/hooks/useNotification";
 import { toChecksumAddress } from "ethereumjs-util";
+import { TokenType } from "@/lib/Token/token";
+import useExplore from "@/hooks/useExplore";
 const ABI = require("../../../abis/PledgePost.json").abi;
 const TOKEN_ABI = require("../../../abis/Token.json").abi;
 
@@ -30,8 +37,9 @@ export default function ArticlePage({ params }: any) {
   const [content, setContent] = useState<any>(null);
   const [messages, setMessages] = useState<string>("");
   const [amount, setAmount] = useState<number>(0);
-  const [token, setToken] = useState<string>(""); //erc20 token address
+  const [token, setToken] = useState<TokenType | undefined>(undefined); //erc20 token
   const { address } = useAccount();
+  const url = useExplore();
 
   const [comments, setComments] = useState<Comment[] | undefined>(undefined);
   let timestamp = new Date();
@@ -67,13 +75,18 @@ export default function ArticlePage({ params }: any) {
     address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
     abi: ABI,
     functionName: "donateToArticle",
-    args: [params.articleId[0], params.articleId[1], token, amount],
+    args: [
+      params.articleId[0],
+      params.articleId[1],
+      token?.address,
+      amount * 10 ** (token?.decimals || 0),
+    ],
   });
   const { write: approve } = useContractWrite({
-    address: process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as any,
+    address: token?.address,
     abi: TOKEN_ABI,
     functionName: "approve",
-    args: [process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any, amount],
+    args: [token?.address, amount * 10 ** (token?.decimals || 0)],
   });
   const { data: history } = useContractRead({
     address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
@@ -82,26 +95,46 @@ export default function ArticlePage({ params }: any) {
     args: [address, params.articleId[0], params.articleId[1]],
   });
   const { data: Allowance } = useContractRead({
-    address: process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as any,
+    address: token?.address,
     abi: TOKEN_ABI,
     functionName: "allowance",
     args: [address, process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any],
   });
+  const { data: txreceipt } = useWaitForTransaction({
+    hash: data?.hash,
+    onSuccess: (txreceipt) => {
+      if (txreceipt) {
+        showSuccessToast(`${url}/tx/${txreceipt.transactionHash}`);
+      }
+    },
+  });
+  useEffect(() => {
+    if (txreceipt) {
+      console.log("Receipt: ", txreceipt);
+    }
+  }, [txreceipt]);
 
   async function handleClick() {
-    if (!address || amount === 0 || token === "") return;
-    try {
-      showDefaultToast("Approving for Contract...");
-      await approve();
+    if (!address || amount === 0 || token === undefined) return;
+    const inputAmount = amount * 10 ** (token?.decimals || 0);
 
-      await donate();
-      // console.log("result :>> ", result);
-      // showSuccessToast("Donation succeeded");
+    try {
+      console.log("Allowance :>> ", Allowance);
+      if (Allowance === undefined) return "Allowance is undefined";
+      if (Allowance[0] < inputAmount) {
+        console.log("Allowance is less than input amount");
+        approve();
+        showDefaultToast("Approving for Contract...");
+      }
+
+      donate();
+      showDefaultToast("Sending Transaction...");
     } catch (e) {
       console.log("error: ", e);
       showErrorToast("Error posting donation");
     }
   }
+
   useEffect(() => {
     async function fetchContent() {
       const result = await fetchData(params.articleId[0], params.articleId[2]);
@@ -120,7 +153,7 @@ export default function ArticlePage({ params }: any) {
       return result;
     }
     getComments();
-  }, [params.articleId]);
+  }, [comments, params.articleId]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
