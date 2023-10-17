@@ -5,7 +5,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import sliceAddress from "@/lib/sliceAddress";
 import { Badge } from "@/components/ui/badge";
 
-const CardLists = ({ Title, Description, ImageUrl, author, donation }: any) => {
+const CardLists = ({
+  Title,
+  Description,
+  ImageUrl,
+  author,
+  donation,
+  roundId,
+}: any) => {
   const addr = sliceAddress(author);
   return (
     <div className="w-[400px] rounded-[15px] bg-white cursor-pointer shadow-lg">
@@ -14,11 +21,13 @@ const CardLists = ({ Title, Description, ImageUrl, author, donation }: any) => {
         alt="fund"
         className="w-full h-[158px] object-cover rounded-[15px]"
       />
-      <div className="px-4 mt-2">
-        <Badge className="rounded-sm" variant="secondary">
-          Round
-        </Badge>
-      </div>
+      {roundId && (
+        <div className="px-4 mt-2">
+          <Badge className="rounded-sm" variant="secondary">
+            Round
+          </Badge>
+        </div>
+      )}
 
       <div className="flex flex-col px-4 py-2">
         <div className="block">

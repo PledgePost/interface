@@ -25,14 +25,18 @@ export default function Explore() {
       provider
     );
 
-    const getDonation = async (
-      address: string,
-      articleId: any
-    ): Promise<any> => {
+    const fetchData = async (address: string, articleId: any): Promise<any> => {
       try {
-        const data = await contract.getDonatedAmount(address, articleId);
-        const donationAmount = ethers.utils.formatUnits(data, 18);
-        return { author: address, articleId, donation: donationAmount };
+        const donation = await contract.getDonatedAmount(address, articleId);
+        const donationAmount = ethers.utils.formatUnits(donation, 18);
+        const round = await contract.getAppliedRound(address, articleId);
+        const roundId = ethers.utils.parseEther(round.toString());
+        return {
+          author: address,
+          articleId,
+          donation: donationAmount,
+          roundId: roundId,
+        };
       } catch (error) {
         console.error("Error fetching donation for", articleId, ":", error);
         return { author: address, articleId, donation: "0" };
@@ -41,16 +45,21 @@ export default function Explore() {
 
     const fetchAllDonations = async () => {
       const donationPromises = posts.map((post: any) =>
-        getDonation(post.author, post.articleId)
+        fetchData(post.author, post.articleId)
       );
       const donations = await Promise.all(donationPromises);
       const updatedPosts = posts.map((post: any) => {
         const donationData = donations.find(
           (d) => d.articleId === post.articleId
         );
-        return { ...post, donation: donationData.donation };
+        return {
+          ...post,
+          donation: donationData.donation,
+          roundId: donationData.roundId,
+        };
       });
       setAllPosts(updatedPosts);
+      console.log(updatedPosts);
     };
 
     fetchAllDonations();
@@ -74,6 +83,7 @@ export default function Explore() {
               Description={post.value}
               ImageUrl="https://picsum.photos/200/300"
               donation={post.donation}
+              roundId={post.roundId}
             />
           </Link>
         ))}
