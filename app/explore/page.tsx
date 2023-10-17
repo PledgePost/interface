@@ -1,99 +1,83 @@
-import React from "react";
+"use client";
+import React, { use, cache, useState, useEffect, useCallback } from "react";
 import CardLists from "@/components/CardLists";
-import { toChecksumAddress } from "ethereumjs-util";
-const ABI = require("../../abis/PledgePost.json").abi;
-import { gql } from "@apollo/client";
-import client from "@/lib/apolloClient";
 import Link from "next/link";
 import { ethers } from "ethers";
 import { Input } from "@/components/ui/input";
 
-const GET_ARTICLE_POSTED = gql`
-  query GetArticlePosted {
-    articlePosteds {
-      id
-      author
-      content
-      articleId
-      blockNumber
-      blockTimestamp
-      transactionHash
-    }
-  }
-`;
-export default async function Explore() {
-  const posts: any = await getData();
-  // const provider = new ethers.providers.JsonRpcProvider();
-  // const contract = new ethers.Contract(
-  //   process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
-  //   ABI,
-  //   provider
-  // );
+const ABI = require("../../abis/PledgePost.json").abi;
+import { getAllData } from "@/lib/fetchData";
+import { useNetwork } from "wagmi";
+import { useEthersProvider } from "@/hooks/useEthers";
 
-  const AllPost = await Promise.all(
-    posts.map(async (post: any) => {
-      const ipfsData = await fetchData(post.author, post.content);
+export default function Explore() {
+  const posts: any = use(getAllData());
+  const [allPosts, setAllPosts] = useState<any>([]);
+  const { chain } = useNetwork();
+  const provider = useEthersProvider({ chainId: chain?.id });
 
-      // TODO: get matching amount, should apply before getMatchingAmount function
-      // const matchingAmount = await contract.getMatchingAmount(
-      //   0,
-      //   post.author,
-      //   post.articleId
-      // );
-      return { ...post, ipfsData };
-    })
-  );
+  useEffect(() => {
+    if (!provider) return;
 
-  console.log("AllPost :>> ", AllPost);
+    const contract = new ethers.Contract(
+      process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string,
+      ABI,
+      provider
+    );
+
+    const getDonation = async (
+      address: string,
+      articleId: any
+    ): Promise<any> => {
+      try {
+        const data = await contract.getDonatedAmount(address, articleId);
+        const donationAmount = ethers.utils.formatUnits(data, 18);
+        return { author: address, articleId, donation: donationAmount };
+      } catch (error) {
+        console.error("Error fetching donation for", articleId, ":", error);
+        return { author: address, articleId, donation: "0" };
+      }
+    };
+
+    const fetchAllDonations = async () => {
+      const donationPromises = posts.map((post: any) =>
+        getDonation(post.author, post.articleId)
+      );
+      const donations = await Promise.all(donationPromises);
+      const updatedPosts = posts.map((post: any) => {
+        const donationData = donations.find(
+          (d) => d.articleId === post.articleId
+        );
+        return { ...post, donation: donationData.donation };
+      });
+      setAllPosts(updatedPosts);
+    };
+
+    fetchAllDonations();
+  }, [posts, provider]);
 
   return (
     <>
       <Input
         placeholder="Search"
-        className="w-[500px] h-[44px] flex justify-center items-center mx-auto mt-12 rounded-full"
+        className="md:w-[500px] h-[44px] flex justify-center items-center mx-auto md:mt-10 rounded-full"
       />
-      <div className="flex flex-wrap gap-[26px] p-12 justify-center">
-        {AllPost.map((post?: any) => (
+      <div className="flex flex-wrap gap-[26px] md:p-12 p-4 justify-center ">
+        {allPosts.map((post: any, index: number) => (
           <Link
-            key={post?.articleId}
+            key={index}
             href={`/post/${post.author}/${post.articleId}/${post.content}`}
           >
             <CardLists
-              Title={post.ipfsData?.title}
+              Title={post.title}
               author={post?.author}
-              Description={post?.ipfsData?.value}
+              Description={post.value}
               ImageUrl="https://picsum.photos/200/300"
-              matchingAmount="1000"
+              donation={post.donation}
             />
           </Link>
         ))}
       </div>
     </>
   );
-}
-
-async function getData() {
-  if (!client) throw new Error("Client not available");
-  try {
-    const { data } = await client.query({
-      query: GET_ARTICLE_POSTED,
-      fetchPolicy: "no-cache",
-    });
-    return data.articlePosteds;
-  } catch (error) {
-    console.error("getData error :>> ", error);
-    throw error;
-  }
-}
-
-async function fetchData(address: string, cid: string) {
-  const checksumAddress = toChecksumAddress(address);
-
-  const url = `https://${cid}.ipfs.dweb.link/pledgepost:${checksumAddress}`;
-
-  console.log("url :>> ", url);
-  const res = await fetch(url);
-  const content = await res.json();
-  console.log("content :>> ", content);
-  return content;
 }

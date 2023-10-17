@@ -3,46 +3,40 @@ import Image from "next/image";
 import vercel from "../public/vercel.svg";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import sliceAddress from "@/lib/sliceAddress";
-const CardLists = ({
-  Title,
-  Description,
-  ImageUrl,
-  author,
-  matchingAmount,
-}: any) => {
+import { Badge } from "@/components/ui/badge";
+
+const CardLists = ({ Title, Description, ImageUrl, author, donation }: any) => {
   const addr = sliceAddress(author);
   return (
-    <div className="sm:w-[400px] w-full rounded-[15px] bg-white cursor-pointer shadow-lg">
+    <div className="w-[400px] rounded-[15px] bg-white cursor-pointer shadow-lg">
       <Image
         src={vercel}
         alt="fund"
         className="w-full h-[158px] object-cover rounded-[15px]"
       />
+      <div className="px-4 mt-2">
+        <Badge className="rounded-sm" variant="secondary">
+          Round
+        </Badge>
+      </div>
 
-      <div className="flex flex-col p-4">
+      <div className="flex flex-col px-4 py-2">
         <div className="block">
           <h3 className="font-epilogue font-semibold text-[16px] text-black text-left leading-[26px] truncate">
-            {Title || "Title"}
+            {Title}
           </h3>
           <p className="mt-[5px] font-epilogue font-normal text-[#808191] text-left leading-[18px] truncate">
-            {Description || "Description"}
+            {Description}
           </p>
         </div>
         <div className="flex justify-between flex-wrap mt-[10px] gap-2">
           <div className="flex flex-col">
             <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] leading-[22px]">
-              Raised of ${matchingAmount}
+              Raised ${donation}
             </h4>
           </div>
         </div>
         <div className="flex items-center mt-[10px] gap-[12px]">
-          {/* <div className="w-[30px] h-[30px] rounded-full flex justify-center items-center overflow-hidden">
-            <Image
-              src={vercel}
-              alt="user"
-              className="object-cover w-full h-full"
-            />
-          </div> */}
           <Avatar>
             <AvatarImage src={ImageUrl} />
             <AvatarFallback></AvatarFallback>
