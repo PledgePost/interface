@@ -12,7 +12,6 @@ const CardLists = ({
   author,
   donation,
   roundId,
-  isLoading,
 }: any) => {
   const addr = sliceAddress(author);
   return (
