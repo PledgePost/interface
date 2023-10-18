@@ -22,6 +22,8 @@ contract PledgePost {
     struct Round {
         uint256 id;
         address owner;
+        string name;
+        bytes description;
         address poolAddress;
         IERC20 poolToken;
         uint256 poolAmount;
@@ -36,13 +38,12 @@ contract PledgePost {
     mapping(address => uint256) public authorTotalDonations;
     // author => articleId => donators
     mapping(address => mapping(uint256 => address[])) public articleDonators;
-    // array of rounds
-    Round[] public rounds;
     // Round.id => Article[]
     mapping(uint256 => Article[]) public roundArticles;
     // author => Article.id => Round
     mapping(address => mapping(uint256 => Round))
         public authorToArticleIdToRound;
+
     enum ApplicationStatus {
         Pending,
         Accepted,
@@ -59,9 +60,11 @@ contract PledgePost {
     // round.id => author => article.id => amount
     mapping(uint256 => mapping(address => mapping(uint256 => uint256)))
         public matchingAmounts;
+    // array of rounds
+    Round[] public rounds;
+    uint256 roundLength = 1;
 
     // TODO: initialize token
-    // TODO: add apply for round event
     event ArticlePosted(
         address indexed author,
         string content,
@@ -73,12 +76,19 @@ contract PledgePost {
         uint256 articleId,
         uint256 amount
     );
-    // TODO: add round id
+
     event RoundCreated(
         address indexed owner,
         address ipoolAddress,
+        uint256 roundId,
+        string name,
         uint256 startDate,
         uint256 endDate
+    );
+    event RoundApplied(
+        address indexed author,
+        uint256 articleId,
+        uint256 roundId
     );
     event Allocated(uint256 indexed roundId, address recipient, uint256 amount);
 
@@ -90,7 +100,10 @@ contract PledgePost {
     constructor() {
         owner = msg.sender;
         // TODO: change token URI
-        nft = new PledgePostERC721(address(this), "https://pledgepost.io/");
+        nft = new PledgePostERC721(
+            address(this),
+            "https://bafybeiev4tgktvtgo5hjmfukj5p76iw5uyh3bisu7ivk6s4n7mfyrqmvf4.ipfs.dweb.link"
+        );
     }
 
     modifier onlyOwner() {
@@ -168,7 +181,7 @@ contract PledgePost {
             msg.sender == article.author,
             "Only author can apply for round"
         );
-        require(_roundId < rounds.length, "Round does not exist");
+        require(_roundId < roundLength, "Round does not exist");
         Round storage round = rounds[_roundId];
         require(round.isActive, "Round is not active");
         require(round.endDate > block.timestamp, "Round has ended");
@@ -178,8 +191,11 @@ contract PledgePost {
         );
         authorToArticleIdToRound[msg.sender][_articleId] = round;
         roundArticles[_roundId].push(article);
+
+        emit RoundApplied(msg.sender, _articleId, _roundId);
     }
 
+    // TODO: control status when donated
     function acceptApplication(
         uint256 _roundId,
         address _author,
@@ -228,6 +244,7 @@ contract PledgePost {
     function createRound(
         IERC20 _token,
         string memory _name,
+        string memory _description,
         uint256 _startDate,
         uint256 _endDate
     ) external onlyOwner returns (Round memory) {
@@ -239,9 +256,13 @@ contract PledgePost {
         require(_endDate > block.timestamp, "End date must be in the future");
 
         address pool = _createPool(_token, _name, _startDate, _endDate);
+        bytes memory description = abi.encodePacked(_description);
+
         Round memory newRound = Round({
-            id: rounds.length,
+            id: roundLength,
             owner: owner,
+            name: _name,
+            description: description,
             poolAddress: pool,
             poolToken: _token,
             poolAmount: 0,
@@ -250,13 +271,21 @@ contract PledgePost {
             createdTimestamp: block.timestamp,
             isActive: false
         });
-        emit RoundCreated(msg.sender, pool, _startDate, _endDate);
+        emit RoundCreated(
+            msg.sender,
+            pool,
+            roundLength,
+            _name,
+            _startDate,
+            _endDate
+        );
         rounds.push(newRound);
+        roundLength++;
         return newRound;
     }
 
     function activateRound(uint256 _roundId) external onlyOwner {
-        require(_roundId < rounds.length, "Round does not exist");
+        require(_roundId < roundLength, "Round does not exist");
         Round storage round = rounds[_roundId];
         require(!round.isActive, "Round is already active");
         require(round.endDate > block.timestamp, "Round has ended");
@@ -264,14 +293,14 @@ contract PledgePost {
     }
 
     function deactivateRound(uint256 _roundId) external onlyOwner {
-        require(_roundId < rounds.length, "Round does not exist");
+        require(_roundId < roundLength, "Round does not exist");
         Round storage round = rounds[_roundId];
         require(round.isActive, "Round is not active");
         round.isActive = false;
     }
 
     function Allocate(uint256 _roundId) external onlyOwner {
-        require(_roundId < rounds.length, "Round does not exist");
+        require(_roundId < roundLength, "Round does not exist");
         Round storage round = rounds[_roundId];
         uint256 totalSquareSqrtSum = 0;
         // calculate totalSquareSqrtSum
@@ -300,7 +329,7 @@ contract PledgePost {
         uint256 _roundId,
         uint256 _amount
     ) external returns (bool success) {
-        require(_roundId < rounds.length, "Round does not exist");
+        require(_roundId < roundLength, "Round does not exist");
         Round storage round = rounds[_roundId];
         success = IERC20(address(round.poolToken)).transferFrom(
             msg.sender,
@@ -331,6 +360,15 @@ contract PledgePost {
         address _author,
         uint256 _articleId
     ) public view returns (uint256) {
+        require(_roundId < roundLength, "Round does not exist");
+        require(
+            _articleId < authorArticles[_author].length,
+            "Article does not exist"
+        );
+        require(
+            authorToArticleIdToRound[_author][_articleId].id == _roundId,
+            "Author has not applied for this round"
+        );
         uint256 totalSquareSqrtSum = getTotalSquareSqrtSum(_roundId);
         uint256 suquareSqrtSum = recievedDonationsWithinRound[_author][
             _articleId
@@ -365,6 +403,16 @@ contract PledgePost {
         address _author,
         uint256 _articleId
     ) public view returns (uint256) {
+        require(_roundId < roundLength, "Round does not exist");
+        require(
+            _articleId < authorArticles[_author].length,
+            "Article does not exist"
+        );
+        require(
+            authorToArticleIdToRound[_author][_articleId].id == _roundId,
+            "Author has not applied for this round"
+        );
+
         return matchingAmounts[_roundId][_author][_articleId];
     }
 
@@ -372,7 +420,7 @@ contract PledgePost {
         return QF.sqrt(x);
     }
 
-    function getArticle(
+    function getAppliedArticle(
         uint256 _roundId,
         uint256 _index
     ) public view returns (Article memory) {
@@ -387,25 +435,44 @@ contract PledgePost {
         return authorArticles[_author][_articleId];
     }
 
+    function getAllAuthorArticle(
+        address _author
+    ) public view returns (Article[] memory) {
+        return authorArticles[_author];
+    }
+
     function getAppliedRound(
         address _author,
         uint256 _articleId
     ) public view returns (Round memory) {
+        require(
+            _articleId < authorArticles[_author].length,
+            "Article does not exist"
+        );
         return authorToArticleIdToRound[_author][_articleId];
     }
 
     function getRoundLength() public view returns (uint256) {
-        return rounds.length;
+        return roundLength;
     }
 
     function getRound(uint256 _roundId) public view returns (Round memory) {
+        require(_roundId < roundLength, "Round does not exist");
         return rounds[_roundId];
+    }
+
+    function getAllRound() public view returns (Round[] memory) {
+        return rounds;
     }
 
     function getDonatedAmount(
         address _author,
         uint256 _articleId
     ) public view returns (uint256) {
+        require(
+            _articleId < authorArticles[_author].length,
+            "Article does not exist"
+        );
         return authorArticles[_author][_articleId].donationsReceived;
     }
 
@@ -414,6 +481,15 @@ contract PledgePost {
         uint256 _articleId,
         uint256 _roundId
     ) public view returns (uint256) {
+        require(_roundId < roundLength, "Round does not exist");
+        require(
+            _articleId < authorArticles[_author].length,
+            "Article does not exist"
+        );
+        require(
+            authorToArticleIdToRound[_author][_articleId].id == _roundId,
+            "Author has not applied for this round"
+        );
         return recievedDonationsWithinRound[_author][_articleId][_roundId];
     }
 
@@ -422,7 +498,7 @@ contract PledgePost {
         address _author,
         uint256 _articleId
     ) public view returns (ApplicationStatus) {
-        require(_roundId < rounds.length, "Round does not exist");
+        require(_roundId < roundLength, "Round does not exist");
         require(
             _articleId < authorArticles[_author].length,
             "Article does not exist"
