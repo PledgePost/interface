@@ -7,11 +7,12 @@ import { AccountAbstractionProvider } from "@/hooks/AccountAbstractionContext";
 import Header from "../components/Header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { WagmiContextProvider } from "@/hooks/WagmiContextProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "PledgePost",
-  description: "PledgePost is a decentralized social media platform.",
+  description: "A Quadratic Funding Media Platform.",
 };
 
 export default function RootLayout({
@@ -24,11 +25,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <AccountAbstractionProvider>
           <RainbowProviders>
-            <ThemeProvider attribute="class" defaultTheme="system">
-              <ToastContainer newestOnTop />
-              <Header />
-              {children}
-            </ThemeProvider>
+            <WagmiContextProvider>
+              <ThemeProvider attribute="class" defaultTheme="system">
+                <ToastContainer newestOnTop />
+                <Header />
+                {children}
+              </ThemeProvider>
+            </WagmiContextProvider>
           </RainbowProviders>
         </AccountAbstractionProvider>
       </body>
