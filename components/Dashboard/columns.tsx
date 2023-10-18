@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-
+import ApplicationModal from "./ApplicationModal";
 export type ArticleColumn = {
   articleId: string;
   author: string;
@@ -88,6 +88,14 @@ export const columns: ColumnDef<ArticleColumn>[] = [
           </DropdownMenuContent>
         </DropdownMenu>
       );
+    },
+  },
+  {
+    id: "apply",
+    cell: ({ row }) => {
+      const article = row.original;
+
+      return <ApplicationModal id={article.articleId} />;
     },
   },
 ];
