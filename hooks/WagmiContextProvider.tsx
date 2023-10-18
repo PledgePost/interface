@@ -11,8 +11,8 @@ import {
   useContractRead,
   useContractReads,
   usePrepareContractWrite,
+  useAccount,
 } from "wagmi";
-
 
 const WagmiContext = createContext<any>(null);
 
@@ -25,14 +25,14 @@ export const WagmiContextProvider = ({
     address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
     abi: require("../abis/PledgePost.json").abi,
   };
-
+  const { address } = useAccount();
   const [roundId, setRoundId] = useState<number>(0);
   const [articleId, setArticleId] = useState<number>(0);
   const [depositAmount, setDepositAmount] = useState<number>(0);
   const [token, setToken] = useState<any>(null);
   const [author, setAuthor] = useState<any>("");
-  const [userAddress, setUserAddress] = useState<any>("");
   const [donation, setDonation] = useState<any>(0);
+
   const { write: createRound } = useContractWrite({
     ...contract,
     functionName: "createRound",
@@ -48,7 +48,7 @@ export const WagmiContextProvider = ({
     functionName: "applyForRound",
     args: [roundId, articleId],
   });
-  const { write: donate } = useContractWrite({
+  const { data: donationResult, write: donate } = useContractWrite({
     ...contract,
     functionName: "donateToArticle",
     args: [
@@ -71,25 +71,29 @@ export const WagmiContextProvider = ({
   const { data: history } = useContractRead({
     ...contract,
     functionName: "checkOwner",
-    args: [userAddress, author, articleId],
+    args: [address, author, articleId],
   });
   const { data: Allowance } = useContractRead({
     address: "0x5CA1ED81795F5fE7174D8baA64c5d1B7bBB2b439",
     abi: require("../abis/Token.json").abi,
     functionName: "allowance",
-    args: [userAddress, process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any],
+    args: [address, process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any],
   });
 
   const { write: approve } = useContractWrite({
     address: "0x5CA1ED81795F5fE7174D8baA64c5d1B7bBB2b439",
     abi: require("../abis/Token.json").abi,
     functionName: "approve",
-    args: [process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any, 100000 * 10 ** 18],
+    args: [
+      process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
+      10000000000 * 10 ** 18,
+    ],
   });
 
   return (
     <WagmiContext.Provider
       value={{
+        address,
         roundId,
         setRoundId,
         articleId,
@@ -100,8 +104,7 @@ export const WagmiContextProvider = ({
         setToken,
         author,
         setAuthor,
-        userAddress,
-        setUserAddress,
+        donationResult,
         donation,
         setDonation,
         createRound,
