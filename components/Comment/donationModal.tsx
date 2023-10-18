@@ -1,14 +1,13 @@
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -30,7 +29,6 @@ export default function DonationModal({
 }: any) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAmount(Number(e.target.value));
-    // setAmount(e.target.value);
   };
   const handleToken = (token_address: string) => {
     const token: TokenType | undefined = TokenConfig.find(
@@ -42,19 +40,19 @@ export default function DonationModal({
   };
   return (
     <>
-      <AlertDialog>
-        <AlertDialogTrigger>
+      <Dialog>
+        <DialogTrigger>
           <Button>Donate to unlock comment</Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex justify-center items-center">
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex justify-center items-center">
               Donate to this article!
-            </AlertDialogTitle>
-            <AlertDialogDescription className="flex justify-center items-center">
+            </DialogTitle>
+            <DialogDescription className="flex justify-center items-center">
               You can donate to this article to unlock the comment section!
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+            </DialogDescription>
+          </DialogHeader>
           <div className="flex flex-row gap-4">
             <Input
               placeholder="Amount"
@@ -76,12 +74,16 @@ export default function DonationModal({
             </Select>
           </div>
 
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
+            </DialogClose>
             <Button onClick={() => handleClick()}>Confirm</Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
