@@ -37,14 +37,11 @@ export default function ApplicationModal({
     author,
   } = useWagmiContextProvider();
   useEffect(() => {
-    console.log("id :>> ", id);
     setArticleId(id);
   }, [id, setArticleId]);
 
   const handleChange = () => {
     setArticleId(id);
-    console.log("id :>> ", id);
-    // setAmount(e.target.value);
   };
 
   const handleApply = () => {

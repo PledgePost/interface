@@ -4,13 +4,12 @@ import CardLists from "@/components/CardLists";
 import Link from "next/link";
 import { ethers } from "ethers";
 import { Input } from "@/components/ui/input";
-
-const ABI = require("../../abis/PledgePost.json").abi;
 import { getAllData } from "@/lib/fetchData";
 import { useNetwork } from "wagmi";
 import { useEthersProvider } from "@/hooks/useEthers";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const ABI = require("../../abis/PledgePost.json").abi;
 export default function Explore() {
   const posts: any = use(getAllData());
   const [allPosts, setAllPosts] = useState<any>([]);
