@@ -61,7 +61,7 @@ contract PledgePost {
         public matchingAmounts;
 
     // TODO: initialize token
-
+    // TODO: add apply for round event
     event ArticlePosted(
         address indexed author,
         string content,
@@ -73,6 +73,7 @@ contract PledgePost {
         uint256 articleId,
         uint256 amount
     );
+    // TODO: add round id
     event RoundCreated(
         address indexed owner,
         address ipoolAddress,
