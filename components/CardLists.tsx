@@ -25,7 +25,7 @@ const CardLists = ({
       {roundId && (
         <div className="px-4 mt-2">
           <Badge className="rounded-sm" variant="secondary">
-            {roundId}
+            Round: {roundId}
           </Badge>
         </div>
       )}

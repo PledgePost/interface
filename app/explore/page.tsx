@@ -32,14 +32,12 @@ export default function Explore() {
         const donation = await contract.getDonatedAmount(address, articleId);
         const donationAmount = ethers.utils.formatUnits(donation, 18);
         const round = await contract.getAppliedRound(address, articleId);
-        const roundId = ethers.utils.formatUnits(round.id, 18);
-				const roundName  = round.name
-        console.log("roundId", roundId);
+        const roundId = ethers.utils.formatUnits(round.id, 0);
         return {
           author: address,
           articleId,
           donation: donationAmount,
-          // roundId: roundId,
+          roundId: roundId,
         };
       } catch (error) {
         console.error("Error fetching donation for", articleId, ":", error);
@@ -60,12 +58,13 @@ export default function Explore() {
         return {
           ...post,
           donation: donationData.donation,
+          roundId: donationData.roundId,
         };
       });
 
       setAllPosts(updatedPosts);
       setIsLoading(false);
-      console.log("updatedPosts", updatedPosts);
+      console.log("Posts", updatedPosts);
     };
     fetchAllDonations();
   }, [posts, provider]);
