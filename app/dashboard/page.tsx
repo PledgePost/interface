@@ -15,6 +15,8 @@ import { useContractWrite } from "wagmi";
 import { useNetwork } from "wagmi";
 import { useEthersProvider } from "@/hooks/useEthers";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SalesCard, SubscriptionCard } from "@/components/Card";
+
 const ABI = require("../../abis/PledgePost.json").abi;
 
 const contract = {
@@ -26,7 +28,8 @@ export default function Dashboard() {
   const posts: any = use(getAllData());
   const { chain } = useNetwork();
   const provider = useEthersProvider({ chainId: chain?.id });
-
+  const [totalDonation, setTotalDonation] = useState<number>(0);
+  const [totalDonor, setTotalDonor] = useState<number>(0);
   const [allPosts, setAllPosts] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   useEffect(() => {
@@ -44,11 +47,32 @@ export default function Dashboard() {
         const donationAmount = ethers.utils.formatUnits(donation, 18);
         const round = await contract.getAppliedRound(address, articleId);
         const roundId = ethers.utils.formatUnits(round.id, 0);
+        if (roundId) {
+          const matching = await contract.getMatchingAmount(
+            roundId,
+            address,
+            articleId
+          );
+          const matchingAmount = ethers.utils.formatUnits(matching, 18);
+          const applicationStatus = await contract.getApplicationStatus(
+            roundId,
+            address,
+            articleId
+          );
+          return {
+            author: address,
+            articleId,
+            donation: donationAmount,
+            roundId: roundId,
+            matchingAmount: matchingAmount,
+            status: applicationStatus,
+          };
+        }
         return {
           author: address,
           articleId,
           donation: donationAmount,
-          roundId: roundId,
+          roundId: "Not Applied",
         };
       } catch (error) {
         console.error("Error fetching donation for", articleId, ":", error);
@@ -70,6 +94,8 @@ export default function Dashboard() {
           ...post,
           donation: donationData.donation,
           roundId: donationData.roundId,
+          matchingAmount: donationData.matchingAmount,
+          status: donationData.status,
         };
       });
 
@@ -79,6 +105,18 @@ export default function Dashboard() {
     };
     fetchAllDonations();
   }, [posts, provider]);
+
+  useEffect(() => {
+    if (!allPosts) return;
+    let totalDonation = 0;
+    let totalDonor = 0;
+    allPosts.forEach((post: any) => {
+      totalDonation += parseInt(post.donation);
+      if (parseInt(post.donation) > 0) totalDonor++;
+    });
+    setTotalDonation(totalDonation);
+    setTotalDonor(totalDonor);
+  }, [allPosts]);
 
   const { write: createRound } = useContractWrite({
     ...contract,
@@ -127,6 +165,19 @@ export default function Dashboard() {
         apply
       </Button>
       <h1 className="text-3xl font-bold">Dashboard</h1>
+      <div className="flex flex-row gap-4 my-4 ">
+        <SalesCard
+          title="Recieved Donation"
+          amount={totalDonation}
+          isLoading={isLoading}
+        />
+        <SubscriptionCard
+          title="Total Donors"
+          amount={totalDonor}
+          isLoading={isLoading}
+        />
+        <SubscriptionCard title="Total Comments" isLoading={isLoading} />
+      </div>
       <div>
         <Tabs defaultValue="article">
           <TabsList>
@@ -134,10 +185,14 @@ export default function Dashboard() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
           <TabsContent value="article">
-            <ArticleBoard columns={columns} data={posts} />
+            {isLoading ? (
+              <Skeleton className="flex flex-wrap gap-[26px] md:p-12 p-4 justify-center" />
+            ) : (
+              <ArticleBoard columns={columns} data={allPosts} />
+            )}
           </TabsContent>
           <TabsContent value="analytics">
-            <ArticleBoard columns={analyticsColumn} data={posts} />
+            <ArticleBoard columns={analyticsColumn} data={allPosts} />
           </TabsContent>
         </Tabs>
       </div>
