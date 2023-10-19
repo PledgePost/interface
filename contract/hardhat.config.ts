@@ -110,7 +110,7 @@ const config: HardhatUserConfig = {
         chainId: 1337,
         urls: {
           apiURL: "https://api-sepolia.scroll.io/api",
-          browserURL: "https://sepolia.scroll.io",
+          browserURL: "https://sepolia.scrollscan.com",
         },
       },
     ],
