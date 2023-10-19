@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 
 async function main() {
   // Hardcoded deploying nonce
-  const deployNonce = 11;
+  const deployNonce = 14;
 
   const signer = (await ethers.getSigners())[0];
 

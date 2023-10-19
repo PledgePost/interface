@@ -20,12 +20,12 @@ export const goerliChain: Chain = {
   token: "gETH",
   label: "Goerli",
   shortName: "gor",
-  rpcUrl: "https://goerli.infura.io/v3/cf4f68a2648c42159c880252a44f923b",
+  rpcUrl: "https://goerli.infura.io/v3/4ed233e4236e45d5ac1024b4c1daf682",
   blockExplorerUrl: "https://goerli.etherscan.io",
   color: "#fbc02d",
   transactionServiceUrl: "https://safe-transaction-goerli.safe.global",
   isStripePaymentsEnabled: false,
-  isMoneriumPaymentsEnabled: true,
+  isMoneriumPaymentsEnabled: false,
   paymaster: process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_GOERLI,
 };
 

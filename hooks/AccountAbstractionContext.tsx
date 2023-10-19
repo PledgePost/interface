@@ -17,9 +17,14 @@ import { ChainId } from "@biconomy/core-types";
 import { IPaymaster, BiconomyPaymaster } from "@biconomy/paymaster";
 import {
   BiconomySmartAccount,
+  BiconomySmartAccountV2,
   BiconomySmartAccountConfig,
   DEFAULT_ENTRYPOINT_ADDRESS,
 } from "@biconomy/account";
+import {
+  ECDSAOwnershipValidationModule,
+  DEFAULT_ECDSA_OWNERSHIP_MODULE,
+} from "@biconomy/modules";
 import { IBundler, Bundler } from "@biconomy/bundler";
 
 const clientId: string = (process.env.NEXT_PUBLIC_CLIENT_ID as string) || "";
@@ -35,9 +40,8 @@ export const AccountAbstractionProvider = ({
   const [web3AuthModalPack, setWeb3AuthModalPack] = useState<any>(null);
   const [currentAddress, setCurrentAddress] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
-  const [smartAccount, setSmartAccount] = useState<BiconomySmartAccount | null>(
-    null
-  );
+  const [smartAccount, setSmartAccount] =
+    useState<BiconomySmartAccountV2 | null>(null);
 
   // chainId should be selected by the user
   const [chainId, setChainId] = useState<any>("0x5");
@@ -120,7 +124,12 @@ export const AccountAbstractionProvider = ({
       const provider = new ethers.providers.Web3Provider(
         web3AuthModalPack.getProvider()
       );
+
       const signer = provider.getSigner();
+      const signerAddress = await signer.getAddress();
+      // console.log("provider: ", provider);
+      // console.log("signer: ", signer);
+      // console.log("signerAddress: ", signerAddress);
 
       const bundler: IBundler = new Bundler({
         bundlerUrl: `https://bundler.biconomy.io/api/v2/${chain.id}/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44`,
@@ -131,17 +140,26 @@ export const AccountAbstractionProvider = ({
       const paymaster: IPaymaster = new BiconomyPaymaster({
         paymasterUrl: chain?.paymaster as string,
       });
-      const biconomySmartAccountConfig: BiconomySmartAccountConfig = {
+      const biconomyModule = await ECDSAOwnershipValidationModule.create({
         signer: provider.getSigner(),
+        moduleAddress: DEFAULT_ECDSA_OWNERSHIP_MODULE,
+      });
+      // const biconomySmartAccountConfig: BiconomySmartAccountConfig = {
+      //   signer: signer,
+      //   chainId: chain.id,
+      //   bundler: bundler,
+      //   paymaster: paymaster,
+      // };
+      let biconomySmartAccount = await BiconomySmartAccountV2.create({
         chainId: chain.id,
         bundler: bundler,
         paymaster: paymaster,
-      };
-      let biconomySmartAccount = new BiconomySmartAccount(
-        biconomySmartAccountConfig
-      );
-      biconomySmartAccount = await biconomySmartAccount.init();
-      setCurrentAddress(await biconomySmartAccount.getSmartAccountAddress());
+        entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
+        defaultValidationModule: biconomyModule,
+        activeValidationModule: biconomyModule,
+      });
+      // biconomySmartAccount = await biconomySmartAccount.init();
+      setCurrentAddress(await biconomySmartAccount.getAccountAddress());
       setSmartAccount(biconomySmartAccount);
       setChainId(chain?.hex);
       setAddress(eoa);

@@ -13,6 +13,7 @@
     "@biconomy/account": "^3.1.0",
     "@biconomy/bundler": "^3.1.0",
     "@biconomy/core-types": "^3.1.0",
+    "@biconomy/modules": "^3.1.0",
     "@biconomy/paymaster": "^3.1.0",
     "@hookform/resolvers": "^3.3.1",
     "@radix-ui/react-alert-dialog": "^1.0.5",
