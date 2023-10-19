@@ -29,7 +29,7 @@ export const showSuccessToast = (url?: string, message?: string) => {
 export const showDefaultToast = (message?: string) => {
   toast.info(displaydefault(message), {
     position: "top-right",
-    autoClose: 7500,
+    autoClose: 9500,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,

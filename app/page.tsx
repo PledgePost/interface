@@ -5,13 +5,7 @@ import { ethers } from "ethers";
 import { useState, useEffect } from "react";
 import { useSafeAA } from "@/hooks/AccountAbstractionContext";
 import { Button } from "@/components/ui/button";
-import {
-  IHybridPaymaster,
-  SponsorUserOperationDto,
-  PaymasterMode,
-} from "@biconomy/paymaster";
 import { BiconomySmartAccount } from "@biconomy/account";
-import { showDefaultToast, showSuccessToast } from "@/hooks/useNotification";
 
 interface Props {
   smartAccount: BiconomySmartAccount;
@@ -32,6 +26,7 @@ export default function Home() {
     chainId,
     setChainId,
     loading,
+    handleUserOp,
   } = useSafeAA();
   const [minted, setMinted] = useState(false);
   console.log("provider: ", web3Provider);
@@ -42,43 +37,11 @@ export default function Home() {
     console.log("contract: ", contract);
 
     try {
-      showDefaultToast("Minting 10000 tokens");
       const mintTx = await contract.populateTransaction.mint(
         currentAddress,
         10000
       );
-      console.log("mintTx: ", mintTx.data);
-      const tx1 = {
-        to: contractAddress,
-        data: mintTx.data,
-      };
-      console.log("here before userop");
-      let userOp = await smartAccount.buildUserOp([tx1]);
-      console.log("useOp", userOp);
-      const biconomyPaymaster =
-        smartAccount.paymaster as IHybridPaymaster<SponsorUserOperationDto>;
-      let paymasterServiceData: SponsorUserOperationDto = {
-        mode: PaymasterMode.SPONSORED,
-        smartAccountInfo: {
-          name: "BICONOMY",
-          version: "2.0.0",
-        },
-      };
-      const paymasterAndDataResponse =
-        await biconomyPaymaster.getPaymasterAndData(
-          userOp,
-          paymasterServiceData
-        );
-      userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
-      const userOpResponse = await smartAccount.sendUserOp(userOp);
-      console.log("userOpHash", userOpResponse);
-      const { receipt } = await userOpResponse.wait(1);
-      console.log("txHash", receipt.transactionHash);
-      setMinted(true);
-      showSuccessToast(
-        `https://goerli.etherscan.io/tx/${receipt.transactionHash}`,
-        "Minted 10000 tokens"
-      );
+      await handleUserOp(mintTx, smartAccount);
     } catch (e) {
       console.log(e);
     }

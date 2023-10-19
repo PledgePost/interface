@@ -11,14 +11,17 @@ import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
 import { Web3AuthOptions } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import { Web3AuthModalPack, Web3AuthConfig } from "@safe-global/auth-kit";
-
 import getChain from "../lib/Chains/getchains";
 import { ChainId } from "@biconomy/core-types";
-import { IPaymaster, BiconomyPaymaster } from "@biconomy/paymaster";
 import {
-  BiconomySmartAccount,
+  IPaymaster,
+  BiconomyPaymaster,
+  IHybridPaymaster,
+  SponsorUserOperationDto,
+  PaymasterMode,
+} from "@biconomy/paymaster";
+import {
   BiconomySmartAccountV2,
-  BiconomySmartAccountConfig,
   DEFAULT_ENTRYPOINT_ADDRESS,
 } from "@biconomy/account";
 import {
@@ -26,8 +29,14 @@ import {
   DEFAULT_ECDSA_OWNERSHIP_MODULE,
 } from "@biconomy/modules";
 import { IBundler, Bundler } from "@biconomy/bundler";
-
+import {
+  showDefaultToast,
+  showErrorToast,
+  showSuccessToast,
+} from "./useNotification";
+const ABI = require("../abis/PledgePost.json").abi;
 const clientId: string = (process.env.NEXT_PUBLIC_CLIENT_ID as string) || "";
+const pledgeContractAddr = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string;
 
 const AccountAbstractionContext = createContext<any>(null);
 export const AccountAbstractionProvider = ({
@@ -144,12 +153,7 @@ export const AccountAbstractionProvider = ({
         signer: provider.getSigner(),
         moduleAddress: DEFAULT_ECDSA_OWNERSHIP_MODULE,
       });
-      // const biconomySmartAccountConfig: BiconomySmartAccountConfig = {
-      //   signer: signer,
-      //   chainId: chain.id,
-      //   bundler: bundler,
-      //   paymaster: paymaster,
-      // };
+
       let biconomySmartAccount = await BiconomySmartAccountV2.create({
         chainId: chain.id,
         bundler: bundler,
@@ -158,7 +162,7 @@ export const AccountAbstractionProvider = ({
         defaultValidationModule: biconomyModule,
         activeValidationModule: biconomyModule,
       });
-      // biconomySmartAccount = await biconomySmartAccount.init();
+
       setCurrentAddress(await biconomySmartAccount.getAccountAddress());
       setSmartAccount(biconomySmartAccount);
       setChainId(chain?.hex);
@@ -201,6 +205,48 @@ export const AccountAbstractionProvider = ({
     setSliceAddress(addr);
   }, [currentAddress]);
 
+  const handleUserOp = async (
+    tx: ethers.PopulatedTransaction,
+    account: BiconomySmartAccountV2
+  ) => {
+    if (!account || !tx) return;
+    try {
+      showDefaultToast("Creating transaction...");
+      console.log("Populated tx: ", tx);
+      const tx1 = {
+        to: tx?.to as string,
+        // to: "pledgeContractAddr",
+        data: tx.data,
+      };
+      console.log("here before userop");
+      let userOp = await account.buildUserOp([tx1]);
+      console.log("useOp", userOp);
+      const biconomyPaymaster =
+        account.paymaster as IHybridPaymaster<SponsorUserOperationDto>;
+      let paymasterServiceData: SponsorUserOperationDto = {
+        mode: PaymasterMode.SPONSORED,
+        smartAccountInfo: {
+          name: "BICONOMY",
+          version: "2.0.0",
+        },
+      };
+      const paymasterAndDataResponse =
+        await biconomyPaymaster.getPaymasterAndData(
+          userOp,
+          paymasterServiceData
+        );
+      userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
+      const userOpResponse = await account.sendUserOp(userOp);
+      const { receipt } = await userOpResponse.wait(1);
+      console.log("txHash", receipt.transactionHash);
+      showSuccessToast(
+        `${chain?.blockExplorerUrl}/tx/${receipt.transactionHash}`
+      );
+    } catch (error) {
+      console.error(error);
+      showErrorToast('Error: "Transaction failed"');
+    }
+  };
   return (
     <AccountAbstractionContext.Provider
       value={{
@@ -216,6 +262,7 @@ export const AccountAbstractionProvider = ({
         setChainId,
         loginWeb3Auth,
         logoutWeb3Auth,
+        handleUserOp,
       }}
     >
       {children}
