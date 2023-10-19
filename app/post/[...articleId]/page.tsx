@@ -19,6 +19,10 @@ import {
 import { toChecksumAddress } from "ethereumjs-util";
 import { TokenType } from "@/lib/Token/token";
 import useExplore from "@/hooks/useExplore";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Pre } from "@/components/RichEditor";
+
 const ABI = require("../../../abis/PledgePost.json").abi;
 const TOKEN_ABI = require("../../../abis/Token.json").abi;
 
@@ -161,10 +165,15 @@ export default function ArticlePage({ params }: any) {
         {content?.title}
       </h1>
       <div className="flex flex-row gap-4">
-        <div
-          className="w-3/4 bg-white p-5 rounded shadow"
-          dangerouslySetInnerHTML={{ __html: content?.value }}
-        />
+        <div className="w-3/4 bg-white p-5 rounded shadow">
+          <ReactMarkdown
+            className="markdown overflow-auto"
+            remarkPlugins={[remarkGfm]}
+            components={{ pre: Pre }}
+          >
+            {content?.value}
+          </ReactMarkdown>
+        </div>
         <div className="w-1/4 bg-white p-5 rounded shadow gap-4">
           <div className="flex justify-center font-semibold p-2">Comments</div>
           <div>
