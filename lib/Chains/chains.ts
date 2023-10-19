@@ -18,7 +18,7 @@ export const goerliChain: Chain = {
   token: "gETH",
   label: "Görli",
   shortName: "gor",
-  rpcUrl: "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+  rpcUrl: "https://goerli.infura.io/v3/cf4f68a2648c42159c880252a44f923b",
   blockExplorerUrl: "https://goerli.etherscan.io",
   color: "#fbc02d",
   transactionServiceUrl: "https://safe-transaction-goerli.safe.global",
@@ -65,7 +65,7 @@ export const mumbaiChain: Chain = {
   faucetUrl: "https://mumbaifaucet.com/",
 };
 
-const chains: Chain[] = [
+export const chains: Chain[] = [
   gnosisChain,
   goerliChain,
   mainnetChain,
