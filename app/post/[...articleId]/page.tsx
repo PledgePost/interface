@@ -70,7 +70,6 @@ export default function ArticlePage({ params }: any) {
     }
   }
 
-  // TODO: create Tx context API
   const {
     data,
     isLoading,

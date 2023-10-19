@@ -3,7 +3,6 @@ import Chain from "./chaintype";
 export const gnosisChain: Chain = {
   id: 100,
   hex: "0x64",
-
   token: "xDai",
   shortName: "gno",
   label: "Gnosis Chain",
@@ -18,9 +17,8 @@ export const gnosisChain: Chain = {
 export const goerliChain: Chain = {
   id: 5,
   hex: "0x5",
-
   token: "gETH",
-  label: "Görli",
+  label: "Goerli",
   shortName: "gor",
   rpcUrl: "https://goerli.infura.io/v3/cf4f68a2648c42159c880252a44f923b",
   blockExplorerUrl: "https://goerli.etherscan.io",

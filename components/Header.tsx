@@ -25,15 +25,16 @@ const Header = () => {
     sliceAddress,
     currentAddress,
     smartAccount,
+    chain,
     chainId,
     setChainId,
     loading,
   } = useSafeAA();
-  // TODO: handleChain
   // 0xa6Fd859Eff69aE7EB5EfcC7e2576f39fed87B1b4
-  // const handleChain = (chain_prefix: string) => {
-  //   setChainPrefix(chain_prefix);
-  // };
+  const handleChain = (chain_prefix: string) => {
+    setChainId(chain_prefix);
+  };
+  const chainConfig = chain;
   console.log("smartAccount: ", smartAccount);
   console.log("currentAddress: ", currentAddress);
 
@@ -93,18 +94,22 @@ const Header = () => {
               showBalance={false}
               accountStatus={{ smallScreen: "address", largeScreen: "full" }}
             /> */}
-            {/* <Select onValueChange={(value) => handleChain(value)}>
+            <Select onValueChange={(value) => handleChain(value)}>
               <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Goerli" defaultValue={chainPrefix} />
+                <SelectValue placeholder={chainConfig.label} />
               </SelectTrigger>
               <SelectContent>
-                {chains.map((chain, index) => (
-                  <SelectItem key={index} value={chain.prefix}>
-                    {chain.label}
-                  </SelectItem>
-                ))}
+                {chains
+                  .filter(
+                    (chain) => chain.transactionServiceUrl && chain.paymaster
+                  )
+                  .map((chain, index) => (
+                    <SelectItem key={index} value={chain.hex}>
+                      {chain.label}
+                    </SelectItem>
+                  ))}
               </SelectContent>
-            </Select> */}
+            </Select>
             {address ? (
               <Button variant="default" onClick={logoutWeb3Auth}>
                 {sliceAddress}

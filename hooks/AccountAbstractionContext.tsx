@@ -43,12 +43,12 @@ export const AccountAbstractionProvider = ({
   const [chainId, setChainId] = useState<any>("0x5");
   // initial chain: goerli
   const chain = getChain(chainId);
+  console.log("currentchain: ", chain);
   // safes owned by the user
   const [safes, setSafes] = useState<string[]>([]);
   const [signer, setSigner] = useState<any>(undefined);
   const [web3Provider, setWeb3Provider] =
     useState<ethers.providers.Web3Provider>();
-
   useEffect(() => {
     const init = async () => {
       if (!chain || !chain.id || !chain.hex) return;
@@ -114,6 +114,7 @@ export const AccountAbstractionProvider = ({
 
     try {
       if (!chain || !chain.id || !chain.hex) return;
+      if (currentAddress) logoutWeb3Auth();
       setLoading(true);
       const { safe, eoa } = await web3AuthModalPack.signIn();
       const provider = new ethers.providers.Web3Provider(
@@ -185,6 +186,7 @@ export const AccountAbstractionProvider = ({
   return (
     <AccountAbstractionContext.Provider
       value={{
+        chain,
         address,
         currentAddress,
         smartAccount,
