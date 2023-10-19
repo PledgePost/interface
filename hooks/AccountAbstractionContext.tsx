@@ -52,6 +52,7 @@ export const AccountAbstractionProvider = ({
   useEffect(() => {
     const init = async () => {
       if (!chain) return;
+      console.log("chain:", chain);
       try {
         const options: Web3AuthOptions = {
           clientId: clientId,
@@ -125,8 +126,7 @@ export const AccountAbstractionProvider = ({
       });
 
       const paymaster: IPaymaster = new BiconomyPaymaster({
-        paymasterUrl: process.env
-          .NEXT_PUBLIC_BICONOMY_PAYMASTER_GOERLI as string,
+        paymasterUrl: chain?.paymaster as string,
       });
       const biconomySmartAccountConfig: BiconomySmartAccountConfig = {
         signer: provider.getSigner(),
@@ -149,7 +149,7 @@ export const AccountAbstractionProvider = ({
     } catch (error) {
       console.log("error: ", error);
     }
-  }, [chain?.id, web3AuthModalPack]);
+  }, [chain?.id, chain?.paymaster, web3AuthModalPack]);
 
   useEffect(() => {
     if (web3AuthModalPack && web3AuthModalPack.getProvider()) {
@@ -190,6 +190,7 @@ export const AccountAbstractionProvider = ({
         web3Provider,
         signer,
         chainId,
+        loading,
         setChainId,
         loginWeb3Auth,
         logoutWeb3Auth,

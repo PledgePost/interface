@@ -1,6 +1,8 @@
 import Chain from "./chaintype";
 
 export const gnosisChain: Chain = {
+  // id: 100,
+  // prefix: "0x64",
   id: "0x64",
   token: "xDai",
   shortName: "gno",
@@ -14,6 +16,8 @@ export const gnosisChain: Chain = {
 };
 
 export const goerliChain: Chain = {
+  // id: 5,
+  // prefix: "0x5",
   id: "0x5",
   token: "gETH",
   label: "Görli",
@@ -24,14 +28,17 @@ export const goerliChain: Chain = {
   transactionServiceUrl: "https://safe-transaction-goerli.safe.global",
   isStripePaymentsEnabled: false,
   isMoneriumPaymentsEnabled: true,
+  paymaster: process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_GOERLI,
 };
 
 export const mainnetChain: Chain = {
+  // id: 1,
+  // prefix: "0x1",
   id: "0x1",
   token: "ETH",
   label: "Ethereum",
   shortName: "eth",
-  rpcUrl: "https://cloudflare-eth.com",
+  rpcUrl: "https://mainnet.infura.io/v3/{providerApiKey}",
   blockExplorerUrl: "https://etherscan.io",
   color: "#DDDDDD",
   transactionServiceUrl: "https://safe-transaction-mainnet.safe.global",
@@ -40,6 +47,8 @@ export const mainnetChain: Chain = {
 };
 
 export const polygonChain: Chain = {
+  // id: 137,
+  // prefix: "0x89",
   id: "0x89",
   token: "matic",
   shortName: "matic",
@@ -50,27 +59,83 @@ export const polygonChain: Chain = {
   transactionServiceUrl: "https://safe-transaction-polygon.safe.global",
   isStripePaymentsEnabled: false,
   isMoneriumPaymentsEnabled: false,
+  paymaster: process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_POLYGONPOS,
 };
 
 export const mumbaiChain: Chain = {
+  // id: 80001,
+  // prefix: "0x13881",
   id: "0x13881",
   token: "matic",
   shortName: "matic",
   label: "Mumbai",
-  rpcUrl: "https://rpc-mumbai.maticvigil.com/",
+  rpcUrl:
+    "https://polygon-mumbai.infura.io/v3/cf4f68a2648c42159c880252a44f923b",
   blockExplorerUrl: "https://mumbai.polygonscan.com",
   color: "#8248E5",
   isStripePaymentsEnabled: true,
   isMoneriumPaymentsEnabled: false,
   faucetUrl: "https://mumbaifaucet.com/",
+  paymaster: process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_MUMBAI,
+};
+export const polygonZkEVMTestnet: Chain = {
+  // id: 1442,
+  // prefix: "0x5a2",
+  id: "0x5a2",
+  token: "ETH",
+  label: "Polygon ZK-EVM Testnet",
+  shortName: "zkTest",
+  rpcUrl: "https://rpc.public.zkevm-test.net",
+  blockExplorerUrl: "https://testnet-zkevm.polygonscan.com",
+  paymaster: process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_ZKEVM_TESTNET,
+};
+export const polygonZkEVM: Chain = {
+  // id: 1101,
+  // prefix: "0x44d",
+  id: "0x44d",
+  token: "zkMATIC",
+  label: "Polygon ZK-EVM",
+  shortName: "zk",
+  rpcUrl: "https://zkevm-rpc.com/",
+  transactionServiceUrl: "https://safe-transaction-zkevm.safe.global",
+  blockExplorerUrl: "https://zkevm.polygonscan.com/",
 };
 
+export const optimismChain: Chain = {
+  // id: 10,
+  token: "ETH",
+  id: "0xa",
+  label: "Optimism",
+  shortName: "opt",
+  rpcUrl:
+    "https://optimism-mainnet.infura.io/v3/cf4f68a2648c42159c880252a44f923b",
+  blockExplorerUrl: "https://optimistic.etherscan.io",
+  color: "#fbb040",
+  transactionServiceUrl: "https://safe-transaction-optimism.safe.global",
+  isStripePaymentsEnabled: false,
+  isMoneriumPaymentsEnabled: false,
+};
+export const optimismGoerliChain: Chain = {
+  // id: 420,
+  token: "gETH",
+  id: "0x1a4",
+  label: "Optimism Goerli",
+  shortName: "opt",
+  rpcUrl:
+    "https://optimism-goerli.infura.io/v3/cf4f68a2648c42159c880252a44f923b",
+  blockExplorerUrl: "https://goerli-optimistic.etherscan.io",
+  paymaster: process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_OP_GOERLI,
+};
 export const chains: Chain[] = [
   gnosisChain,
   goerliChain,
   mainnetChain,
   mumbaiChain,
   polygonChain,
+  polygonZkEVMTestnet,
+  polygonZkEVM,
+  optimismChain,
+  optimismGoerliChain,
 ];
 
 export const initialChain = mumbaiChain;
