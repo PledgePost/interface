@@ -1,7 +1,7 @@
 import chains from "./chains";
 
 const getChain = (chainId?: string) => {
-  const chain = chains.find((chain) => chain.id === chainId);
+  const chain = chains.find((chain) => chain.hex === chainId);
 
   return chain;
 };

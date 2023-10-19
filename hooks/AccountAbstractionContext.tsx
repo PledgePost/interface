@@ -10,7 +10,8 @@ import { ethers } from "ethers";
 import { CHAIN_NAMESPACES, WALLET_ADAPTERS } from "@web3auth/base";
 import { Web3AuthOptions } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
-import { Web3AuthModalPack } from "@safe-global/auth-kit";
+import { Web3AuthModalPack, Web3AuthConfig } from "@safe-global/auth-kit";
+
 import getChain from "../lib/Chains/getchains";
 import { ChainId } from "@biconomy/core-types";
 import { IPaymaster, BiconomyPaymaster } from "@biconomy/paymaster";
@@ -38,31 +39,31 @@ export const AccountAbstractionProvider = ({
     null
   );
 
+  // chainId should be selected by the user
+  const [chainId, setChainId] = useState<any>("0x5");
   // initial chain: goerli
-  const chain = getChain("0x5");
+  const chain = getChain(chainId);
   // safes owned by the user
   const [safes, setSafes] = useState<string[]>([]);
-  // chainId should be selected by the user
-  const [chainId, setChainId] = useState<any>("");
-
+  const [signer, setSigner] = useState<any>(undefined);
   const [web3Provider, setWeb3Provider] =
     useState<ethers.providers.Web3Provider>();
-  const [signer, setSigner] = useState<any>(undefined);
 
   useEffect(() => {
     const init = async () => {
-      if (!chain) return;
+      if (!chain || !chain.id || !chain.hex) return;
       console.log("chain:", chain);
       try {
-        const options: Web3AuthOptions = {
+        const web3AuthOptions: Web3AuthOptions = {
           clientId: clientId,
           web3AuthNetwork: "testnet",
           chainConfig: {
             chainNamespace: CHAIN_NAMESPACES.EIP155,
-            chainId: chain.id,
+            chainId: chain.hex,
             rpcTarget: chain.rpcUrl,
           },
           uiConfig: {
+            theme: "dark" as any,
             loginMethodsOrder: ["google", "facebook"],
           },
         };
@@ -87,15 +88,16 @@ export const AccountAbstractionProvider = ({
             uxMode: "popup",
           },
         });
-
-        const web3AuthModalPack = new Web3AuthModalPack({
+        const web3AuthConfig: Web3AuthConfig = {
           txServiceUrl: chain.transactionServiceUrl,
-        });
+        };
+
+        const web3AuthModalPack = new Web3AuthModalPack(web3AuthConfig);
 
         await web3AuthModalPack.init({
-          options,
-          adapters: [openloginAdapter],
-          modalConfig,
+          options: web3AuthOptions,
+          adapters: undefined,
+          modalConfig: modalConfig,
         });
         setWeb3AuthModalPack(web3AuthModalPack);
         console.log("web3AuthModalPack: ", web3AuthModalPack);
@@ -111,6 +113,7 @@ export const AccountAbstractionProvider = ({
     if (!web3AuthModalPack) return;
 
     try {
+      if (!chain || !chain.id || !chain.hex) return;
       setLoading(true);
       const { safe, eoa } = await web3AuthModalPack.signIn();
       const provider = new ethers.providers.Web3Provider(
@@ -119,9 +122,8 @@ export const AccountAbstractionProvider = ({
       const signer = provider.getSigner();
 
       const bundler: IBundler = new Bundler({
-        bundlerUrl:
-          "https://bundler.biconomy.io/api/v2/5/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44",
-        chainId: ChainId.GOERLI,
+        bundlerUrl: `https://bundler.biconomy.io/api/v2/${chain.id}/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44`,
+        chainId: chain.id,
         entryPointAddress: DEFAULT_ENTRYPOINT_ADDRESS,
       });
 
@@ -130,7 +132,7 @@ export const AccountAbstractionProvider = ({
       });
       const biconomySmartAccountConfig: BiconomySmartAccountConfig = {
         signer: provider.getSigner(),
-        chainId: ChainId.GOERLI,
+        chainId: chain.id,
         bundler: bundler,
         paymaster: paymaster,
       };
@@ -140,7 +142,7 @@ export const AccountAbstractionProvider = ({
       biconomySmartAccount = await biconomySmartAccount.init();
       setCurrentAddress(await biconomySmartAccount.getSmartAccountAddress());
       setSmartAccount(biconomySmartAccount);
-      setChainId(chain?.id);
+      setChainId(chain?.hex);
       setAddress(eoa);
       setSafes(safe || []);
       setWeb3Provider(provider);
@@ -149,7 +151,7 @@ export const AccountAbstractionProvider = ({
     } catch (error) {
       console.log("error: ", error);
     }
-  }, [chain?.id, chain?.paymaster, web3AuthModalPack]);
+  }, [web3AuthModalPack, chain]);
 
   useEffect(() => {
     if (web3AuthModalPack && web3AuthModalPack.getProvider()) {
@@ -166,7 +168,7 @@ export const AccountAbstractionProvider = ({
       setCurrentAddress("");
       setSmartAccount(null);
       setSafes([]);
-      setChainId(chain?.id);
+      setChainId(chain?.hex);
       setWeb3Provider(undefined);
       setSigner(undefined);
     } catch (error) {

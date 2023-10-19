@@ -1,9 +1,9 @@
 import Chain from "./chaintype";
 
 export const gnosisChain: Chain = {
-  // id: 100,
-  // prefix: "0x64",
-  id: "0x64",
+  id: 100,
+  hex: "0x64",
+
   token: "xDai",
   shortName: "gno",
   label: "Gnosis Chain",
@@ -16,9 +16,9 @@ export const gnosisChain: Chain = {
 };
 
 export const goerliChain: Chain = {
-  // id: 5,
-  // prefix: "0x5",
-  id: "0x5",
+  id: 5,
+  hex: "0x5",
+
   token: "gETH",
   label: "Görli",
   shortName: "gor",
@@ -32,9 +32,9 @@ export const goerliChain: Chain = {
 };
 
 export const mainnetChain: Chain = {
-  // id: 1,
-  // prefix: "0x1",
-  id: "0x1",
+  id: 1,
+  hex: "0x1",
+
   token: "ETH",
   label: "Ethereum",
   shortName: "eth",
@@ -47,9 +47,8 @@ export const mainnetChain: Chain = {
 };
 
 export const polygonChain: Chain = {
-  // id: 137,
-  // prefix: "0x89",
-  id: "0x89",
+  id: 137,
+  hex: "0x89",
   token: "matic",
   shortName: "matic",
   label: "Polygon",
@@ -63,9 +62,8 @@ export const polygonChain: Chain = {
 };
 
 export const mumbaiChain: Chain = {
-  // id: 80001,
-  // prefix: "0x13881",
-  id: "0x13881",
+  id: 80001,
+  hex: "0x13881",
   token: "matic",
   shortName: "matic",
   label: "Mumbai",
@@ -79,9 +77,9 @@ export const mumbaiChain: Chain = {
   paymaster: process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_MUMBAI,
 };
 export const polygonZkEVMTestnet: Chain = {
-  // id: 1442,
-  // prefix: "0x5a2",
-  id: "0x5a2",
+  id: 1442,
+  hex: "0x5a2",
+
   token: "ETH",
   label: "Polygon ZK-EVM Testnet",
   shortName: "zkTest",
@@ -90,9 +88,8 @@ export const polygonZkEVMTestnet: Chain = {
   paymaster: process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_ZKEVM_TESTNET,
 };
 export const polygonZkEVM: Chain = {
-  // id: 1101,
-  // prefix: "0x44d",
-  id: "0x44d",
+  id: 1101,
+  hex: "0x44d",
   token: "zkMATIC",
   label: "Polygon ZK-EVM",
   shortName: "zk",
@@ -102,9 +99,9 @@ export const polygonZkEVM: Chain = {
 };
 
 export const optimismChain: Chain = {
-  // id: 10,
+  id: 10,
+  hex: "0xa",
   token: "ETH",
-  id: "0xa",
   label: "Optimism",
   shortName: "opt",
   rpcUrl:
@@ -116,9 +113,9 @@ export const optimismChain: Chain = {
   isMoneriumPaymentsEnabled: false,
 };
 export const optimismGoerliChain: Chain = {
-  // id: 420,
+  id: 420,
+  hex: "0x1a4",
   token: "gETH",
-  id: "0x1a4",
   label: "Optimism Goerli",
   shortName: "opt",
   rpcUrl:

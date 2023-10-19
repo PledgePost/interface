@@ -1,5 +1,6 @@
 type Chain = {
-  id: string;
+  id: number;
+  hex: string;
   token: string;
   rpcUrl: string;
   shortName: string;
