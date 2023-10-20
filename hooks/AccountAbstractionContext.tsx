@@ -75,10 +75,10 @@ export const AccountAbstractionProvider = ({
             chainId: chain.hex,
             rpcTarget: chain.rpcUrl,
           },
-          uiConfig: {
-            theme: "dark" as any,
-            loginMethodsOrder: ["google", "facebook"],
-          },
+          // uiConfig: {
+          //   theme: "dark" as any,
+          //   loginMethodsOrder: ["google", "facebook"],
+          // },
         };
 
         const modalConfig = {
