@@ -14,21 +14,8 @@ interface Props {
   provider: ethers.providers.Provider;
 }
 export default function Home() {
-  const {
-    loginWeb3Auth,
-    logoutWeb3Auth,
-    address,
-    sliceAddress,
-    currentAddress,
-    smartAccount,
-    web3Provider,
-    signer,
-    chain,
-    chainId,
-    setChainId,
-    loading,
-    handleUserOp,
-  } = useSafeAA();
+  const { currentAddress, smartAccount, web3Provider, signer, handleUserOp } =
+    useSafeAA();
   const [minted, setMinted] = useState(false);
   console.log("provider: ", web3Provider);
   console.log("signer: ", signer);

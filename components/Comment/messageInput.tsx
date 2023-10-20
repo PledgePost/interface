@@ -9,7 +9,7 @@ export default function MessageInput({
   isDonated,
   handleClick,
   setToken,
-	setAmount
+  setAmount,
 }: any) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessages(e.target.value);
@@ -22,7 +22,11 @@ export default function MessageInput({
         onChange={(e) => handleChange(e)}
       />
       {!isDonated ? (
-        <DonationModal handleClick={handleClick} setToken={setToken} setAmount={setAmount}/>
+        <DonationModal
+          handleClick={handleClick}
+          setToken={setToken}
+          setAmount={setAmount}
+        />
       ) : (
         <Button onClick={() => handleSend()}>Submit Comment</Button>
       )}

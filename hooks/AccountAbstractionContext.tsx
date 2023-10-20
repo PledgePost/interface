@@ -34,10 +34,7 @@ import {
   showErrorToast,
   showSuccessToast,
 } from "./useNotification";
-const ABI = require("../abis/PledgePost.json").abi;
 const clientId: string = (process.env.NEXT_PUBLIC_CLIENT_ID as string) || "";
-const pledgeContractAddr = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string;
-
 const AccountAbstractionContext = createContext<any>(null);
 export const AccountAbstractionProvider = ({
   children,
@@ -53,8 +50,9 @@ export const AccountAbstractionProvider = ({
     useState<BiconomySmartAccountV2 | null>(null);
 
   // chainId should be selected by the user
-  const [chainId, setChainId] = useState<any>("0x5");
-  // initial chain: goerli
+
+  const [chainId, setChainId] = useState<any>("0x1a4");
+  // initial chain: op-goerli
   const chain = getChain(chainId);
   console.log("currentchain: ", chain);
   // safes owned by the user
@@ -133,13 +131,7 @@ export const AccountAbstractionProvider = ({
       const provider = new ethers.providers.Web3Provider(
         web3AuthModalPack.getProvider()
       );
-
       const signer = provider.getSigner();
-      const signerAddress = await signer.getAddress();
-      // console.log("provider: ", provider);
-      // console.log("signer: ", signer);
-      // console.log("signerAddress: ", signerAddress);
-
       const bundler: IBundler = new Bundler({
         bundlerUrl: `https://bundler.biconomy.io/api/v2/${chain.id}/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44`,
         chainId: chain.id,

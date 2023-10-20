@@ -28,7 +28,7 @@ export default function DonationModal({
   setToken,
 }: any) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(Number(e.target.value));
+    setAmount(e.target.value);
   };
   const handleToken = (token_address: string) => {
     const token: TokenType | undefined = TokenConfig.find(
