@@ -6,7 +6,37 @@
 
 ## Deployed contracts and links
 
+### PledgePost.sol
+
+https://goerli.etherscan.io/address/0xedae7875809dc9aCd076b1e7c5A2109048c54a70
+
+https://sepolia.etherscan.io/address/0xedae7875809dc9aCd076b1e7c5A2109048c54a70
+
+https://goerli-optimistic.etherscan.io/address/0xedae7875809dc9aCd076b1e7c5A2109048c54a70
+
+https://mumbai.polygonscan.com/address/0xedae7875809dc9aCd076b1e7c5A2109048c54a70
+
+https://testnet-zkevm.polygonscan.com/address/0xedae7875809dc9aCd076b1e7c5A2109048c54a70
+
+https://sepolia.scrollscan.com/address/0xedae7875809dc9aCd076b1e7c5A2109048c54a70
+
+
+### TestToken
+
+https://goerli.etherscan.io/address/0x298005746ff8C64252c1398e24eA5C17541db1B5
+
+https://sepolia.etherscan.io/address/0x298005746ff8C64252c1398e24eA5C17541db1B5
+
+https://goerli-optimistic.etherscan.io/address/0x298005746ff8C64252c1398e24eA5C17541db1B5
+
+https://mumbai.polygonscan.com/address/0x298005746ff8C64252c1398e24eA5C17541db1B5
+
+https://testnet-zkevm.polygonscan.com/address/0x298005746ff8C64252c1398e24eA5C17541db1B5
+
+https://sepolia.scrollscan.com/address/0x298005746ff8C64252c1398e24eA5C17541db1B5
+
 ## Tech stack & Tools
+
 - Next.js13, Typescript, React, TailwindCSS, solidity
 - Ethers.js
 - Hardhat
@@ -15,7 +45,6 @@
 - Biconomy SDK
 - Tableland
 - Filecoin
-
 
 ## Huge thanks to
 
