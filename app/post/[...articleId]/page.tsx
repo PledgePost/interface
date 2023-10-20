@@ -2,15 +2,9 @@
 import React, { useState, useEffect } from "react";
 import Messages from "@/components/Comment/messages";
 import MessageInput from "@/components/Comment/messageInput";
-import {
-  useAccount,
-  useContractRead,
-  useContractWrite,
-  useWaitForTransaction,
-} from "wagmi";
 import { readComments, writeComment, Comment } from "@/hooks/useTableland";
 import { Button } from "@/components/ui/button";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
+
 import {
   showDefaultToast,
   showErrorToast,
@@ -18,13 +12,15 @@ import {
 } from "@/hooks/useNotification";
 import { toChecksumAddress } from "ethereumjs-util";
 import { TokenType } from "@/lib/Token/token";
-import useExplore from "@/hooks/useExplore";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Pre } from "@/components/RichEditor";
+import { useSafeAA } from "@/hooks/AccountAbstractionContext";
+import { BigNumber, ethers } from "ethers";
 
 const ABI = require("../../../abis/PledgePost.json").abi;
 const TOKEN_ABI = require("../../../abis/Token.json").abi;
+const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string;
 
 async function fetchData(address: any, cid: string) {
   const checksumAddress = toChecksumAddress(address);
@@ -37,28 +33,36 @@ async function fetchData(address: any, cid: string) {
 }
 
 export default function ArticlePage({ params }: any) {
-  const { openConnectModal } = useConnectModal();
   const [content, setContent] = useState<any>(null);
   const [messages, setMessages] = useState<string>("");
-  const [amount, setAmount] = useState<number>(0);
   const [token, setToken] = useState<TokenType | undefined>(undefined); //erc20 token
-  const { address } = useAccount();
-  const url = useExplore();
-
+  const [isApproved, setIsApproved] = useState<boolean>(true);
   const [comments, setComments] = useState<Comment[] | undefined>(undefined);
+  const [amount, setAmount] = useState<any>();
+  const [allowance, setAllowance] = useState<number>();
+  const [donated, setDonated] = useState<boolean>();
+  const {
+    currentAddress,
+    smartAccount,
+    loginWeb3Auth,
+    web3Provider,
+    signer,
+    handleUserOp,
+  } = useSafeAA();
+
   let timestamp = new Date();
   let unix = timestamp.getTime();
   let UNIXtimestamp = Math.floor(unix / 1000);
 
   async function handleSend() {
-    if (!address || messages === "") return;
+    if (!currentAddress || messages === "") return;
     try {
       showDefaultToast("Sending Transaction...");
       const result = await writeComment({
         author: params.articleId[0],
         article_id: params.articleId[1],
         message: messages,
-        user: address,
+        user: smartAccount,
         timestamp: UNIXtimestamp,
       });
       console.log("result :>> ", result);
@@ -69,72 +73,104 @@ export default function ArticlePage({ params }: any) {
       showErrorToast("Error posting comment");
     }
   }
+  const donate = async () => {
+    if (!token?.address) return;
+    const contract = new ethers.Contract(contractAddress, ABI, signer);
+    // const inputAmount: string = ethers.utils.parseUnits(amount, token.decimals);
+    const amount = ethers.utils.parseUnits("10000", 18);
 
-  const {
-    data,
-    isLoading,
-    write: donate,
-  } = useContractWrite({
-    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
-    abi: ABI,
-    functionName: "donateToArticle",
-    args: [
+    const tx = await contract.populateTransaction.donateToArticle(
       params.articleId[0],
       params.articleId[1],
-      token?.address,
-      amount * 10 ** (token?.decimals || 0),
-    ],
-  });
-  const { write: approve } = useContractWrite({
-    address: token?.address,
-    abi: TOKEN_ABI,
-    functionName: "approve",
-    args: [token?.address, amount * 10 ** (token?.decimals || 0)],
-  });
-  const { data: history } = useContractRead({
-    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
-    abi: ABI,
-    functionName: "checkOwner",
-    args: [address, params.articleId[0], params.articleId[1]],
-  });
-  const { data: Allowance } = useContractRead({
-    address: token?.address,
-    abi: TOKEN_ABI,
-    functionName: "allowance",
-    args: [address, process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any],
-  });
-  const { data: txreceipt } = useWaitForTransaction({
-    hash: data?.hash,
-    onSuccess: (txreceipt) => {
-      if (txreceipt) {
-        showSuccessToast(`${url}/tx/${txreceipt.transactionHash}`);
-      }
-    },
-  });
+      token.address,
+      1000
+    );
+    await handleUserOp(tx, smartAccount);
+  };
+  const approve = async () => {
+    if (!token?.address) return;
+    const tokenAddress = process.env
+      .NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as string;
+
+    const contract = new ethers.Contract(tokenAddress, TOKEN_ABI, signer);
+    const inputAmount = ethers.utils.parseUnits(amount, token.decimals);
+    console.log("inputAmount :>> ", inputAmount);
+
+    const tx = await contract.populateTransaction.approve(
+      contractAddress,
+      inputAmount
+    );
+    console.log("tx :>> ", tx);
+    await handleUserOp(tx, smartAccount);
+  };
   useEffect(() => {
-    if (txreceipt) {
-      console.log("Receipt: ", txreceipt);
-    }
-  }, [txreceipt]);
+    const donationHistory = async () => {
+      try {
+        const contract = new ethers.Contract(
+          contractAddress,
+          ABI,
+          web3Provider
+        );
 
-  async function handleClick() {
-    if (!address || amount === 0 || token === undefined) return;
-    const inputAmount = amount * 10 ** (token?.decimals || 0);
-
-    try {
-      console.log("Allowance :>> ", Allowance);
-      if (Allowance === undefined) return "Allowance is undefined";
-      if (Allowance[0] < inputAmount) {
-        console.log("Allowance is less than input amount");
-        approve();
-        showDefaultToast("Approving for Contract...");
+        const donated = await contract.checkOwner(
+          currentAddress,
+          params.articleId[0],
+          params.articleId[1]
+        );
+        setDonated(donated);
+      } catch (e) {
+        console.log("error :>> ", e);
       }
+    };
+    const checkAllowance = async () => {
+      if (!token?.address) return;
+      try {
+        const tokenContract = new ethers.Contract(
+          token?.address,
+          TOKEN_ABI,
+          web3Provider
+        );
+        console.log("tokenContract :>> ", tokenContract);
+        const allowance = await tokenContract.allowance(
+          currentAddress,
+          contractAddress
+        );
+        const tokenAllowance = ethers.utils.formatUnits(
+          allowance,
+          token?.decimals
+        );
+        setAllowance(allowance);
+      } catch (e) {
+        console.log("error :>> ", e);
+      }
+    };
+    donationHistory();
+    checkAllowance();
+  }, [
+    currentAddress,
+    params.articleId,
+    token?.address,
+    token?.decimals,
+    web3Provider,
+  ]);
 
+  // useEffect(() => {
+  //   if (!amount || !allowance || !token) return;
+  //   console.log("typeof amount :>> ", typeof amount, amount);
+  //   console.log("typeof allowance :>> ", typeof allowance, allowance);
+
+  //   const isApproved = amount <= allowance ? true : false;
+  //   console.log("boolean :>> ", isApproved);
+  //   setIsApproved(isApproved);
+  // }, [amount]);
+  async function handleClick() {
+    // if (!currentAddress || amount === 0 || token === undefined) return;
+    try {
       donate();
-      showDefaultToast("Sending Transaction...");
+      // approve();
     } catch (e) {
       console.log("error: ", e);
-      showErrorToast("Error posting donation");
+      showErrorToast("Error donating to article");
     }
   }
 
@@ -146,17 +182,17 @@ export default function ArticlePage({ params }: any) {
     }
     fetchContent();
   }, [params.articleId]);
-  useEffect(() => {
-    async function getComments() {
-      const result = await readComments(
-        params.articleId[0],
-        params.articleId[1]
-      );
-      setComments(result);
-      return result;
-    }
-    getComments();
-  }, [comments, params.articleId]);
+  // useEffect(() => {
+  //   async function getComments() {
+  //     const result = await readComments(
+  //       params.articleId[0],
+  //       params.articleId[1]
+  //     );
+  //     setComments(result);
+  //     return result;
+  //   }
+  //   getComments();
+  // }, [comments, params.articleId]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
@@ -187,8 +223,8 @@ export default function ArticlePage({ params }: any) {
                 ))}
               </>
             )}
-            {!address ? (
-              <Button onClick={openConnectModal} className="w-full">
+            {!currentAddress ? (
+              <Button onClick={loginWeb3Auth} className="w-full">
                 Connect Wallet
               </Button>
             ) : (
@@ -199,7 +235,8 @@ export default function ArticlePage({ params }: any) {
                 setAmount={setAmount}
                 handleSend={handleSend}
                 handleClick={handleClick}
-                isDonated={history}
+                isDonated={donated}
+                isApproved={isApproved}
               />
             )}
           </div>
