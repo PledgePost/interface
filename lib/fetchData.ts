@@ -5,7 +5,7 @@ import { GET_ARTICLE_POSTED } from "./query";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 const client = new ApolloClient({
-  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_op_v1/version/latest",
+  uri: "https://api.studio.thegraph.com/query/52298/plegepost_v2/v0.0.1",
   cache: new InMemoryCache(),
 });
 
