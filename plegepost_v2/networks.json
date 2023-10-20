@@ -1,0 +1,8 @@
+{
+  "optimism-goerli": {
+    "PledgePost": {
+      "address": "0xedae7875809dc9aCd076b1e7c5A2109048c54a70",
+      "startBlock": 16181605
+    }
+  }
+}
