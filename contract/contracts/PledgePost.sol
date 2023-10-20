@@ -62,7 +62,7 @@ contract PledgePost {
         public matchingAmounts;
     // array of rounds
     Round[] public rounds;
-    uint256 roundLength = 1;
+    uint256 roundLength = 0;
 
     // TODO: initialize token
     event ArticlePosted(
@@ -181,8 +181,9 @@ contract PledgePost {
             msg.sender == article.author,
             "Only author can apply for round"
         );
-        require(_roundId < roundLength, "Round does not exist");
-        Round storage round = rounds[_roundId];
+        require(_roundId <= roundLength, "Round does not exist");
+        require(_roundId > 0, "RoundId 0 does not exist");
+        Round storage round = rounds[_roundId - 1];
         require(round.isActive, "Round is not active");
         require(round.endDate > block.timestamp, "Round has ended");
         require(
@@ -259,7 +260,7 @@ contract PledgePost {
         bytes memory description = abi.encodePacked(_description);
 
         Round memory newRound = Round({
-            id: roundLength,
+            id: roundLength + 1,
             owner: owner,
             name: _name,
             description: description,
@@ -285,23 +286,28 @@ contract PledgePost {
     }
 
     function activateRound(uint256 _roundId) external onlyOwner {
-        require(_roundId < roundLength, "Round does not exist");
-        Round storage round = rounds[_roundId];
+        require(_roundId <= roundLength, "Round does not exist");
+        require(_roundId > 0, "RoundId 0 does not exist");
+
+        Round storage round = rounds[_roundId - 1];
         require(!round.isActive, "Round is already active");
         require(round.endDate > block.timestamp, "Round has ended");
         round.isActive = true;
     }
 
     function deactivateRound(uint256 _roundId) external onlyOwner {
-        require(_roundId < roundLength, "Round does not exist");
-        Round storage round = rounds[_roundId];
+        require(_roundId <= roundLength, "Round does not exist");
+        require(_roundId > 0, "RoundId 0 does not exist");
+        Round storage round = rounds[_roundId - 1];
         require(round.isActive, "Round is not active");
         round.isActive = false;
     }
 
     function Allocate(uint256 _roundId) external onlyOwner {
-        require(_roundId < roundLength, "Round does not exist");
-        Round storage round = rounds[_roundId];
+        require(_roundId <= roundLength, "Round does not exist");
+        require(_roundId > 0, "RoundId 0 does not exist");
+
+        Round storage round = rounds[_roundId - 1];
         uint256 totalSquareSqrtSum = 0;
         // calculate totalSquareSqrtSum
         totalSquareSqrtSum = getTotalSquareSqrtSum(_roundId);
@@ -329,8 +335,9 @@ contract PledgePost {
         uint256 _roundId,
         uint256 _amount
     ) external returns (bool success) {
-        require(_roundId < roundLength, "Round does not exist");
-        Round storage round = rounds[_roundId];
+        require(_roundId <= roundLength, "Round does not exist");
+        require(_roundId > 0, "RoundId 0 does not exist");
+        Round storage round = rounds[_roundId - 1];
         success = IERC20(address(round.poolToken)).transferFrom(
             msg.sender,
             round.poolAddress,
@@ -360,7 +367,8 @@ contract PledgePost {
         address _author,
         uint256 _articleId
     ) public view returns (uint256) {
-        require(_roundId < roundLength, "Round does not exist");
+        require(_roundId <= roundLength, "Round does not exist");
+        require(_roundId > 0, "RoundId 0 does not exist");
         require(
             _articleId < authorArticles[_author].length,
             "Article does not exist"
@@ -373,7 +381,7 @@ contract PledgePost {
         uint256 suquareSqrtSum = recievedDonationsWithinRound[_author][
             _articleId
         ][_roundId] ** 2;
-        Round storage round = rounds[_roundId];
+        Round storage round = rounds[_roundId - 1];
         uint256 matching = (round.poolAmount * suquareSqrtSum) /
             totalSquareSqrtSum;
         return matching;
@@ -385,7 +393,7 @@ contract PledgePost {
         uint256 _articleId,
         uint256 _amount
     ) public view returns (uint256) {
-        Round storage round = rounds[_roundId];
+        Round storage round = rounds[_roundId - 1];
         uint256 totalSquareSqrtSum = getTotalSquareSqrtSum(_roundId);
         uint256 sqrtSum = recievedDonationsWithinRound[_author][_articleId][
             _roundId
@@ -403,7 +411,8 @@ contract PledgePost {
         address _author,
         uint256 _articleId
     ) public view returns (uint256) {
-        require(_roundId < roundLength, "Round does not exist");
+        require(_roundId <= roundLength, "Round does not exist");
+        require(_roundId > 0, "RoundId 0 does not exist");
         require(
             _articleId < authorArticles[_author].length,
             "Article does not exist"
@@ -457,8 +466,9 @@ contract PledgePost {
     }
 
     function getRound(uint256 _roundId) public view returns (Round memory) {
-        require(_roundId < roundLength, "Round does not exist");
-        return rounds[_roundId];
+        require(_roundId <= roundLength, "Round does not exist");
+        require(_roundId > 0, "RoundId 0 does not exist");
+        return rounds[_roundId - 1];
     }
 
     function getAllRound() public view returns (Round[] memory) {
@@ -481,7 +491,8 @@ contract PledgePost {
         uint256 _articleId,
         uint256 _roundId
     ) public view returns (uint256) {
-        require(_roundId < roundLength, "Round does not exist");
+        require(_roundId <= roundLength, "Round does not exist");
+        require(_roundId > 0, "RoundId 0 does not exist");
         require(
             _articleId < authorArticles[_author].length,
             "Article does not exist"
@@ -498,7 +509,8 @@ contract PledgePost {
         address _author,
         uint256 _articleId
     ) public view returns (ApplicationStatus) {
-        require(_roundId < roundLength, "Round does not exist");
+        require(_roundId <= roundLength, "Round does not exist");
+        require(_roundId > 0, "RoundId 0 does not exist");
         require(
             _articleId < authorArticles[_author].length,
             "Article does not exist"
