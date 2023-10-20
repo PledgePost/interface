@@ -16,7 +16,7 @@ export const showErrorToast = (message: string) => {
 export const showSuccessToast = (url?: string, message?: string) => {
   toast.success(displayLink(url, message), {
     position: "top-right",
-    autoClose: 5000,
+    autoClose: 6500,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,

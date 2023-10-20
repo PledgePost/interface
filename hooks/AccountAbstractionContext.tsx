@@ -238,9 +238,9 @@ export const AccountAbstractionProvider = ({
       userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
       const userOpResponse = await account.sendUserOp(userOp);
       const { receipt } = await userOpResponse.wait(1);
-      console.log("txHash", receipt.transactionHash);
+      console.log("txHash", receipt?.transactionHash);
       showSuccessToast(
-        `${chain?.blockExplorerUrl}/tx/${receipt.transactionHash}`
+        `${chain?.blockExplorerUrl}/tx/${receipt?.transactionHash}`
       );
     } catch (error) {
       console.error(error);
