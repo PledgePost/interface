@@ -6,11 +6,16 @@
 
 ## Deployed contracts and links
 
-## Tech stack
+## Tech stack & Tools
+- Next.js13, Typescript, React, TailwindCSS, solidity
+- Ethers.js
+- Hardhat
+- TheGraph
+- Safe AA SDK
+- Biconomy SDK
+- Tableland
+- Filecoin
 
-- Next.js / Vercel
-- React/TS/Solidity
-- Hardhat/Wagmi/Rainbow-kit/Ethers
 
 ## Huge thanks to
 
