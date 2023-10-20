@@ -1,5 +1,4 @@
 "use client";
-const contractAddress = "0x40a3fc5965066c367c9f6e309fefc4414a63c6fb";
 const ABI = require("../abis/Token.json").abi;
 import { ethers } from "ethers";
 import { useState, useEffect } from "react";
@@ -7,6 +6,8 @@ import { useSafeAA } from "@/hooks/AccountAbstractionContext";
 import { Button } from "@/components/ui/button";
 import { BiconomySmartAccount } from "@biconomy/account";
 
+const contractAddress = process.env
+  .NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as string;
 interface Props {
   smartAccount: BiconomySmartAccount;
   address: string;

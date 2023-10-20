@@ -101,7 +101,7 @@ const Header = () => {
               <SelectContent>
                 {chains
                   .filter(
-                    (chain) => chain.transactionServiceUrl && chain.paymaster
+                    (chain) => chain.paymaster //&& chain.transactionServiceUrl
                   )
                   .map((chain, index) => (
                     <SelectItem key={index} value={chain.hex}>
