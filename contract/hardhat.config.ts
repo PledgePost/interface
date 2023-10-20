@@ -5,6 +5,7 @@ dotenv.config();
 const providerApiKey = process.env.PROVIDER_API_KEY as string;
 const deployerPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY as string;
+const gasLimit = 60000000;
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -18,45 +19,54 @@ const config: HardhatUserConfig = {
   },
 
   networks: {
-    mainnet: {
-      url: `https://mainnet.infura.io/v3/{providerApiKey}`,
-      accounts: [deployerPrivateKey],
-    },
+    // mainnet: {
+    //   url: `https://mainnet.infura.io/v3/{providerApiKey}`,
+    //   accounts: [deployerPrivateKey],
+    // },
     sepolia: {
       url: `https://sepolia.infura.io/v3/${providerApiKey}`,
       accounts: [deployerPrivateKey],
+      blockGasLimit: gasLimit,
     },
     goerli: {
       url: `https://goerli.infura.io/v3/${providerApiKey}`,
       accounts: [deployerPrivateKey],
+      blockGasLimit: gasLimit,
     },
     optimism: {
       url: `https://optimism-mainnet.infura.io/v3/${providerApiKey}`,
       accounts: [deployerPrivateKey],
+      blockGasLimit: gasLimit,
     },
     optimismGoerli: {
       url: `https://optimism-goerli.infura.io/v3/${providerApiKey}`,
       accounts: [deployerPrivateKey],
+      blockGasLimit: gasLimit,
     },
     polygon: {
       url: `https://polygon-mainnet.infura.io/v3/${providerApiKey}`,
       accounts: [deployerPrivateKey],
+      blockGasLimit: gasLimit,
     },
     polygonMumbai: {
       url: `https://polygon-mumbai.infura.io/v3/${providerApiKey}`,
       accounts: [deployerPrivateKey],
+      blockGasLimit: gasLimit,
     },
     polygonZkEvm: {
       url: "https://zkevm-rpc.com",
       accounts: [deployerPrivateKey],
+      blockGasLimit: gasLimit,
     },
     polygonZkEvmTestnet: {
       url: "https://rpc.public.zkevm-test.net",
       accounts: [deployerPrivateKey],
+      blockGasLimit: gasLimit,
     },
     scrollSepolia: {
       url: "https://sepolia-rpc.scroll.io",
       accounts: [deployerPrivateKey],
+      blockGasLimit: gasLimit,
     },
   },
   etherscan: {
@@ -103,7 +113,7 @@ const config: HardhatUserConfig = {
         chainId: 1442,
         urls: {
           apiURL: "https://api-testnet-zkevm.polygonscan.com/api",
-          browserURL: "https://rpc.public.zkevm-test.net",
+          browserURL: "https://testnet-zkevm.polygonscan.com/",
         },
       },
       {
