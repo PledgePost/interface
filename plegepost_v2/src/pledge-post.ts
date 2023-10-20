@@ -52,13 +52,13 @@ export function handleArticleDonated(event: ArticleDonatedEvent): void {
   );
   donation.amount = event.params.amount;
   donation.article =
-    event.params.articleId.toString() + "-" + event.params.author.toString();
-  donation.donor = event.params.from.toString();
+    event.params.articleId.toString() + "-" + event.params.author.toHexString();
+  donation.donor = event.params.from;
   donation.save();
 
-  let user = User.load(event.params.from.toString());
+  let user = User.load(event.params.from);
   if (!user) {
-    user = new User(event.params.from.toString());
+    user = new User(event.params.from);
     user.save();
   }
   user.save();
@@ -77,6 +77,30 @@ export function handleArticlePosted(event: ArticlePostedEvent): void {
   entity.transactionHash = event.transaction.hash;
 
   entity.save();
+
+  let article = Article.load(
+    event.params.articleId.toString() + "-" + event.params.author.toHexString()
+  );
+  if (!article) {
+    article = new Article(
+      event.params.articleId.toString() +
+        "-" +
+        event.params.author.toHexString()
+    );
+    article.articleId = event.params.articleId;
+    article.author = event.params.author;
+    article.content = event.params.content;
+    article.save();
+  }
+  article.content = event.params.content;
+  article.save();
+
+  let user = User.load(event.params.author);
+  if (!user) {
+    user = new User(event.params.author);
+    user.save();
+  }
+  user.save();
 }
 
 export function handleRoundApplied(event: RoundAppliedEvent): void {
@@ -92,23 +116,25 @@ export function handleRoundApplied(event: RoundAppliedEvent): void {
   entity.save();
 
   let article = Article.load(
-    event.params.articleId.toString() + "-" + event.params.author.toString()
+    event.params.articleId.toString() + "-" + event.params.author.toHexString()
   );
   if (!article) {
     article = new Article(
-      event.params.articleId.toString() + "-" + event.params.author.toString()
+      event.params.articleId.toString() +
+        "-" +
+        event.params.author.toHexString()
     );
     article.articleId = event.params.articleId;
-    article.author = event.params.author.toString();
+    article.author = event.params.author;
     article.associatedRound = event.params.roundId.toString();
     article.save();
   }
   article.associatedRound = event.params.roundId.toString();
   article.save();
 
-  let user = User.load(event.params.author.toString());
+  let user = User.load(event.params.author);
   if (!user) {
-    user = new User(event.params.author.toString());
+    user = new User(event.params.author);
     user.save();
   }
   user.save();
@@ -124,6 +150,10 @@ export function handleRoundCreated(event: RoundCreatedEvent): void {
   entity.name = event.params.name;
   entity.startDate = event.params.startDate;
   entity.endDate = event.params.endDate;
+  entity.blockNumber = event.block.number;
+  entity.blockTimestamp = event.block.timestamp;
+  entity.transactionHash = event.transaction.hash;
+
   entity.save();
 
   let round = Round.load(event.params.roundId.toString());

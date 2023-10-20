@@ -1,5 +1,5 @@
 type User @entity {
-  id: ID!
+  id: Bytes!
   donations: [Donation!]! @derivedFrom(field: "donor")
   articles: [Article!]! @derivedFrom(field: "author")
 }
@@ -26,9 +26,6 @@ type Round @entity {
   name: String! # string
   startDate: BigInt! # uint256
   endDate: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
   articles: [Article!]! @derivedFrom(field: "associatedRound")
 }
 

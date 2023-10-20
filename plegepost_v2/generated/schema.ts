@@ -12,9 +12,9 @@ import {
 } from "@graphprotocol/graph-ts";
 
 export class User extends Entity {
-  constructor(id: string) {
+  constructor(id: Bytes) {
     super();
-    this.set("id", Value.fromString(id));
+    this.set("id", Value.fromBytes(id));
   }
 
   save(): void {
@@ -22,32 +22,34 @@ export class User extends Entity {
     assert(id != null, "Cannot save User entity without an ID");
     if (id) {
       assert(
-        id.kind == ValueKind.STRING,
-        `Entities of type User must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+        id.kind == ValueKind.BYTES,
+        `Entities of type User must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
       );
-      store.set("User", id.toString(), this);
+      store.set("User", id.toBytes().toHexString(), this);
     }
   }
 
-  static loadInBlock(id: string): User | null {
-    return changetype<User | null>(store.get_in_block("User", id));
+  static loadInBlock(id: Bytes): User | null {
+    return changetype<User | null>(
+      store.get_in_block("User", id.toHexString())
+    );
   }
 
-  static load(id: string): User | null {
-    return changetype<User | null>(store.get("User", id));
+  static load(id: Bytes): User | null {
+    return changetype<User | null>(store.get("User", id.toHexString()));
   }
 
-  get id(): string {
+  get id(): Bytes {
     let value = this.get("id");
     if (!value || value.kind == ValueKind.NULL) {
       throw new Error("Cannot return null for a required field.");
     } else {
-      return value.toString();
+      return value.toBytes();
     }
   }
 
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
+  set id(value: Bytes) {
+    this.set("id", Value.fromBytes(value));
   }
 
   get donations(): DonationLoader {
@@ -117,17 +119,17 @@ export class Article extends Entity {
     this.set("articleId", Value.fromBigInt(value));
   }
 
-  get author(): string {
+  get author(): Bytes {
     let value = this.get("author");
     if (!value || value.kind == ValueKind.NULL) {
       throw new Error("Cannot return null for a required field.");
     } else {
-      return value.toString();
+      return value.toBytes();
     }
   }
 
-  set author(value: string) {
-    this.set("author", Value.fromString(value));
+  set author(value: Bytes) {
+    this.set("author", Value.fromBytes(value));
   }
 
   get content(): string {
@@ -225,17 +227,17 @@ export class Donation extends Entity {
     this.set("article", Value.fromString(value));
   }
 
-  get donor(): string {
+  get donor(): Bytes {
     let value = this.get("donor");
     if (!value || value.kind == ValueKind.NULL) {
       throw new Error("Cannot return null for a required field.");
     } else {
-      return value.toString();
+      return value.toBytes();
     }
   }
 
-  set donor(value: string) {
-    this.set("donor", Value.fromString(value));
+  set donor(value: Bytes) {
+    this.set("donor", Value.fromBytes(value));
   }
 
   get amount(): BigInt {
@@ -354,45 +356,6 @@ export class Round extends Entity {
 
   set endDate(value: BigInt) {
     this.set("endDate", Value.fromBigInt(value));
-  }
-
-  get blockNumber(): BigInt {
-    let value = this.get("blockNumber");
-    if (!value || value.kind == ValueKind.NULL) {
-      throw new Error("Cannot return null for a required field.");
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set blockNumber(value: BigInt) {
-    this.set("blockNumber", Value.fromBigInt(value));
-  }
-
-  get blockTimestamp(): BigInt {
-    let value = this.get("blockTimestamp");
-    if (!value || value.kind == ValueKind.NULL) {
-      throw new Error("Cannot return null for a required field.");
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set blockTimestamp(value: BigInt) {
-    this.set("blockTimestamp", Value.fromBigInt(value));
-  }
-
-  get transactionHash(): Bytes {
-    let value = this.get("transactionHash");
-    if (!value || value.kind == ValueKind.NULL) {
-      throw new Error("Cannot return null for a required field.");
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set transactionHash(value: Bytes) {
-    this.set("transactionHash", Value.fromBytes(value));
   }
 
   get articles(): ArticleLoader {
