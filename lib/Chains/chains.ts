@@ -85,6 +85,7 @@ export const polygonZkEVMTestnet: Chain = {
   blockExplorerUrl: "https://testnet-zkevm.polygonscan.com",
   paymaster: process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_ZKEVM_TESTNET,
 };
+
 export const polygonZkEVM: Chain = {
   id: 1101,
   hex: "0x44d",
@@ -120,7 +121,20 @@ export const optimismGoerliChain: Chain = {
     "https://optimism-goerli.infura.io/v3/cf4f68a2648c42159c880252a44f923b",
   blockExplorerUrl: "https://goerli-optimistic.etherscan.io",
   paymaster: process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_OP_GOERLI,
+  //
 };
+
+export const scrollSepolia: Chain = {
+  id: 1337,
+  hex: "0x8274F",
+  token: "ETH",
+  label: "Scroll Sepolia",
+  shortName: "scrolltest",
+  rpcUrl: "https://sepolia-rpc.scroll.io",
+  blockExplorerUrl: "https://sepolia.scrollscan.com",
+  transactionServiceUrl: "https://transaction-sepolia.safe.scroll.xyz",
+};
+
 export const chains: Chain[] = [
   gnosisChain,
   goerliChain,
@@ -131,6 +145,7 @@ export const chains: Chain[] = [
   polygonZkEVM,
   optimismChain,
   optimismGoerliChain,
+  scrollSepolia,
 ];
 
 export const initialChain = mumbaiChain;

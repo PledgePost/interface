@@ -71,6 +71,7 @@ const config: HardhatUserConfig = {
       polygonZkEvm: process.env.ETHERSCAN_POLYGON_ZKEVM_API_KEY as string,
       polygonZkEvmTestnet: process.env
         .ETHERSCAN_POLYGON_ZKEVM_API_KEY as string,
+      scrollSepolia: "D62920783A4311EE9D6600155D570C742E",
     },
     customChains: [
       {
@@ -109,7 +110,7 @@ const config: HardhatUserConfig = {
         network: "scrollSepolia",
         chainId: 1337,
         urls: {
-          apiURL: "https://api-sepolia.scroll.io/api",
+          apiURL: "https://api-sepolia.scrollscan.dev/api",
           browserURL: "https://sepolia.scrollscan.com",
         },
       },
