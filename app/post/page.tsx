@@ -1,79 +1,56 @@
 "use client";
+import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 import { makeFileObjects, storeFiles } from "@/hooks/useweb3Storage";
-import {
-  useAccount,
-  useContractWrite,
-  useNetwork,
-  useWaitForTransaction,
-} from "wagmi";
-import {
-  showDefaultToast,
-  showErrorToast,
-  showSuccessToast,
-} from "@/hooks/useNotification";
-import useExplore from "@/hooks/useExplore";
+import { showDefaultToast } from "@/hooks/useNotification";
 import dynamic from "next/dynamic";
+import { useSafeAA } from "@/hooks/AccountAbstractionContext";
+import { CIDString } from "web3.storage";
 
 const ABI = require("../../abis/PledgePost.json").abi;
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
-const contract_address: any = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string;
 
 const Post = () => {
   const [value, setValue] = useState(``);
   const [title, setTitle] = useState("");
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setValue(e.target.value);
-  };
   const [obj, setObj] = useState({});
-  const { chain } = useNetwork();
-  const { address } = useAccount();
-  const url = useExplore();
   let timestamp = new Date();
   let unix = timestamp.getTime();
   let UNIXtimestamp = Math.floor(unix / 1000);
-  const { data, write: post } = useContractWrite({
-    address: contract_address,
-    abi: ABI,
-    functionName: "postArticle",
-    chainId: chain?.id,
-    onError(error) {
-      console.log("Error", error);
-      showErrorToast(error.message);
-    },
-  });
-  const { data: txreceipt } = useWaitForTransaction({
-    hash: data?.hash,
-    onSuccess: (txreceipt) => {
-      if (txreceipt) {
-        showSuccessToast(`${url}/tx/${txreceipt.transactionHash}`);
-      }
-    },
-  });
-  useEffect(() => {
-    if (txreceipt) {
-      console.log("Receipt: ", txreceipt);
-    }
-  }, [txreceipt]);
-  useEffect(() => {
-    const object = { title, value, address, UNIXtimestamp };
-    setObj(object);
-  }, [title, value, address, UNIXtimestamp]);
+  const { currentAddress, smartAccount, signer, handleUserOp } = useSafeAA();
 
-  async function handleSubmit() {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setValue(e.target.value);
+  };
+  const handleSubmit = async () => {
     try {
       showDefaultToast("Uploading...");
-      if (!address || !title || !value) return;
-      const files = makeFileObjects(obj, address);
+      if (!currentAddress || !title || !value) return;
+      const files = makeFileObjects(obj, currentAddress);
       const cid = await storeFiles(files);
-      post({ args: [cid] });
-      showDefaultToast();
+      handleSend(cid);
     } catch (e) {
       console.log(e);
     }
-  }
+  };
+
+  const handleSend = async (cid: CIDString | undefined) => {
+    const contract = new ethers.Contract(contractAddress, ABI, signer);
+    console.log("contract: ", contract);
+    try {
+      const tx = await contract.populateTransaction.postArticle(cid);
+      await handleUserOp(tx, smartAccount);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  useEffect(() => {
+    const object = { title, value, currentAddress, UNIXtimestamp };
+    setObj(object);
+  }, [title, value, currentAddress, UNIXtimestamp]);
 
   return (
     <div className="flex justify-center">

@@ -10,7 +10,7 @@ async function getNonce() {
 
 async function main() {
   // Hardcoded deploying nonce
-  const deployNonce = 44;
+  const deployNonce = 48;
 
   const signer = (await ethers.getSigners())[0];
   const currentNonce = await ethers.provider.getTransactionCount(
@@ -46,8 +46,8 @@ async function main() {
 }
 
 async function setup() {
-  let contractAddress = "0xedae7875809dc9aCd076b1e7c5A2109048c54a70";
-  let tokenAddress = "0x298005746ff8C64252c1398e24eA5C17541db1B5";
+  let contractAddress = "0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f";
+  let tokenAddress = "0xD4978Df429A81Fb2032C0416D6bD854E1f93EcAa";
 
   const contract = await ethers.getContractAt("PledgePost", contractAddress);
   const tokenContract = await ethers.getContractAt("TestToken", tokenAddress);
@@ -65,8 +65,8 @@ async function setup() {
   console.log(`Round 1 activated`);
 }
 // main()
-// setup()
-getNonce()
+setup()
+  // getNonce()
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);
@@ -84,8 +84,8 @@ npx hardhat run scripts/deploy.ts --network scrollSepolia
 /*
 npx hardhat verify --network goerli 0x298005746ff8C64252c1398e24eA5C17541db1B5
 npx hardhat verify --network sepolia 0x298005746ff8C64252c1398e24eA5C17541db1B5
-npx hardhat verify --network optimismGoerli 0x298005746ff8C64252c1398e24eA5C17541db1B5
-npx hardhat verify --network polygonMumbai 0x298005746ff8C64252c1398e24eA5C17541db1B5
+npx hardhat verify --network optimismGoerli 0xD4978Df429A81Fb2032C0416D6bD854E1f93EcAa
+npx hardhat verify --network polygonMumbai 0xD4978Df429A81Fb2032C0416D6bD854E1f93EcAa
 npx hardhat verify --network polygonZkEvmTestnet 0x298005746ff8C64252c1398e24eA5C17541db1B5
 npx hardhat verify --network scrollSepolia 0x298005746ff8C64252c1398e24eA5C17541db1B5
 */

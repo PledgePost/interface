@@ -21,8 +21,14 @@ describe("Describe entity assertions", () => {
     let recipient = Address.fromString(
       "0x0000000000000000000000000000000000000001"
     )
+    let articleId = BigInt.fromI32(234)
     let amount = BigInt.fromI32(234)
-    let newAllocatedEvent = createAllocatedEvent(roundId, recipient, amount)
+    let newAllocatedEvent = createAllocatedEvent(
+      roundId,
+      recipient,
+      articleId,
+      amount
+    )
     handleAllocated(newAllocatedEvent)
   })
 
@@ -48,6 +54,12 @@ describe("Describe entity assertions", () => {
       "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
       "recipient",
       "0x0000000000000000000000000000000000000001"
+    )
+    assert.fieldEquals(
+      "Allocated",
+      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
+      "articleId",
+      "234"
     )
     assert.fieldEquals(
       "Allocated",

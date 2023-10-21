@@ -11,7 +11,7 @@ const CardLists = ({
   ImageUrl,
   author,
   donation,
-  roundId,
+  round,
 }: any) => {
   const addr = sliceAddress(author);
   return (
@@ -21,13 +21,14 @@ const CardLists = ({
         alt="fund"
         className="w-full h-[158px] object-cover rounded-[15px]"
       />
-      {roundId && (
-        <div className="px-4 mt-2">
-          <Badge className="rounded-sm" variant="secondary">
-            Round: {roundId}
-          </Badge>
-        </div>
-      )}
+      {!round ||
+        (round !== "0" && (
+          <div className="px-4 mt-2">
+            <Badge className="rounded-sm" variant="secondary">
+              Round: {round}
+            </Badge>
+          </div>
+        ))}
 
       <div className="flex flex-col px-4 py-2">
         <div className="block">
@@ -41,7 +42,7 @@ const CardLists = ({
         <div className="flex justify-between flex-wrap mt-[10px] gap-2">
           <div className="flex flex-col">
             <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] leading-[22px]">
-              Raised ${donation}
+              Received Donation ${donation}
             </h4>
           </div>
         </div>

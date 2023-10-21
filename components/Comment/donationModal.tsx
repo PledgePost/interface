@@ -20,15 +20,18 @@ import { Button } from "../ui/button";
 
 import React from "react";
 import { TokenConfig, TokenType } from "@/lib/Token/token";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 export default function DonationModal({
   handleClick,
   amount,
   setAmount,
   setToken,
+  loadingTx,
+  isApproved,
 }: any) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(Number(e.target.value));
+    setAmount(e.target.value);
   };
   const handleToken = (token_address: string) => {
     const token: TokenType | undefined = TokenConfig.find(
@@ -80,7 +83,16 @@ export default function DonationModal({
                 Cancel
               </Button>
             </DialogClose>
-            <Button onClick={() => handleClick()}>Confirm</Button>
+            {!loadingTx ? (
+              <Button onClick={() => handleClick()}>
+                {isApproved ? "Donate" : "Approve"}
+              </Button>
+            ) : (
+              <Button disabled>
+                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

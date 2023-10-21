@@ -9,11 +9,14 @@ export default function MessageInput({
   isDonated,
   handleClick,
   setToken,
-	setAmount
+  isApproved,
+  setAmount,
+  loadingTx,
 }: any) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessages(e.target.value);
   };
+
   return (
     <div className="flex flex-col gap-2">
       <Input
@@ -22,7 +25,13 @@ export default function MessageInput({
         onChange={(e) => handleChange(e)}
       />
       {!isDonated ? (
-        <DonationModal handleClick={handleClick} setToken={setToken} setAmount={setAmount}/>
+        <DonationModal
+          handleClick={handleClick}
+          setToken={setToken}
+          setAmount={setAmount}
+          loadingTx={loadingTx}
+					isApproved={isApproved}
+        />
       ) : (
         <Button onClick={() => handleSend()}>Submit Comment</Button>
       )}

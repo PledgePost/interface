@@ -1,6 +1,7 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { toChecksumAddress } from "ethereumjs-util";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,11 +15,16 @@ import Link from "next/link";
 import ApplicationModal from "./ApplicationModal";
 export type ArticleColumn = {
   articleId: string;
-  author: string;
+  author: {
+    id: string;
+  };
   content: string;
   title: string;
   status: string;
-  round: string;
+  associatedRound: {
+    id: string;
+    name: string;
+  };
 };
 export type AnalyticsColumn = {
   articleId: string;
@@ -41,13 +47,23 @@ export const columns: ColumnDef<ArticleColumn>[] = [
     accessorKey: "status",
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Round Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        <div className="text-center">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Round Status
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const article = row.original;
+      return (
+        <div className=" font-normal text-center">
+          {`Round${article.associatedRound.id}: ${article.associatedRound.name}`}
+        </div>
       );
     },
   },
@@ -55,6 +71,7 @@ export const columns: ColumnDef<ArticleColumn>[] = [
     id: "actions",
     cell: ({ row }) => {
       const article = row.original;
+      const author = toChecksumAddress(article.author.id);
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -67,23 +84,16 @@ export const columns: ColumnDef<ArticleColumn>[] = [
             <DropdownMenuItem>Edit draft</DropdownMenuItem>
             <DropdownMenuSeparator />
             <Link
-              href={`/post/${article.author}/${article.articleId}/${article.content}`}
+              href={`/post/${author}/${article.articleId}/${article.content}`}
             >
               <DropdownMenuItem>View on Explore</DropdownMenuItem>
             </Link>
             <Link
-              href={`https://${article.content}.ipfs.dweb.link/pledgepost:${article.author}`}
+              href={`https://${article.content}.ipfs.dweb.link/pledgepost:${author}`}
               target="_blank"
               rel="noopener noreferrer"
             >
               <DropdownMenuItem>View on IPFS</DropdownMenuItem>
-            </Link>
-            <Link
-              href={`https://${article.content}.ipfs.dweb.link/pledgepost:${article.author}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <DropdownMenuItem>View on BlockExplore</DropdownMenuItem>
             </Link>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -94,8 +104,12 @@ export const columns: ColumnDef<ArticleColumn>[] = [
     id: "apply",
     cell: ({ row }) => {
       const article = row.original;
-
-      return <ApplicationModal id={article.articleId} />;
+      return (
+        <ApplicationModal
+          id={article.articleId}
+          round={article.associatedRound.id}
+        />
+      );
     },
   },
 ];
@@ -112,13 +126,24 @@ export const analyticsColumn: ColumnDef<AnalyticsColumn>[] = [
     accessorKey: "donation",
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Donation
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        <div className="text-center">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Donation
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const article = row.original;
+      const formattedDonation: any = parseFloat(
+        article.donation.toString()
+      ).toFixed(2);
+      return (
+        <div className="text-center font-medium">${formattedDonation}</div>
       );
     },
   },
@@ -126,13 +151,15 @@ export const analyticsColumn: ColumnDef<AnalyticsColumn>[] = [
     accessorKey: "matchingAmount",
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Matching Amount
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        <div className="text-center">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Matching Amount
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       );
     },
   },

@@ -4,12 +4,14 @@ import {
   Allocated,
   ArticleDonated,
   ArticlePosted,
+  RoundApplied,
   RoundCreated
 } from "../generated/PledgePost/PledgePost"
 
 export function createAllocatedEvent(
   roundId: BigInt,
   recipient: Address,
+  articleId: BigInt,
   amount: BigInt
 ): Allocated {
   let allocatedEvent = changetype<Allocated>(newMockEvent())
@@ -24,6 +26,12 @@ export function createAllocatedEvent(
   )
   allocatedEvent.parameters.push(
     new ethereum.EventParam("recipient", ethereum.Value.fromAddress(recipient))
+  )
+  allocatedEvent.parameters.push(
+    new ethereum.EventParam(
+      "articleId",
+      ethereum.Value.fromUnsignedBigInt(articleId)
+    )
   )
   allocatedEvent.parameters.push(
     new ethereum.EventParam("amount", ethereum.Value.fromUnsignedBigInt(amount))
@@ -86,9 +94,39 @@ export function createArticlePostedEvent(
   return articlePostedEvent
 }
 
+export function createRoundAppliedEvent(
+  author: Address,
+  articleId: BigInt,
+  roundId: BigInt
+): RoundApplied {
+  let roundAppliedEvent = changetype<RoundApplied>(newMockEvent())
+
+  roundAppliedEvent.parameters = new Array()
+
+  roundAppliedEvent.parameters.push(
+    new ethereum.EventParam("author", ethereum.Value.fromAddress(author))
+  )
+  roundAppliedEvent.parameters.push(
+    new ethereum.EventParam(
+      "articleId",
+      ethereum.Value.fromUnsignedBigInt(articleId)
+    )
+  )
+  roundAppliedEvent.parameters.push(
+    new ethereum.EventParam(
+      "roundId",
+      ethereum.Value.fromUnsignedBigInt(roundId)
+    )
+  )
+
+  return roundAppliedEvent
+}
+
 export function createRoundCreatedEvent(
   owner: Address,
   ipoolAddress: Address,
+  roundId: BigInt,
+  name: string,
   startDate: BigInt,
   endDate: BigInt
 ): RoundCreated {
@@ -104,6 +142,15 @@ export function createRoundCreatedEvent(
       "ipoolAddress",
       ethereum.Value.fromAddress(ipoolAddress)
     )
+  )
+  roundCreatedEvent.parameters.push(
+    new ethereum.EventParam(
+      "roundId",
+      ethereum.Value.fromUnsignedBigInt(roundId)
+    )
+  )
+  roundCreatedEvent.parameters.push(
+    new ethereum.EventParam("name", ethereum.Value.fromString(name))
   )
   roundCreatedEvent.parameters.push(
     new ethereum.EventParam(

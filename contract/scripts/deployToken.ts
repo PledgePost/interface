@@ -17,10 +17,6 @@ async function main() {
   // Now deploy the main contract
   const ContractFactory = await ethers.getContractFactory("TestToken");
   const contract = await ContractFactory.deploy({ nonce: deployNonce });
-  await contract.transfer(
-    "0x06aa005386F53Ba7b980c61e0D067CaBc7602a62",
-    100000000
-  );
 
   console.log(`Contract deployed at address: ${contract.target}`);
 }

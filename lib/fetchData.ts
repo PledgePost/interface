@@ -1,19 +1,19 @@
 import { cache } from "react";
-
+import { ethers } from "ethers";
 import { toChecksumAddress } from "ethereumjs-util";
-import { GET_ARTICLE_POSTED } from "./query";
+import { GET_ALL_ROUNDS, GET_ARTICLE, GET_ARTICLE_BY_ID } from "./query";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 const client = new ApolloClient({
-  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_op_v1/version/latest",
+  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_v3/version/latest",
   cache: new InMemoryCache(),
 });
 
-export const getData = cache(async () => {
+export const getArticle = cache(async (query: any) => {
   if (!client) throw new Error("Client not available");
   try {
     const response = await client.query({
-      query: GET_ARTICLE_POSTED,
+      query: query,
       fetchPolicy: "no-cache",
     });
 
@@ -21,7 +21,7 @@ export const getData = cache(async () => {
       throw new Error("No data returned from the query");
     }
 
-    return response.data.articlePosteds;
+    return response.data.articles;
   } catch (error) {
     console.error("getData error :>> ", error);
     throw error;
@@ -32,22 +32,106 @@ export const fetchData = cache(async (address: string, cid: string) => {
   const checksumAddress = toChecksumAddress(address);
 
   const url = `https://${cid}.ipfs.dweb.link/pledgepost:${checksumAddress}`;
-
-  console.log("url :>> ", url);
   const res = await fetch(url);
   const content = await res.json();
-  console.log("content :>> ", content);
   return content;
 });
 
 export const getAllData = cache(async () => {
-  const posts: any = await getData();
+  const posts: any = await getArticle(GET_ARTICLE);
+  const AllPost = await Promise.all(
+    posts.map(async (post: any) => {
+      let donation = ethers.BigNumber.from("0");
+      if (post.donations) {
+        for (let i = 0; i < post.donations.length; i++) {
+          let amount = ethers.BigNumber.from(post.donations[i].amount);
+          donation = donation.add(amount);
+        }
+      }
+      const ipfsData = await fetchData(post.author.id, post.content);
+      return {
+        ...post,
+        ...ipfsData,
+        donation: ethers.utils.formatUnits(donation, 18), //TODO: change depending on token
+      };
+    })
+  );
+  console.log("AllPost :>> ", AllPost);
+  return AllPost;
+});
+export const getAllRound = cache(async (query: any) => {
+  if (!client) throw new Error("Client not available");
+  try {
+    const response = await client.query({
+      query: query,
+      fetchPolicy: "no-cache",
+    });
+
+    if (!response || !response.data) {
+      throw new Error("No data returned from the query");
+    }
+
+    return response.data.rounds;
+  } catch (error) {
+    console.error("getData error :>> ", error);
+    throw error;
+  }
+});
+export const getAllRoundData = cache(async () => {
+  const posts: any = await getAllRound(GET_ALL_ROUNDS);
+  function formatTimestampToYMD(unixTimestamp: number) {
+    const date = new Date(unixTimestamp * 1000);
+    const year = date.getFullYear();
+    const month = ("0" + (date.getMonth() + 1)).slice(-2);
+    const day = ("0" + date.getDate()).slice(-2);
+    return `${month}/${day}/${year}`;
+  }
+  const AllRound = await Promise.all(
+    posts.map(async (post: any) => {
+      return {
+        ...post,
+        startDate: formatTimestampToYMD(post.startDate),
+        endDate: formatTimestampToYMD(post.endDate),
+      };
+    })
+  );
+  console.log("AllRound :>> ", AllRound);
+  return AllRound;
+});
+/*
+export const getArticleByAddress = cache(async (address: string) => {
+  const checksumAddress = toChecksumAddress(address);
+  const response = await client.query({
+    query: GET_ARTICLE_BY_ID,
+    variables: {
+      authorAddress: checksumAddress,
+    },
+    fetchPolicy: "no-cache",
+  });
+  if (!response || !response.data) {
+    throw new Error("No data returned from the query");
+  }
+
+  const posts = response.data.articles;
 
   const AllPost = await Promise.all(
     posts.map(async (post: any) => {
-      const ipfsData = await fetchData(post.author, post.content);
-      return { ...post, ...ipfsData };
+      let donation = ethers.BigNumber.from("0");
+      if (post.donations) {
+        for (let i = 0; i < post.donations.length; i++) {
+          let amount = ethers.BigNumber.from(post.donations[i].amount);
+          donation = donation.add(amount);
+        }
+      }
+      const ipfsData = await fetchData(post.author.id, post.content);
+      return {
+        ...post,
+        ...ipfsData,
+        donation: ethers.utils.formatUnits(donation, 18), //TODO: change depending on token
+      };
     })
   );
+  console.log("AllPost :>> ", AllPost);
   return AllPost;
 });
+ */

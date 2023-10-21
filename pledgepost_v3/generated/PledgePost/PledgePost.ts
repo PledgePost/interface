@@ -31,8 +31,12 @@ export class Allocated__Params {
     return this._event.parameters[1].value.toAddress();
   }
 
-  get amount(): BigInt {
+  get articleId(): BigInt {
     return this._event.parameters[2].value.toBigInt();
+  }
+
+  get amount(): BigInt {
+    return this._event.parameters[3].value.toBigInt();
   }
 }
 
@@ -92,6 +96,32 @@ export class ArticlePosted__Params {
   }
 }
 
+export class RoundApplied extends ethereum.Event {
+  get params(): RoundApplied__Params {
+    return new RoundApplied__Params(this);
+  }
+}
+
+export class RoundApplied__Params {
+  _event: RoundApplied;
+
+  constructor(event: RoundApplied) {
+    this._event = event;
+  }
+
+  get author(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get articleId(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+
+  get roundId(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
 export class RoundCreated extends ethereum.Event {
   get params(): RoundCreated__Params {
     return new RoundCreated__Params(this);
@@ -113,12 +143,20 @@ export class RoundCreated__Params {
     return this._event.parameters[1].value.toAddress();
   }
 
-  get startDate(): BigInt {
+  get roundId(): BigInt {
     return this._event.parameters[2].value.toBigInt();
   }
 
+  get name(): string {
+    return this._event.parameters[3].value.toString();
+  }
+
+  get startDate(): BigInt {
+    return this._event.parameters[4].value.toBigInt();
+  }
+
   get endDate(): BigInt {
-    return this._event.parameters[3].value.toBigInt();
+    return this._event.parameters[5].value.toBigInt();
   }
 }
 
@@ -164,24 +202,28 @@ export class PledgePost__authorArticlesResult {
 export class PledgePost__authorToArticleIdToRoundResult {
   value0: BigInt;
   value1: Address;
-  value2: Address;
-  value3: Address;
-  value4: BigInt;
-  value5: BigInt;
+  value2: string;
+  value3: Bytes;
+  value4: Address;
+  value5: Address;
   value6: BigInt;
   value7: BigInt;
-  value8: boolean;
+  value8: BigInt;
+  value9: BigInt;
+  value10: boolean;
 
   constructor(
     value0: BigInt,
     value1: Address,
-    value2: Address,
-    value3: Address,
-    value4: BigInt,
-    value5: BigInt,
+    value2: string,
+    value3: Bytes,
+    value4: Address,
+    value5: Address,
     value6: BigInt,
     value7: BigInt,
-    value8: boolean
+    value8: BigInt,
+    value9: BigInt,
+    value10: boolean
   ) {
     this.value0 = value0;
     this.value1 = value1;
@@ -192,19 +234,23 @@ export class PledgePost__authorToArticleIdToRoundResult {
     this.value6 = value6;
     this.value7 = value7;
     this.value8 = value8;
+    this.value9 = value9;
+    this.value10 = value10;
   }
 
   toMap(): TypedMap<string, ethereum.Value> {
     let map = new TypedMap<string, ethereum.Value>();
     map.set("value0", ethereum.Value.fromUnsignedBigInt(this.value0));
     map.set("value1", ethereum.Value.fromAddress(this.value1));
-    map.set("value2", ethereum.Value.fromAddress(this.value2));
-    map.set("value3", ethereum.Value.fromAddress(this.value3));
-    map.set("value4", ethereum.Value.fromUnsignedBigInt(this.value4));
-    map.set("value5", ethereum.Value.fromUnsignedBigInt(this.value5));
+    map.set("value2", ethereum.Value.fromString(this.value2));
+    map.set("value3", ethereum.Value.fromBytes(this.value3));
+    map.set("value4", ethereum.Value.fromAddress(this.value4));
+    map.set("value5", ethereum.Value.fromAddress(this.value5));
     map.set("value6", ethereum.Value.fromUnsignedBigInt(this.value6));
     map.set("value7", ethereum.Value.fromUnsignedBigInt(this.value7));
-    map.set("value8", ethereum.Value.fromBoolean(this.value8));
+    map.set("value8", ethereum.Value.fromUnsignedBigInt(this.value8));
+    map.set("value9", ethereum.Value.fromUnsignedBigInt(this.value9));
+    map.set("value10", ethereum.Value.fromBoolean(this.value10));
     return map;
   }
 
@@ -216,32 +262,40 @@ export class PledgePost__authorToArticleIdToRoundResult {
     return this.value1;
   }
 
-  getPoolAddress(): Address {
+  getName(): string {
     return this.value2;
   }
 
-  getPoolToken(): Address {
+  getDescription(): Bytes {
     return this.value3;
   }
 
-  getPoolAmount(): BigInt {
+  getPoolAddress(): Address {
     return this.value4;
   }
 
-  getStartDate(): BigInt {
+  getPoolToken(): Address {
     return this.value5;
   }
 
-  getEndDate(): BigInt {
+  getPoolAmount(): BigInt {
     return this.value6;
   }
 
-  getCreatedTimestamp(): BigInt {
+  getStartDate(): BigInt {
     return this.value7;
   }
 
-  getIsActive(): boolean {
+  getEndDate(): BigInt {
     return this.value8;
+  }
+
+  getCreatedTimestamp(): BigInt {
+    return this.value9;
+  }
+
+  getIsActive(): boolean {
+    return this.value10;
   }
 }
 
@@ -254,74 +308,44 @@ export class PledgePost__createRoundResultValue0Struct extends ethereum.Tuple {
     return this[1].toAddress();
   }
 
-  get poolAddress(): Address {
-    return this[2].toAddress();
+  get name(): string {
+    return this[2].toString();
   }
 
-  get poolToken(): Address {
-    return this[3].toAddress();
-  }
-
-  get poolAmount(): BigInt {
-    return this[4].toBigInt();
-  }
-
-  get startDate(): BigInt {
-    return this[5].toBigInt();
-  }
-
-  get endDate(): BigInt {
-    return this[6].toBigInt();
-  }
-
-  get createdTimestamp(): BigInt {
-    return this[7].toBigInt();
-  }
-
-  get isActive(): boolean {
-    return this[8].toBoolean();
-  }
-}
-
-export class PledgePost__getAppliedRoundResultValue0Struct extends ethereum.Tuple {
-  get id(): BigInt {
-    return this[0].toBigInt();
-  }
-
-  get owner(): Address {
-    return this[1].toAddress();
+  get description(): Bytes {
+    return this[3].toBytes();
   }
 
   get poolAddress(): Address {
-    return this[2].toAddress();
+    return this[4].toAddress();
   }
 
   get poolToken(): Address {
-    return this[3].toAddress();
+    return this[5].toAddress();
   }
 
   get poolAmount(): BigInt {
-    return this[4].toBigInt();
-  }
-
-  get startDate(): BigInt {
-    return this[5].toBigInt();
-  }
-
-  get endDate(): BigInt {
     return this[6].toBigInt();
   }
 
-  get createdTimestamp(): BigInt {
+  get startDate(): BigInt {
     return this[7].toBigInt();
   }
 
+  get endDate(): BigInt {
+    return this[8].toBigInt();
+  }
+
+  get createdTimestamp(): BigInt {
+    return this[9].toBigInt();
+  }
+
   get isActive(): boolean {
-    return this[8].toBoolean();
+    return this[10].toBoolean();
   }
 }
 
-export class PledgePost__getArticleResultValue0Struct extends ethereum.Tuple {
+export class PledgePost__getAllAuthorArticleResultValue0Struct extends ethereum.Tuple {
   get id(): BigInt {
     return this[0].toBigInt();
   }
@@ -336,6 +360,116 @@ export class PledgePost__getArticleResultValue0Struct extends ethereum.Tuple {
 
   get donationsReceived(): BigInt {
     return this[3].toBigInt();
+  }
+}
+
+export class PledgePost__getAllRoundResultValue0Struct extends ethereum.Tuple {
+  get id(): BigInt {
+    return this[0].toBigInt();
+  }
+
+  get owner(): Address {
+    return this[1].toAddress();
+  }
+
+  get name(): string {
+    return this[2].toString();
+  }
+
+  get description(): Bytes {
+    return this[3].toBytes();
+  }
+
+  get poolAddress(): Address {
+    return this[4].toAddress();
+  }
+
+  get poolToken(): Address {
+    return this[5].toAddress();
+  }
+
+  get poolAmount(): BigInt {
+    return this[6].toBigInt();
+  }
+
+  get startDate(): BigInt {
+    return this[7].toBigInt();
+  }
+
+  get endDate(): BigInt {
+    return this[8].toBigInt();
+  }
+
+  get createdTimestamp(): BigInt {
+    return this[9].toBigInt();
+  }
+
+  get isActive(): boolean {
+    return this[10].toBoolean();
+  }
+}
+
+export class PledgePost__getAppliedArticleResultValue0Struct extends ethereum.Tuple {
+  get id(): BigInt {
+    return this[0].toBigInt();
+  }
+
+  get author(): Address {
+    return this[1].toAddress();
+  }
+
+  get content(): string {
+    return this[2].toString();
+  }
+
+  get donationsReceived(): BigInt {
+    return this[3].toBigInt();
+  }
+}
+
+export class PledgePost__getAppliedRoundResultValue0Struct extends ethereum.Tuple {
+  get id(): BigInt {
+    return this[0].toBigInt();
+  }
+
+  get owner(): Address {
+    return this[1].toAddress();
+  }
+
+  get name(): string {
+    return this[2].toString();
+  }
+
+  get description(): Bytes {
+    return this[3].toBytes();
+  }
+
+  get poolAddress(): Address {
+    return this[4].toAddress();
+  }
+
+  get poolToken(): Address {
+    return this[5].toAddress();
+  }
+
+  get poolAmount(): BigInt {
+    return this[6].toBigInt();
+  }
+
+  get startDate(): BigInt {
+    return this[7].toBigInt();
+  }
+
+  get endDate(): BigInt {
+    return this[8].toBigInt();
+  }
+
+  get createdTimestamp(): BigInt {
+    return this[9].toBigInt();
+  }
+
+  get isActive(): boolean {
+    return this[10].toBoolean();
   }
 }
 
@@ -366,32 +500,40 @@ export class PledgePost__getRoundResultValue0Struct extends ethereum.Tuple {
     return this[1].toAddress();
   }
 
+  get name(): string {
+    return this[2].toString();
+  }
+
+  get description(): Bytes {
+    return this[3].toBytes();
+  }
+
   get poolAddress(): Address {
-    return this[2].toAddress();
+    return this[4].toAddress();
   }
 
   get poolToken(): Address {
-    return this[3].toAddress();
+    return this[5].toAddress();
   }
 
   get poolAmount(): BigInt {
-    return this[4].toBigInt();
-  }
-
-  get startDate(): BigInt {
-    return this[5].toBigInt();
-  }
-
-  get endDate(): BigInt {
     return this[6].toBigInt();
   }
 
-  get createdTimestamp(): BigInt {
+  get startDate(): BigInt {
     return this[7].toBigInt();
   }
 
+  get endDate(): BigInt {
+    return this[8].toBigInt();
+  }
+
+  get createdTimestamp(): BigInt {
+    return this[9].toBigInt();
+  }
+
   get isActive(): boolean {
-    return this[8].toBoolean();
+    return this[10].toBoolean();
   }
 }
 
@@ -437,24 +579,28 @@ export class PledgePost__roundArticlesResult {
 export class PledgePost__roundsResult {
   value0: BigInt;
   value1: Address;
-  value2: Address;
-  value3: Address;
-  value4: BigInt;
-  value5: BigInt;
+  value2: string;
+  value3: Bytes;
+  value4: Address;
+  value5: Address;
   value6: BigInt;
   value7: BigInt;
-  value8: boolean;
+  value8: BigInt;
+  value9: BigInt;
+  value10: boolean;
 
   constructor(
     value0: BigInt,
     value1: Address,
-    value2: Address,
-    value3: Address,
-    value4: BigInt,
-    value5: BigInt,
+    value2: string,
+    value3: Bytes,
+    value4: Address,
+    value5: Address,
     value6: BigInt,
     value7: BigInt,
-    value8: boolean
+    value8: BigInt,
+    value9: BigInt,
+    value10: boolean
   ) {
     this.value0 = value0;
     this.value1 = value1;
@@ -465,19 +611,23 @@ export class PledgePost__roundsResult {
     this.value6 = value6;
     this.value7 = value7;
     this.value8 = value8;
+    this.value9 = value9;
+    this.value10 = value10;
   }
 
   toMap(): TypedMap<string, ethereum.Value> {
     let map = new TypedMap<string, ethereum.Value>();
     map.set("value0", ethereum.Value.fromUnsignedBigInt(this.value0));
     map.set("value1", ethereum.Value.fromAddress(this.value1));
-    map.set("value2", ethereum.Value.fromAddress(this.value2));
-    map.set("value3", ethereum.Value.fromAddress(this.value3));
-    map.set("value4", ethereum.Value.fromUnsignedBigInt(this.value4));
-    map.set("value5", ethereum.Value.fromUnsignedBigInt(this.value5));
+    map.set("value2", ethereum.Value.fromString(this.value2));
+    map.set("value3", ethereum.Value.fromBytes(this.value3));
+    map.set("value4", ethereum.Value.fromAddress(this.value4));
+    map.set("value5", ethereum.Value.fromAddress(this.value5));
     map.set("value6", ethereum.Value.fromUnsignedBigInt(this.value6));
     map.set("value7", ethereum.Value.fromUnsignedBigInt(this.value7));
-    map.set("value8", ethereum.Value.fromBoolean(this.value8));
+    map.set("value8", ethereum.Value.fromUnsignedBigInt(this.value8));
+    map.set("value9", ethereum.Value.fromUnsignedBigInt(this.value9));
+    map.set("value10", ethereum.Value.fromBoolean(this.value10));
     return map;
   }
 
@@ -489,32 +639,40 @@ export class PledgePost__roundsResult {
     return this.value1;
   }
 
-  getPoolAddress(): Address {
+  getName(): string {
     return this.value2;
   }
 
-  getPoolToken(): Address {
+  getDescription(): Bytes {
     return this.value3;
   }
 
-  getPoolAmount(): BigInt {
+  getPoolAddress(): Address {
     return this.value4;
   }
 
-  getStartDate(): BigInt {
+  getPoolToken(): Address {
     return this.value5;
   }
 
-  getEndDate(): BigInt {
+  getPoolAmount(): BigInt {
     return this.value6;
   }
 
-  getCreatedTimestamp(): BigInt {
+  getStartDate(): BigInt {
     return this.value7;
   }
 
-  getIsActive(): boolean {
+  getEndDate(): BigInt {
     return this.value8;
+  }
+
+  getCreatedTimestamp(): BigInt {
+    return this.value9;
+  }
+
+  getIsActive(): boolean {
+    return this.value10;
   }
 }
 
@@ -650,7 +808,7 @@ export class PledgePost extends ethereum.SmartContract {
   ): PledgePost__authorToArticleIdToRoundResult {
     let result = super.call(
       "authorToArticleIdToRound",
-      "authorToArticleIdToRound(address,uint256):(uint256,address,address,address,uint256,uint256,uint256,uint256,bool)",
+      "authorToArticleIdToRound(address,uint256):(uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool)",
       [
         ethereum.Value.fromAddress(param0),
         ethereum.Value.fromUnsignedBigInt(param1)
@@ -660,13 +818,15 @@ export class PledgePost extends ethereum.SmartContract {
     return new PledgePost__authorToArticleIdToRoundResult(
       result[0].toBigInt(),
       result[1].toAddress(),
-      result[2].toAddress(),
-      result[3].toAddress(),
-      result[4].toBigInt(),
-      result[5].toBigInt(),
+      result[2].toString(),
+      result[3].toBytes(),
+      result[4].toAddress(),
+      result[5].toAddress(),
       result[6].toBigInt(),
       result[7].toBigInt(),
-      result[8].toBoolean()
+      result[8].toBigInt(),
+      result[9].toBigInt(),
+      result[10].toBoolean()
     );
   }
 
@@ -676,7 +836,7 @@ export class PledgePost extends ethereum.SmartContract {
   ): ethereum.CallResult<PledgePost__authorToArticleIdToRoundResult> {
     let result = super.tryCall(
       "authorToArticleIdToRound",
-      "authorToArticleIdToRound(address,uint256):(uint256,address,address,address,uint256,uint256,uint256,uint256,bool)",
+      "authorToArticleIdToRound(address,uint256):(uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool)",
       [
         ethereum.Value.fromAddress(param0),
         ethereum.Value.fromUnsignedBigInt(param1)
@@ -690,13 +850,15 @@ export class PledgePost extends ethereum.SmartContract {
       new PledgePost__authorToArticleIdToRoundResult(
         value[0].toBigInt(),
         value[1].toAddress(),
-        value[2].toAddress(),
-        value[3].toAddress(),
-        value[4].toBigInt(),
-        value[5].toBigInt(),
+        value[2].toString(),
+        value[3].toBytes(),
+        value[4].toAddress(),
+        value[5].toAddress(),
         value[6].toBigInt(),
         value[7].toBigInt(),
-        value[8].toBoolean()
+        value[8].toBigInt(),
+        value[9].toBigInt(),
+        value[10].toBoolean()
       )
     );
   }
@@ -762,15 +924,17 @@ export class PledgePost extends ethereum.SmartContract {
   createRound(
     _token: Address,
     _name: string,
+    _description: string,
     _startDate: BigInt,
     _endDate: BigInt
   ): PledgePost__createRoundResultValue0Struct {
     let result = super.call(
       "createRound",
-      "createRound(address,string,uint256,uint256):((uint256,address,address,address,uint256,uint256,uint256,uint256,bool))",
+      "createRound(address,string,string,uint256,uint256):((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool))",
       [
         ethereum.Value.fromAddress(_token),
         ethereum.Value.fromString(_name),
+        ethereum.Value.fromString(_description),
         ethereum.Value.fromUnsignedBigInt(_startDate),
         ethereum.Value.fromUnsignedBigInt(_endDate)
       ]
@@ -784,15 +948,17 @@ export class PledgePost extends ethereum.SmartContract {
   try_createRound(
     _token: Address,
     _name: string,
+    _description: string,
     _startDate: BigInt,
     _endDate: BigInt
   ): ethereum.CallResult<PledgePost__createRoundResultValue0Struct> {
     let result = super.tryCall(
       "createRound",
-      "createRound(address,string,uint256,uint256):((uint256,address,address,address,uint256,uint256,uint256,uint256,bool))",
+      "createRound(address,string,string,uint256,uint256):((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool))",
       [
         ethereum.Value.fromAddress(_token),
         ethereum.Value.fromString(_name),
+        ethereum.Value.fromString(_description),
         ethereum.Value.fromUnsignedBigInt(_startDate),
         ethereum.Value.fromUnsignedBigInt(_endDate)
       ]
@@ -825,6 +991,66 @@ export class PledgePost extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBoolean());
+  }
+
+  getAllAuthorArticle(
+    _author: Address
+  ): Array<PledgePost__getAllAuthorArticleResultValue0Struct> {
+    let result = super.call(
+      "getAllAuthorArticle",
+      "getAllAuthorArticle(address):((uint256,address,string,uint256)[])",
+      [ethereum.Value.fromAddress(_author)]
+    );
+
+    return result[0].toTupleArray<
+      PledgePost__getAllAuthorArticleResultValue0Struct
+    >();
+  }
+
+  try_getAllAuthorArticle(
+    _author: Address
+  ): ethereum.CallResult<
+    Array<PledgePost__getAllAuthorArticleResultValue0Struct>
+  > {
+    let result = super.tryCall(
+      "getAllAuthorArticle",
+      "getAllAuthorArticle(address):((uint256,address,string,uint256)[])",
+      [ethereum.Value.fromAddress(_author)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      value[0].toTupleArray<PledgePost__getAllAuthorArticleResultValue0Struct>()
+    );
+  }
+
+  getAllRound(): Array<PledgePost__getAllRoundResultValue0Struct> {
+    let result = super.call(
+      "getAllRound",
+      "getAllRound():((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool)[])",
+      []
+    );
+
+    return result[0].toTupleArray<PledgePost__getAllRoundResultValue0Struct>();
+  }
+
+  try_getAllRound(): ethereum.CallResult<
+    Array<PledgePost__getAllRoundResultValue0Struct>
+  > {
+    let result = super.tryCall(
+      "getAllRound",
+      "getAllRound():((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool)[])",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      value[0].toTupleArray<PledgePost__getAllRoundResultValue0Struct>()
+    );
   }
 
   getAllocation(
@@ -905,13 +1131,54 @@ export class PledgePost extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toI32());
   }
 
+  getAppliedArticle(
+    _roundId: BigInt,
+    _index: BigInt
+  ): PledgePost__getAppliedArticleResultValue0Struct {
+    let result = super.call(
+      "getAppliedArticle",
+      "getAppliedArticle(uint256,uint256):((uint256,address,string,uint256))",
+      [
+        ethereum.Value.fromUnsignedBigInt(_roundId),
+        ethereum.Value.fromUnsignedBigInt(_index)
+      ]
+    );
+
+    return changetype<PledgePost__getAppliedArticleResultValue0Struct>(
+      result[0].toTuple()
+    );
+  }
+
+  try_getAppliedArticle(
+    _roundId: BigInt,
+    _index: BigInt
+  ): ethereum.CallResult<PledgePost__getAppliedArticleResultValue0Struct> {
+    let result = super.tryCall(
+      "getAppliedArticle",
+      "getAppliedArticle(uint256,uint256):((uint256,address,string,uint256))",
+      [
+        ethereum.Value.fromUnsignedBigInt(_roundId),
+        ethereum.Value.fromUnsignedBigInt(_index)
+      ]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      changetype<PledgePost__getAppliedArticleResultValue0Struct>(
+        value[0].toTuple()
+      )
+    );
+  }
+
   getAppliedRound(
     _author: Address,
     _articleId: BigInt
   ): PledgePost__getAppliedRoundResultValue0Struct {
     let result = super.call(
       "getAppliedRound",
-      "getAppliedRound(address,uint256):((uint256,address,address,address,uint256,uint256,uint256,uint256,bool))",
+      "getAppliedRound(address,uint256):((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool))",
       [
         ethereum.Value.fromAddress(_author),
         ethereum.Value.fromUnsignedBigInt(_articleId)
@@ -929,7 +1196,7 @@ export class PledgePost extends ethereum.SmartContract {
   ): ethereum.CallResult<PledgePost__getAppliedRoundResultValue0Struct> {
     let result = super.tryCall(
       "getAppliedRound",
-      "getAppliedRound(address,uint256):((uint256,address,address,address,uint256,uint256,uint256,uint256,bool))",
+      "getAppliedRound(address,uint256):((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool))",
       [
         ethereum.Value.fromAddress(_author),
         ethereum.Value.fromUnsignedBigInt(_articleId)
@@ -943,45 +1210,6 @@ export class PledgePost extends ethereum.SmartContract {
       changetype<PledgePost__getAppliedRoundResultValue0Struct>(
         value[0].toTuple()
       )
-    );
-  }
-
-  getArticle(
-    _roundId: BigInt,
-    _index: BigInt
-  ): PledgePost__getArticleResultValue0Struct {
-    let result = super.call(
-      "getArticle",
-      "getArticle(uint256,uint256):((uint256,address,string,uint256))",
-      [
-        ethereum.Value.fromUnsignedBigInt(_roundId),
-        ethereum.Value.fromUnsignedBigInt(_index)
-      ]
-    );
-
-    return changetype<PledgePost__getArticleResultValue0Struct>(
-      result[0].toTuple()
-    );
-  }
-
-  try_getArticle(
-    _roundId: BigInt,
-    _index: BigInt
-  ): ethereum.CallResult<PledgePost__getArticleResultValue0Struct> {
-    let result = super.tryCall(
-      "getArticle",
-      "getArticle(uint256,uint256):((uint256,address,string,uint256))",
-      [
-        ethereum.Value.fromUnsignedBigInt(_roundId),
-        ethereum.Value.fromUnsignedBigInt(_index)
-      ]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(
-      changetype<PledgePost__getArticleResultValue0Struct>(value[0].toTuple())
     );
   }
 
@@ -1182,7 +1410,7 @@ export class PledgePost extends ethereum.SmartContract {
   getRound(_roundId: BigInt): PledgePost__getRoundResultValue0Struct {
     let result = super.call(
       "getRound",
-      "getRound(uint256):((uint256,address,address,address,uint256,uint256,uint256,uint256,bool))",
+      "getRound(uint256):((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool))",
       [ethereum.Value.fromUnsignedBigInt(_roundId)]
     );
 
@@ -1196,7 +1424,7 @@ export class PledgePost extends ethereum.SmartContract {
   ): ethereum.CallResult<PledgePost__getRoundResultValue0Struct> {
     let result = super.tryCall(
       "getRound",
-      "getRound(uint256):((uint256,address,address,address,uint256,uint256,uint256,uint256,bool))",
+      "getRound(uint256):((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool))",
       [ethereum.Value.fromUnsignedBigInt(_roundId)]
     );
     if (result.reverted) {
@@ -1446,27 +1674,29 @@ export class PledgePost extends ethereum.SmartContract {
   rounds(param0: BigInt): PledgePost__roundsResult {
     let result = super.call(
       "rounds",
-      "rounds(uint256):(uint256,address,address,address,uint256,uint256,uint256,uint256,bool)",
+      "rounds(uint256):(uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool)",
       [ethereum.Value.fromUnsignedBigInt(param0)]
     );
 
     return new PledgePost__roundsResult(
       result[0].toBigInt(),
       result[1].toAddress(),
-      result[2].toAddress(),
-      result[3].toAddress(),
-      result[4].toBigInt(),
-      result[5].toBigInt(),
+      result[2].toString(),
+      result[3].toBytes(),
+      result[4].toAddress(),
+      result[5].toAddress(),
       result[6].toBigInt(),
       result[7].toBigInt(),
-      result[8].toBoolean()
+      result[8].toBigInt(),
+      result[9].toBigInt(),
+      result[10].toBoolean()
     );
   }
 
   try_rounds(param0: BigInt): ethereum.CallResult<PledgePost__roundsResult> {
     let result = super.tryCall(
       "rounds",
-      "rounds(uint256):(uint256,address,address,address,uint256,uint256,uint256,uint256,bool)",
+      "rounds(uint256):(uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool)",
       [ethereum.Value.fromUnsignedBigInt(param0)]
     );
     if (result.reverted) {
@@ -1477,13 +1707,15 @@ export class PledgePost extends ethereum.SmartContract {
       new PledgePost__roundsResult(
         value[0].toBigInt(),
         value[1].toAddress(),
-        value[2].toAddress(),
-        value[3].toAddress(),
-        value[4].toBigInt(),
-        value[5].toBigInt(),
+        value[2].toString(),
+        value[3].toBytes(),
+        value[4].toAddress(),
+        value[5].toAddress(),
         value[6].toBigInt(),
         value[7].toBigInt(),
-        value[8].toBoolean()
+        value[8].toBigInt(),
+        value[9].toBigInt(),
+        value[10].toBoolean()
       )
     );
   }
@@ -1672,12 +1904,16 @@ export class CreateRoundCall__Inputs {
     return this._call.inputValues[1].value.toString();
   }
 
+  get _description(): string {
+    return this._call.inputValues[2].value.toString();
+  }
+
   get _startDate(): BigInt {
-    return this._call.inputValues[2].value.toBigInt();
+    return this._call.inputValues[3].value.toBigInt();
   }
 
   get _endDate(): BigInt {
-    return this._call.inputValues[3].value.toBigInt();
+    return this._call.inputValues[4].value.toBigInt();
   }
 }
 
@@ -1704,32 +1940,40 @@ export class CreateRoundCallValue0Struct extends ethereum.Tuple {
     return this[1].toAddress();
   }
 
+  get name(): string {
+    return this[2].toString();
+  }
+
+  get description(): Bytes {
+    return this[3].toBytes();
+  }
+
   get poolAddress(): Address {
-    return this[2].toAddress();
+    return this[4].toAddress();
   }
 
   get poolToken(): Address {
-    return this[3].toAddress();
+    return this[5].toAddress();
   }
 
   get poolAmount(): BigInt {
-    return this[4].toBigInt();
-  }
-
-  get startDate(): BigInt {
-    return this[5].toBigInt();
-  }
-
-  get endDate(): BigInt {
     return this[6].toBigInt();
   }
 
-  get createdTimestamp(): BigInt {
+  get startDate(): BigInt {
     return this[7].toBigInt();
   }
 
+  get endDate(): BigInt {
+    return this[8].toBigInt();
+  }
+
+  get createdTimestamp(): BigInt {
+    return this[9].toBigInt();
+  }
+
   get isActive(): boolean {
-    return this[8].toBoolean();
+    return this[10].toBoolean();
   }
 }
 

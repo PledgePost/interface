@@ -1,33 +1,40 @@
 specVersion: 0.0.5
 schema:
-  file: ./schema.graphql
+  file: schema.graphql
 dataSources:
   - kind: ethereum
     name: PledgePost
     network: optimism-goerli
     source:
-      address: "0xF4Fb31B1D7e3e4Ecf188052E89Fc29300AE1277A"
+      address: "0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f"
       abi: PledgePost
-      startBlock: 16014292
+      startBlock: 16238835
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
+        - User
+        - Article
+        - Round
+        - Donation
         - Allocated
         - ArticleDonated
         - ArticlePosted
+        - RoundApplied
         - RoundCreated
       abis:
         - name: PledgePost
-          file: ./abis/PledgePost.json
+          file: PledgePost/abis/PledgePost.json
       eventHandlers:
-        - event: Allocated(indexed uint256,address,uint256)
+        - event: Allocated(indexed uint256,address,uint256,uint256)
           handler: handleAllocated
         - event: ArticleDonated(indexed address,indexed address,uint256,uint256)
           handler: handleArticleDonated
         - event: ArticlePosted(indexed address,string,uint256)
           handler: handleArticlePosted
-        - event: RoundCreated(indexed address,address,uint256,uint256)
+        - event: RoundApplied(indexed address,uint256,uint256)
+          handler: handleRoundApplied
+        - event: RoundCreated(indexed address,address,uint256,string,uint256,uint256)
           handler: handleRoundCreated
-      file: ./src/pledge-post.ts
+      file: PledgePost/PledgePost.wasm

@@ -2,181 +2,125 @@
 import React, { use, useState, useEffect } from "react";
 import ArticleBoard from "@/components/Dashboard/ArticleBoard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  ArticleColumn,
-  AnalyticsColumn,
-  columns,
-  analyticsColumn,
-} from "@/components/Dashboard/columns";
-import { ethers } from "ethers";
-import { getAllData } from "@/lib/fetchData";
+import { columns, analyticsColumn } from "@/components/Dashboard/columns";
+import { getAllData, fetchData } from "@/lib/fetchData";
 import { Button } from "@/components/ui/button";
-import { useContractWrite } from "wagmi";
-import { useNetwork } from "wagmi";
-import { useEthersProvider } from "@/hooks/useEthers";
-import { Skeleton } from "@/components/ui/skeleton";
 import { SalesCard, SubscriptionCard } from "@/components/Card";
+import { cache } from "react";
+import { ethers } from "ethers";
+import { toChecksumAddress } from "ethereumjs-util";
+import { useSafeAA } from "@/hooks/AccountAbstractionContext";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { GET_ARTICLE_BY_ID } from "../../lib/query";
 
-const ABI = require("../../abis/PledgePost.json").abi;
-
-const contract = {
-  address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
-  abi: ABI,
-};
+const client = new ApolloClient({
+  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_v3/version/latest",
+  cache: new InMemoryCache(),
+});
+const tokenABI = require("../../abis/Token.json").abi;
 
 export default function Dashboard() {
-  const posts: any = use(getAllData());
-  const { chain } = useNetwork();
-  const provider = useEthersProvider({ chainId: chain?.id });
   const [totalDonation, setTotalDonation] = useState<number>(0);
   const [totalDonor, setTotalDonor] = useState<number>(0);
-  const [allPosts, setAllPosts] = useState<any>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  useEffect(() => {
-    if (!provider) return;
-
-    const contract = new ethers.Contract(
-      process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string,
-      ABI,
-      provider
-    );
-
-    const fetchData = async (address: string, articleId: any): Promise<any> => {
-      try {
-        const donation = await contract.getDonatedAmount(address, articleId);
-        const donationAmount = ethers.utils.formatUnits(donation, 18);
-        const round = await contract.getAppliedRound(address, articleId);
-        const roundId = ethers.utils.formatUnits(round.id, 0);
-        if (roundId) {
-          const matching = await contract.getMatchingAmount(
-            roundId,
-            address,
-            articleId
-          );
-          const matchingAmount = ethers.utils.formatUnits(matching, 18);
-          const applicationStatus = await contract.getApplicationStatus(
-            roundId,
-            address,
-            articleId
-          );
-          return {
-            author: address,
-            articleId,
-            donation: donationAmount,
-            roundId: roundId,
-            matchingAmount: matchingAmount,
-            status: applicationStatus,
-          };
-        }
-        return {
-          author: address,
-          articleId,
-          donation: donationAmount,
-          roundId: "Not Applied",
-        };
-      } catch (error) {
-        console.error("Error fetching donation for", articleId, ":", error);
-        return { author: address, articleId, donation: "0" };
-      }
-    };
-
-    const fetchAllDonations = async () => {
-      const donationPromises = posts.map((post: any) =>
-        fetchData(post.author, post.articleId)
-      );
-      const donations = await Promise.all(donationPromises);
-      const updatedPosts = posts.map((post: any) => {
-        const donationData = donations.find(
-          (d) => d.articleId === post.articleId
-        );
-
-        return {
-          ...post,
-          donation: donationData.donation,
-          roundId: donationData.roundId,
-          matchingAmount: donationData.matchingAmount,
-          status: donationData.status,
-        };
-      });
-
-      setAllPosts(updatedPosts);
-      setIsLoading(false);
-      console.log("Posts", updatedPosts);
-    };
-    fetchAllDonations();
-  }, [posts, provider]);
-
-  useEffect(() => {
-    if (!allPosts) return;
-    let totalDonation = 0;
-    let totalDonor = 0;
-    allPosts.forEach((post: any) => {
-      totalDonation += parseInt(post.donation);
-      if (parseInt(post.donation) > 0) totalDonor++;
+  const [tokenBalance, setTokenBalance] = useState<any>(0);
+  const [minted, setMinted] = useState(false);
+  const [userArticle, setUserArticle] = useState<any>([]);
+  const { currentAddress, smartAccount, web3Provider, signer, handleUserOp } =
+    useSafeAA();
+  async function getArticleByAddress(address: string) {
+    const response = await client.query({
+      query: GET_ARTICLE_BY_ID,
+      variables: {
+        authorAddress: address,
+      },
+      fetchPolicy: "no-cache",
     });
-    setTotalDonation(totalDonation);
-    setTotalDonor(totalDonor);
-  }, [allPosts]);
+    if (!response || !response.data) {
+      throw new Error("No data returned from the query");
+    }
+    return response.data.articles;
+  }
+  useEffect(() => {
+    console.log("fetching userArticle");
+    if (!currentAddress) return;
+    const fetch = async () => {
+      const lowercaseAddress = currentAddress.toLowerCase();
+      const posts: any = await getArticleByAddress(lowercaseAddress);
+      console.log("UserPosts", posts);
+      const AllPost = await Promise.all(
+        posts.map(async (post: any) => {
+          let donation = ethers.BigNumber.from("0");
+          if (post.donation) {
+            for (let i = 0; i < post.donation.length; i++) {
+              let amount = ethers.BigNumber.from(post.donation[i].amount);
+              donation = donation.add(amount);
+            }
+          }
+          const ipfsData = await fetchData(post.authorAddress, post.content);
+          return {
+            ...post,
+            ...ipfsData,
+            donation: ethers.utils.formatUnits(donation, 18),
+          };
+        })
+      );
 
-  const { write: createRound } = useContractWrite({
-    ...contract,
-    functionName: "createRound",
-    args: [
-      "0x5CA1ED81795F5fE7174D8baA64c5d1B7bBB2b439",
-      "Test Round1",
-      1699509663,
-      1702101663,
-    ],
-  });
-  const { write: applyForRound } = useContractWrite({
-    ...contract,
-    functionName: "applyForRound",
-    args: [1, 1],
-  });
-  const { write: activateRound } = useContractWrite({
-    ...contract,
-    functionName: "activateRound",
-    args: [1],
-  });
-  const { write: deposit } = useContractWrite({
-    ...contract,
-    functionName: "deposit",
-    args: [1, 100 * 10 ** 18],
-  });
-  const { write: approve } = useContractWrite({
-    address: "0x5CA1ED81795F5fE7174D8baA64c5d1B7bBB2b439",
-    abi: require("../../abis/Token.json").abi,
-    functionName: "approve",
-    args: [process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any, 100000 * 10 ** 18],
-  });
+      setUserArticle(AllPost);
+    };
+    fetch();
+  }, [currentAddress]);
 
+  const handleMint = async () => {
+    if (!currentAddress || !smartAccount) return alert("Please connect wallet");
+    const contract = new ethers.Contract(
+      process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as string,
+      tokenABI,
+      signer
+    );
+    const amount = ethers.utils.parseEther("1000000");
+    try {
+      const mintTx = await contract.populateTransaction.mint(
+        currentAddress,
+        amount
+      );
+      await handleUserOp(mintTx, smartAccount);
+      setMinted(true);
+      await updateTokenbalance();
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  async function updateTokenbalance() {
+    const contract = new ethers.Contract(
+      process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as string,
+      tokenABI,
+      web3Provider
+    );
+    contract.balanceOf(currentAddress).then((balance: any) => {
+      let tokenbalance = ethers.utils.formatEther(balance);
+      const formatted = parseFloat(tokenbalance).toFixed(2);
+      setTokenBalance(formatted);
+    });
+  }
+  useEffect(() => {
+    if (!currentAddress) return;
+    updateTokenbalance();
+  }, [currentAddress]);
   return (
     <div className="p-12">
-      <Button onClick={() => createRound()} variant="default">
-        create round
-      </Button>
-      <Button onClick={() => activateRound()} variant="default">
-        activate round
-      </Button>
-      <Button onClick={() => deposit()} variant="default">
-        deposit
-      </Button>
-      <Button variant="default" onClick={() => applyForRound()}>
-        apply
-      </Button>
-      <h1 className="text-3xl font-bold">Dashboard</h1>
+      <div className="flex justify-between">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div className="flex items-center gap-2">
+          <p className="text-lg font-medium">{tokenBalance}USDC</p>
+          <Button onClick={handleMint} disabled={minted}>
+            Faucet
+          </Button>
+        </div>
+      </div>
       <div className="flex flex-row gap-4 my-4 ">
-        <SalesCard
-          title="Recieved Donation"
-          amount={totalDonation}
-          isLoading={isLoading}
-        />
-        <SubscriptionCard
-          title="Total Donors"
-          amount={totalDonor}
-          isLoading={isLoading}
-        />
-        <SubscriptionCard title="Total Comments" isLoading={isLoading} />
+        <SalesCard title="Recieved Donation" amount={totalDonation} />
+        <SubscriptionCard title="Total Donors" amount={totalDonor} />
+        <SubscriptionCard title="Total Comments" />
       </div>
       <div>
         <Tabs defaultValue="article">
@@ -185,14 +129,10 @@ export default function Dashboard() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
           <TabsContent value="article">
-            {isLoading ? (
-              <Skeleton className="flex flex-wrap gap-[26px] md:p-12 p-4 justify-center" />
-            ) : (
-              <ArticleBoard columns={columns} data={allPosts} />
-            )}
+            <ArticleBoard columns={columns} data={userArticle} />
           </TabsContent>
           <TabsContent value="analytics">
-            <ArticleBoard columns={analyticsColumn} data={allPosts} />
+            <ArticleBoard columns={analyticsColumn} data={userArticle} />
           </TabsContent>
         </Tabs>
       </div>
