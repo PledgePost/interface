@@ -94,7 +94,6 @@ export const columns: ColumnDef<ArticleColumn>[] = [
     id: "apply",
     cell: ({ row }) => {
       const article = row.original;
-
       return <ApplicationModal id={article.articleId} />;
     },
   },
@@ -120,6 +119,14 @@ export const analyticsColumn: ColumnDef<AnalyticsColumn>[] = [
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
+    },
+    cell: ({ row }) => {
+      const article = row.original;
+      const formattedDonation: any = parseFloat(
+        article.donation.toString()
+      ).toFixed(2);
+
+      return <div className="text-right font-medium">${formattedDonation}</div>;
     },
   },
   {

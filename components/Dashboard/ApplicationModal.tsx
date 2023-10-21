@@ -16,54 +16,49 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "../ui/button";
+import { ethers } from "ethers";
+const ABI = require("../../abis/PledgePost.json").abi;
+import React, { use, useState } from "react";
+import { useSafeAA } from "@/hooks/AccountAbstractionContext";
+import { getAllRoundData } from "@/lib/fetchData";
+import { Button } from "@/components/ui/button";
 
-import React, { useEffect } from "react";
-import { TokenConfig, TokenType } from "@/lib/Token/token";
-import { useWagmiContextProvider } from "@/hooks/WagmiContextProvider";
-
-export default function ApplicationModal({
-  handleClick,
-  setAmount,
-  setToken,
-  id,
-}: any) {
-  const {
-    applyForRound,
-    roundId,
-    setRoundId,
-    articleId,
-    setArticleId,
-    author,
-  } = useWagmiContextProvider();
-  useEffect(() => {
-    setArticleId(id);
-  }, [id, setArticleId]);
-
-  const handleChange = () => {
-    setArticleId(id);
+export default function ApplicationModal({ id }: any) {
+  const rounds = use(getAllRoundData());
+  const [roundId, setRoundId] = useState<number>(0);
+  const [selectedArticle, setSelectedArticle] = useState<any>(null);
+  const { smartAccount, web3Provider, signer, handleUserOp } = useSafeAA();
+  const handleArticle = () => {
+    setSelectedArticle(id);
   };
-
-  const handleApply = () => {
-    if (id !== articleId) return alert("Please select article");
-    if (!roundId) return alert("Please select round");
-
-    applyForRound();
+  const handleRound = (value: any) => {
+    setRoundId(value);
   };
-  const handleRound = (selectedRoundId: string) => {
-    const selectedRound = roundConfig.find(
-      (round) => round.roundId === parseInt(selectedRoundId)
+  // TODO: figureout why roundId starts at 0
+  const handleApply = async () => {
+    console.log("params", selectedArticle, roundId);
+    if (!selectedArticle || !roundId) return;
+    const contract = new ethers.Contract(
+      process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string,
+      ABI,
+      signer
     );
-    if (!selectedRound) return;
-    console.log("selectedRound :>> ", selectedRound);
-    setRoundId(selectedRound.roundId); // assuming setRoundId is a function that sets the state
+    try {
+      const applyTx = await contract.populateTransaction.applyForRound(
+        roundId,
+        selectedArticle
+      );
+      await handleUserOp(applyTx, smartAccount);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
     <>
       <Dialog>
         <DialogTrigger>
-          <Button onClick={() => handleChange()}>Apply</Button>
+          <Button onClick={() => handleArticle()}>Apply</Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
@@ -80,10 +75,9 @@ export default function ApplicationModal({
                 <SelectValue placeholder="Choose Grant" />
               </SelectTrigger>
               <SelectContent>
-                {roundConfig.map((round, index) => (
-                  <SelectItem key={index} value={String(round.roundId)}>
-                    {round.roundName}
-                    {round.startTime} - {round.endTime}
+                {rounds.map((round, index) => (
+                  <SelectItem key={index} value={round.id}>
+                    {round.name}: {round.startDate} - {round.endDate}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -103,18 +97,3 @@ export default function ApplicationModal({
     </>
   );
 }
-
-const roundConfig = [
-  {
-    roundId: 1,
-    roundName: "Round 1",
-    startTime: 1699509663,
-    endTime: 1702101663,
-  },
-  {
-    roundId: 2,
-    roundName: "Round 2",
-    startTime: 1699509663,
-    endTime: 1702101663,
-  },
-];
