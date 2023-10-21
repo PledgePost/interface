@@ -1,14 +1,12 @@
 "use client";
-import React, { use, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import ArticleBoard from "@/components/Dashboard/ArticleBoard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { columns, analyticsColumn } from "@/components/Dashboard/columns";
-import { getAllData, fetchData } from "@/lib/fetchData";
+import { fetchData } from "@/lib/fetchData";
 import { Button } from "@/components/ui/button";
 import { SalesCard, SubscriptionCard } from "@/components/Card";
-import { cache } from "react";
 import { ethers } from "ethers";
-import { toChecksumAddress } from "ethereumjs-util";
 import { useSafeAA } from "@/hooks/AccountAbstractionContext";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { GET_ARTICLE_BY_ID } from "../../lib/query";
@@ -50,9 +48,9 @@ export default function Dashboard() {
       const AllPost = await Promise.all(
         posts.map(async (post: any) => {
           let donation = ethers.BigNumber.from("0");
-          if (post.donation) {
-            for (let i = 0; i < post.donation.length; i++) {
-              let amount = ethers.BigNumber.from(post.donation[i].amount);
+          if (post.donations) {
+            for (let i = 0; i < post.donations.length; i++) {
+              let amount = ethers.BigNumber.from(post.donations[i].amount);
               donation = donation.add(amount);
             }
           }
