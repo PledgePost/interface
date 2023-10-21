@@ -59,7 +59,7 @@ export function SubscriptionCard({ title, amount, isLoading }: any) {
           <Skeleton className="w-[100px] h-[50px]" />
         ) : (
           <div className="text-2xl font-bold">{amount || 0}</div>
-        )}{" "}
+        )}
       </CardContent>
     </Card>
   );
