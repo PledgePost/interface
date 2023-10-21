@@ -90,7 +90,12 @@ contract PledgePost {
         uint256 articleId,
         uint256 roundId
     );
-    event Allocated(uint256 indexed roundId, address recipient, uint256 amount);
+    event Allocated(
+        uint256 indexed roundId,
+        address recipient,
+        uint256 articleId,
+        uint256 amount
+    );
 
     address public owner;
     IPledgePostERC721 public nft;
@@ -272,15 +277,15 @@ contract PledgePost {
             createdTimestamp: block.timestamp,
             isActive: false
         });
+        rounds.push(newRound);
         emit RoundCreated(
             msg.sender,
             pool,
-            roundLength,
+            roundLength + 1,
             _name,
             _startDate,
             _endDate
         );
-        rounds.push(newRound);
         roundLength++;
         return newRound;
     }
@@ -326,7 +331,7 @@ contract PledgePost {
                 article.author,
                 matching
             );
-            emit Allocated(_roundId, article.author, matching);
+            emit Allocated(_roundId, article.author, article.id, matching);
         }
     }
 
