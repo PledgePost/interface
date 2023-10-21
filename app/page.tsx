@@ -23,11 +23,11 @@ export default function Home() {
   const handleMint = async () => {
     const contract = new ethers.Contract(contractAddress, ABI, signer);
     console.log("contract: ", contract);
-
+    const amount = ethers.utils.parseEther("1000000");
     try {
       const mintTx = await contract.populateTransaction.mint(
         currentAddress,
-        10000
+        amount
       );
       await handleUserOp(mintTx, smartAccount);
     } catch (e) {

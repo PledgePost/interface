@@ -46,6 +46,7 @@ export const AccountAbstractionProvider = ({
   const [web3AuthModalPack, setWeb3AuthModalPack] = useState<any>(null);
   const [currentAddress, setCurrentAddress] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingTx, setLoadingTx] = useState<boolean>(false);
   const [smartAccount, setSmartAccount] =
     useState<BiconomySmartAccountV2 | null>(null);
 
@@ -204,6 +205,7 @@ export const AccountAbstractionProvider = ({
     if (!account || !tx) return;
     try {
       showDefaultToast("Creating transaction...");
+      setLoadingTx(true);
       console.log("Populated tx: ", tx);
       const tx1 = {
         to: tx?.to as string,
@@ -231,9 +233,12 @@ export const AccountAbstractionProvider = ({
       const userOpResponse = await account.sendUserOp(userOp);
       const { receipt } = await userOpResponse.wait(1);
       console.log("txHash", receipt?.transactionHash);
+      console.log(`${chain?.blockExplorerUrl}/tx/${receipt?.transactionHash}`);
       showSuccessToast(
         `${chain?.blockExplorerUrl}/tx/${receipt?.transactionHash}`
       );
+      setLoadingTx(false);
+      return receipt;
     } catch (error) {
       console.error(error);
       showErrorToast('Error: "Transaction failed"');
@@ -251,6 +256,7 @@ export const AccountAbstractionProvider = ({
         signer,
         chainId,
         loading,
+        loadingTx,
         setChainId,
         loginWeb3Auth,
         logoutWeb3Auth,

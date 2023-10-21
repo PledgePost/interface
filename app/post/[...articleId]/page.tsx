@@ -36,10 +36,10 @@ export default function ArticlePage({ params }: any) {
   const [content, setContent] = useState<any>(null);
   const [messages, setMessages] = useState<string>("");
   const [token, setToken] = useState<TokenType | undefined>(undefined); //erc20 token
-  const [isApproved, setIsApproved] = useState<boolean>(true);
+  const [isApproved, setIsApproved] = useState<boolean>();
   const [comments, setComments] = useState<Comment[] | undefined>(undefined);
-  const [amount, setAmount] = useState<any>();
-  const [allowance, setAllowance] = useState<number>();
+  const [amount, setAmount] = useState<any>(null);
+  const [allowance, setAllowance] = useState<any>(null);
   const [donated, setDonated] = useState<boolean>();
   const {
     currentAddress,
@@ -48,6 +48,7 @@ export default function ArticlePage({ params }: any) {
     web3Provider,
     signer,
     handleUserOp,
+    loadingTx,
   } = useSafeAA();
 
   let timestamp = new Date();
@@ -73,27 +74,22 @@ export default function ArticlePage({ params }: any) {
       showErrorToast("Error posting comment");
     }
   }
-  const donate = async () => {
+  const donate = async (inputAmount: any) => {
     if (!token?.address) return;
     const contract = new ethers.Contract(contractAddress, ABI, signer);
-    // const inputAmount: string = ethers.utils.parseUnits(amount, token.decimals);
-    const amount = ethers.utils.parseUnits("10000", 18);
-
     const tx = await contract.populateTransaction.donateToArticle(
       params.articleId[0],
       params.articleId[1],
       token.address,
-      1000
+      inputAmount
     );
     await handleUserOp(tx, smartAccount);
   };
-  const approve = async () => {
+  const approve = async (inputAmount: any) => {
     if (!token?.address) return;
     const tokenAddress = process.env
       .NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as string;
-
     const contract = new ethers.Contract(tokenAddress, TOKEN_ABI, signer);
-    const inputAmount = ethers.utils.parseUnits(amount, token.decimals);
     console.log("inputAmount :>> ", inputAmount);
 
     const tx = await contract.populateTransaction.approve(
@@ -103,6 +99,35 @@ export default function ArticlePage({ params }: any) {
     console.log("tx :>> ", tx);
     await handleUserOp(tx, smartAccount);
   };
+
+  // TODO: fix this
+  async function handleClick() {
+    if (!currentAddress || !amount || !token || !smartAccount || !signer)
+      return alert("Please connect wallet");
+    const inputAmount = ethers.utils.parseUnits(amount, token.decimals);
+    try {
+      console.log("allowance :>> ", allowance);
+      console.log("inputAmount :>> ", inputAmount);
+      if (!allowance) return;
+      if (allowance < inputAmount) {
+        console.log("allowance is less than inputAmount");
+        const approvalTx = await approve(inputAmount);
+        console.log("approvalTx :>> ", approvalTx);
+        await donate(inputAmount);
+      }
+      donate(inputAmount);
+    } catch (e) {
+      console.log("error: ", e);
+      showErrorToast("Error donating to article");
+    }
+  }
+  useEffect(() => {
+    if (!amount || !token?.decimals) return;
+    const inputAmount = ethers.utils.parseUnits(amount, token?.decimals);
+    const bool = allowance < inputAmount ? false : true;
+    console.log("bool :>> ", bool);
+    setIsApproved(bool);
+  }, [amount, allowance]);
   useEffect(() => {
     const donationHistory = async () => {
       try {
@@ -131,7 +156,7 @@ export default function ArticlePage({ params }: any) {
           web3Provider
         );
         console.log("tokenContract :>> ", tokenContract);
-        const allowance = await tokenContract.allowance(
+        const allowance: BigNumber = await tokenContract.allowance(
           currentAddress,
           contractAddress
         );
@@ -153,27 +178,6 @@ export default function ArticlePage({ params }: any) {
     token?.decimals,
     web3Provider,
   ]);
-
-  // useEffect(() => {
-  //   if (!amount || !allowance || !token) return;
-  //   console.log("typeof amount :>> ", typeof amount, amount);
-  //   console.log("typeof allowance :>> ", typeof allowance, allowance);
-
-  //   const isApproved = amount <= allowance ? true : false;
-  //   console.log("boolean :>> ", isApproved);
-  //   setIsApproved(isApproved);
-  // }, [amount]);
-  async function handleClick() {
-    // if (!currentAddress || amount === 0 || token === undefined) return;
-    try {
-      donate();
-      // approve();
-    } catch (e) {
-      console.log("error: ", e);
-      showErrorToast("Error donating to article");
-    }
-  }
-
   useEffect(() => {
     async function fetchContent() {
       const result = await fetchData(params.articleId[0], params.articleId[2]);
@@ -237,6 +241,7 @@ export default function ArticlePage({ params }: any) {
                 handleClick={handleClick}
                 isDonated={donated}
                 isApproved={isApproved}
+                loadingTx={loadingTx}
               />
             )}
           </div>

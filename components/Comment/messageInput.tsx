@@ -9,11 +9,14 @@ export default function MessageInput({
   isDonated,
   handleClick,
   setToken,
+  isApproved,
   setAmount,
+  loadingTx,
 }: any) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessages(e.target.value);
   };
+
   return (
     <div className="flex flex-col gap-2">
       <Input
@@ -26,6 +29,8 @@ export default function MessageInput({
           handleClick={handleClick}
           setToken={setToken}
           setAmount={setAmount}
+          loadingTx={loadingTx}
+					isApproved={isApproved}
         />
       ) : (
         <Button onClick={() => handleSend()}>Submit Comment</Button>

@@ -90,11 +90,11 @@ export default function Explore() {
           {allPosts.map((post: any, index: number) => (
             <Link
               key={index}
-              href={`/post/${post.author}/${post.articleId}/${post.content}`}
+              href={`/post/${post.author.id}/${post.articleId}/${post.content}`}
             >
               <CardLists
                 Title={post.title}
-                author={post?.author}
+                author={post?.author.id}
                 Description={post.value}
                 ImageUrl="https://picsum.photos/200/300"
                 donation={post.donation}
