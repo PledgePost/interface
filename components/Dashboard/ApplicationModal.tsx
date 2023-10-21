@@ -23,7 +23,7 @@ import { useSafeAA } from "@/hooks/AccountAbstractionContext";
 import { getAllRoundData } from "@/lib/fetchData";
 import { Button } from "@/components/ui/button";
 
-export default function ApplicationModal({ id }: any) {
+export default function ApplicationModal({ id, round }: any) {
   const rounds = use(getAllRoundData());
   const [roundId, setRoundId] = useState<number>(0);
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
@@ -57,9 +57,13 @@ export default function ApplicationModal({ id }: any) {
   return (
     <>
       <Dialog>
-        <DialogTrigger>
-          <Button onClick={() => handleArticle()}>Apply</Button>
-        </DialogTrigger>
+        {!round ? (
+          <DialogTrigger>
+            <Button onClick={() => handleArticle()}>Apply</Button>
+          </DialogTrigger>
+        ) : (
+          <Button disabled>Appied</Button>
+        )}
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex justify-center items-center">

@@ -21,6 +21,7 @@ export const GET_ARTICLE = gql`
       author {
         id
       }
+      authorAddress
       content
       donations {
         id
@@ -33,7 +34,27 @@ export const GET_ARTICLE = gql`
     }
   }
 `;
-
+export const GET_ARTICLE_BY_ID = gql`
+  query GetArticleByAuthor($authorAddress: Bytes!) {
+    articles(where: { authorAddress: $authorAddress }) {
+      id
+      articleId
+      author {
+        id
+      }
+      authorAddress
+      content
+      donations {
+        id
+        amount
+      }
+      associatedRound {
+        id
+        name
+      }
+    }
+  }
+`;
 export const GET_DONATIONS_BY_USER = gql`
   query GetDonationsByUser($userId: ID!) {
     user(id: $userId) {

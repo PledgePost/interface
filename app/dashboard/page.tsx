@@ -2,29 +2,74 @@
 import React, { use, useState, useEffect } from "react";
 import ArticleBoard from "@/components/Dashboard/ArticleBoard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  ArticleColumn,
-  AnalyticsColumn,
-  columns,
-  analyticsColumn,
-} from "@/components/Dashboard/columns";
-import { getAllData } from "@/lib/fetchData";
+import { columns, analyticsColumn } from "@/components/Dashboard/columns";
+import { getAllData, fetchData } from "@/lib/fetchData";
 import { Button } from "@/components/ui/button";
 import { SalesCard, SubscriptionCard } from "@/components/Card";
+import { cache } from "react";
 import { ethers } from "ethers";
+import { toChecksumAddress } from "ethereumjs-util";
 import { useSafeAA } from "@/hooks/AccountAbstractionContext";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { GET_ARTICLE_BY_ID } from "../../lib/query";
 
-const ABI = require("../../abis/PledgePost.json").abi;
+const client = new ApolloClient({
+  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_v3/version/latest",
+  cache: new InMemoryCache(),
+});
 const tokenABI = require("../../abis/Token.json").abi;
 
 export default function Dashboard() {
-  const posts: any = use(getAllData());
   const [totalDonation, setTotalDonation] = useState<number>(0);
   const [totalDonor, setTotalDonor] = useState<number>(0);
   const [tokenBalance, setTokenBalance] = useState<any>(0);
+  const [minted, setMinted] = useState(false);
+  const [userArticle, setUserArticle] = useState<any>([]);
   const { currentAddress, smartAccount, web3Provider, signer, handleUserOp } =
     useSafeAA();
-  const [minted, setMinted] = useState(false);
+  async function getArticleByAddress(address: string) {
+    const response = await client.query({
+      query: GET_ARTICLE_BY_ID,
+      variables: {
+        authorAddress: address,
+      },
+      fetchPolicy: "no-cache",
+    });
+    if (!response || !response.data) {
+      throw new Error("No data returned from the query");
+    }
+    return response.data.articles;
+  }
+  useEffect(() => {
+    console.log("fetching userArticle");
+    if (!currentAddress) return;
+    const fetch = async () => {
+      const lowercaseAddress = currentAddress.toLowerCase();
+      const posts: any = await getArticleByAddress(lowercaseAddress);
+      console.log("UserPosts", posts);
+      const AllPost = await Promise.all(
+        posts.map(async (post: any) => {
+          let donation = ethers.BigNumber.from("0");
+          if (post.donation) {
+            for (let i = 0; i < post.donation.length; i++) {
+              let amount = ethers.BigNumber.from(post.donation[i].amount);
+              donation = donation.add(amount);
+            }
+          }
+          const ipfsData = await fetchData(post.authorAddress, post.content);
+          return {
+            ...post,
+            ...ipfsData,
+            donation: ethers.utils.formatUnits(donation, 18),
+          };
+        })
+      );
+
+      setUserArticle(AllPost);
+    };
+    fetch();
+  }, [currentAddress]);
+
   const handleMint = async () => {
     if (!currentAddress || !smartAccount) return alert("Please connect wallet");
     const contract = new ethers.Contract(
@@ -32,7 +77,6 @@ export default function Dashboard() {
       tokenABI,
       signer
     );
-    console.log("contract: ", contract);
     const amount = ethers.utils.parseEther("1000000");
     try {
       const mintTx = await contract.populateTransaction.mint(
@@ -40,6 +84,7 @@ export default function Dashboard() {
         amount
       );
       await handleUserOp(mintTx, smartAccount);
+      setMinted(true);
       await updateTokenbalance();
     } catch (e) {
       console.log(e);
@@ -84,10 +129,10 @@ export default function Dashboard() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
           <TabsContent value="article">
-            <ArticleBoard columns={columns} data={posts} />
+            <ArticleBoard columns={columns} data={userArticle} />
           </TabsContent>
           <TabsContent value="analytics">
-            <ArticleBoard columns={analyticsColumn} data={posts} />
+            <ArticleBoard columns={analyticsColumn} data={userArticle} />
           </TabsContent>
         </Tabs>
       </div>

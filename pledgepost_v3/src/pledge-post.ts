@@ -91,6 +91,7 @@ export function handleArticlePosted(event: ArticlePostedEvent): void {
     );
     article.articleId = event.params.articleId;
     article.author = event.params.author;
+    article.authorAddress = event.params.author;
     article.content = event.params.content;
     article.save();
   }
@@ -130,6 +131,7 @@ export function handleRoundApplied(event: RoundAppliedEvent): void {
     );
     article.articleId = event.params.articleId;
     article.author = event.params.author;
+		article.authorAddress = event.params.author;
     article.associatedRound = event.params.roundId.toString();
     article.save();
   }

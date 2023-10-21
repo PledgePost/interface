@@ -9,6 +9,7 @@ type Article @entity {
   id: ID!
   articleId: BigInt!
   author: User!
+  authorAddress: Bytes!
   content: String!
   donations: [Donation!]! @derivedFrom(field: "article")
   allocation: Allocated

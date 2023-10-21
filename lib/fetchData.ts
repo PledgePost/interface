@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { ethers } from "ethers";
 import { toChecksumAddress } from "ethereumjs-util";
-import { GET_ALL_ROUNDS, GET_ARTICLE } from "./query";
+import { GET_ALL_ROUNDS, GET_ARTICLE, GET_ARTICLE_BY_ID } from "./query";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 const client = new ApolloClient({
@@ -98,3 +98,40 @@ export const getAllRoundData = cache(async () => {
   console.log("AllRound :>> ", AllRound);
   return AllRound;
 });
+/*
+export const getArticleByAddress = cache(async (address: string) => {
+  const checksumAddress = toChecksumAddress(address);
+  const response = await client.query({
+    query: GET_ARTICLE_BY_ID,
+    variables: {
+      authorAddress: checksumAddress,
+    },
+    fetchPolicy: "no-cache",
+  });
+  if (!response || !response.data) {
+    throw new Error("No data returned from the query");
+  }
+
+  const posts = response.data.articles;
+
+  const AllPost = await Promise.all(
+    posts.map(async (post: any) => {
+      let donation = ethers.BigNumber.from("0");
+      if (post.donations) {
+        for (let i = 0; i < post.donations.length; i++) {
+          let amount = ethers.BigNumber.from(post.donations[i].amount);
+          donation = donation.add(amount);
+        }
+      }
+      const ipfsData = await fetchData(post.author.id, post.content);
+      return {
+        ...post,
+        ...ipfsData,
+        donation: ethers.utils.formatUnits(donation, 18), //TODO: change depending on token
+      };
+    })
+  );
+  console.log("AllPost :>> ", AllPost);
+  return AllPost;
+});
+ */

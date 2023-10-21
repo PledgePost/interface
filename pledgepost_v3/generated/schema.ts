@@ -142,6 +142,19 @@ export class Article extends Entity {
     this.set("author", Value.fromBytes(value));
   }
 
+  get authorAddress(): Bytes {
+    let value = this.get("authorAddress");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set authorAddress(value: Bytes) {
+    this.set("authorAddress", Value.fromBytes(value));
+  }
+
   get content(): string {
     let value = this.get("content");
     if (!value || value.kind == ValueKind.NULL) {
