@@ -2,6 +2,7 @@ type User @entity {
   id: Bytes!
   donations: [Donation!]! @derivedFrom(field: "donor")
   articles: [Article!]! @derivedFrom(field: "author")
+  allocation: [Allocated!]! @derivedFrom(field: "recipient")
 }
 
 type Article @entity {
@@ -10,6 +11,7 @@ type Article @entity {
   author: User!
   content: String!
   donations: [Donation!]! @derivedFrom(field: "article")
+  allocation: Allocated
   associatedRound: Round
 }
 type Donation @entity {
@@ -32,8 +34,8 @@ type Round @entity {
 type Allocated @entity(immutable: true) {
   id: Bytes!
   roundId: BigInt! # uint256
-  recipient: Bytes! # address
-  articleId: BigInt! # uint256
+  recipient: User!
+  articleId: Article!
   amount: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!

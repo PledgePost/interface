@@ -65,6 +65,16 @@ export class User extends Entity {
   get articles(): ArticleLoader {
     return new ArticleLoader("User", this.get("id")!.toString(), "articles");
   }
+
+  get allocation(): AllocatedLoader {
+    return new AllocatedLoader(
+      "User",
+      this.get("id")!
+        .toBytes()
+        .toHexString(),
+      "allocation"
+    );
+  }
 }
 
 export class Article extends Entity {
@@ -153,6 +163,23 @@ export class Article extends Entity {
         .toHexString(),
       "donations"
     );
+  }
+
+  get allocation(): Bytes | null {
+    let value = this.get("allocation");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set allocation(value: Bytes | null) {
+    if (!value) {
+      this.unset("allocation");
+    } else {
+      this.set("allocation", Value.fromBytes(<Bytes>value));
+    }
   }
 
   get associatedRound(): string | null {
@@ -432,17 +459,17 @@ export class Allocated extends Entity {
     this.set("recipient", Value.fromBytes(value));
   }
 
-  get articleId(): BigInt {
+  get articleId(): string {
     let value = this.get("articleId");
     if (!value || value.kind == ValueKind.NULL) {
       throw new Error("Cannot return null for a required field.");
     } else {
-      return value.toBigInt();
+      return value.toString();
     }
   }
 
-  set articleId(value: BigInt) {
-    this.set("articleId", Value.fromBigInt(value));
+  set articleId(value: string) {
+    this.set("articleId", Value.fromString(value));
   }
 
   get amount(): BigInt {
@@ -1071,5 +1098,23 @@ export class ArticleLoader extends Entity {
   load(): Article[] {
     let value = store.loadRelated(this._entity, this._id, this._field);
     return changetype<Article[]>(value);
+  }
+}
+
+export class AllocatedLoader extends Entity {
+  _entity: string;
+  _field: string;
+  _id: string;
+
+  constructor(entity: string, id: string, field: string) {
+    super();
+    this._entity = entity;
+    this._id = id;
+    this._field = field;
+  }
+
+  load(): Allocated[] {
+    let value = store.loadRelated(this._entity, this._id, this._field);
+    return changetype<Allocated[]>(value);
   }
 }

@@ -23,7 +23,10 @@ export function handleAllocated(event: AllocatedEvent): void {
   );
   entity.roundId = event.params.roundId;
   entity.recipient = event.params.recipient;
-  entity.articleId = event.params.articleId;
+  entity.articleId =
+    event.params.articleId.toString() +
+    "-" +
+    event.params.recipient.toHexString();
   entity.amount = event.params.amount;
 
   entity.blockNumber = event.block.number;
