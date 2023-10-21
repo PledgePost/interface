@@ -1,0 +1,85 @@
+type User @entity {
+  id: Bytes!
+  donations: [Donation!]! @derivedFrom(field: "donor")
+  articles: [Article!]! @derivedFrom(field: "author")
+}
+
+type Article @entity {
+  id: ID!
+  articleId: BigInt!
+  author: User!
+  content: String!
+  donations: [Donation!]! @derivedFrom(field: "article")
+  associatedRound: Round
+}
+type Donation @entity {
+  id: Bytes!
+  article: Article!
+  donor: User!
+  amount: BigInt!
+}
+
+type Round @entity {
+  id: ID!
+  owner: Bytes! # address
+  ipoolAddress: Bytes! # address
+  name: String! # string
+  startDate: BigInt! # uint256
+  endDate: BigInt! # uint256
+  articles: [Article!]! @derivedFrom(field: "associatedRound")
+}
+
+type Allocated @entity(immutable: true) {
+  id: Bytes!
+  roundId: BigInt! # uint256
+  recipient: Bytes! # address
+  articleId: BigInt! # uint256
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ArticleDonated @entity(immutable: true) {
+  id: Bytes!
+  author: Bytes! # address
+  from: Bytes! # address
+  articleId: BigInt! # uint256
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ArticlePosted @entity(immutable: true) {
+  id: Bytes!
+  author: Bytes! # address
+  content: String! # string
+  articleId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoundApplied @entity(immutable: true) {
+  id: Bytes!
+  author: Bytes! # address
+  articleId: BigInt! # uint256
+  roundId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoundCreated @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  ipoolAddress: Bytes! # address
+  roundId: BigInt! # uint256
+  name: String! # string
+  startDate: BigInt! # uint256
+  endDate: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

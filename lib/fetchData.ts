@@ -5,7 +5,7 @@ import { GET_ALL_ROUNDS, GET_ARTICLE } from "./query";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 const client = new ApolloClient({
-  uri: "https://api.studio.thegraph.com/query/52298/plegepost_v2/version/latest",
+  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_v3/version/latest",
   cache: new InMemoryCache(),
 });
 
