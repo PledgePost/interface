@@ -9,12 +9,18 @@ import { useSafeAA } from "@/hooks/AccountAbstractionContext";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import chains from "@/lib/Chains/chains";
 
 const Header = () => {
@@ -43,19 +49,22 @@ const Header = () => {
       <nav className=" border-gray-200 px-4 lg:px-6 py-5">
         <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
           <Link href="/" className="flex items-center">
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              width={100}
-              height={24}
-              priority
-            />
+            <Image src="/ColoredLogo.png" alt="Logo" width={100} height={24} />
           </Link>
           <div
             className="hidden justify-between items-center w-full lg:flex lg:w-auto "
             id="mobile-menu-2"
           >
             <ul className="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0">
+              <li>
+                <Link
+                  href="/"
+                  className="block py-2 pr-4 pl-3 text-gray-700 bg-primary-700 lg:bg-transparent lg:text-primary-700 lg:p-0 "
+                  aria-current="page"
+                >
+                  Home
+                </Link>
+              </li>
               <li>
                 <Link
                   href="/explore"
@@ -73,27 +82,12 @@ const Header = () => {
                   Dashboard
                 </Link>
               </li>
-              <li>
-                <a
-                  href="https://github.com/tnkshuuhei/EthGlonalOnline2023"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0"
-                >
-                  Github
-                </a>
-              </li>
             </ul>
           </div>
           <div className="flex items-center lg:order-2 gap-4">
             <Button asChild variant="secondary">
               <Link href="/post">New Post</Link>
             </Button>
-            {/* <ConnectButton
-              chainStatus="icon"
-              showBalance={false}
-              accountStatus={{ smallScreen: "address", largeScreen: "full" }}
-            /> */}
             <Select onValueChange={(value) => handleChain(value)}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder={chainConfig.label} />
@@ -111,9 +105,28 @@ const Header = () => {
               </SelectContent>
             </Select>
             {address ? (
-              <Button variant="default" onClick={logoutWeb3Auth}>
-                {sliceAddress}
-              </Button>
+              // <Button variant="default" onClick={logoutWeb3Auth}>
+              //   {sliceAddress}
+              // </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="default">{sliceAddress}</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      onSelect={() =>
+                        navigator.clipboard.writeText(currentAddress)
+                      }
+                    >
+                      Copy Address
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={logoutWeb3Auth}>
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <>
                 {loading ? (
