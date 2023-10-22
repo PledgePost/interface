@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import vercel from "../public/vercel.svg";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import sliceAddress from "@/lib/sliceAddress";
 import { Badge } from "@/components/ui/badge";
@@ -16,11 +16,14 @@ const CardLists = ({
   const addr = sliceAddress(author);
   return (
     <div className="w-[400px] rounded-[15px] bg-white cursor-pointer shadow-lg">
-      <Image
-        src={vercel}
-        alt="fund"
-        className="w-full h-[158px] object-cover rounded-[15px]"
-      />
+      <AspectRatio ratio={18 / 9} className="bg-muted">
+        <Image
+          src="https://picsum.photos/500/300"
+          alt="Photo by Drew Beamer"
+          fill
+          className="rounded-md object-cover"
+        />
+      </AspectRatio>
       {!round ||
         (round !== "0" && (
           <div className="px-4 mt-2">
