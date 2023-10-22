@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 
 export default function ApplicationModal({ id, round }: any) {
   const rounds = use(getAllRoundData());
+  console.log("rounds", rounds);
   const [roundId, setRoundId] = useState<number>(0);
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
   const { smartAccount, web3Provider, signer, handleUserOp } = useSafeAA();
