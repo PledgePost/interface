@@ -49,17 +49,8 @@ Here is a list of what we didn't make in the past two weeks for the future. We w
 
 ### PledgePost.sol
 
-https://goerli.etherscan.io/address/0xedae7875809dc9aCd076b1e7c5A2109048c54a70
+0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f
 
-https://sepolia.etherscan.io/address/0xedae7875809dc9aCd076b1e7c5A2109048c54a70
-
-https://goerli-optimistic.etherscan.io/address/0xedae7875809dc9aCd076b1e7c5A2109048c54a70
-
-https://mumbai.polygonscan.com/address/0xedae7875809dc9aCd076b1e7c5A2109048c54a70
-
-https://testnet-zkevm.polygonscan.com/address/0xedae7875809dc9aCd076b1e7c5A2109048c54a70
-
-https://sepolia.scrollscan.com/address/0xedae7875809dc9aCd076b1e7c5A2109048c54a70
 
 ### TestToken
 
