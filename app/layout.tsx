@@ -23,11 +23,9 @@ export default function RootLayout({
       <body>
         <AccountAbstractionProvider>
           <RainbowProviders>
-            <WagmiContextProvider>
-              <ToastContainer newestOnTop />
-              <Header />
-              {children}
-            </WagmiContextProvider>
+            <ToastContainer newestOnTop />
+            <Header />
+            {children}
           </RainbowProviders>
         </AccountAbstractionProvider>
       </body>
