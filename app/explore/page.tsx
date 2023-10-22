@@ -27,7 +27,7 @@ export default function Explore() {
           </div>
         </div>
       )}
-      <div className="flex flex-wrap gap-[26px] md:p-12 p-4 ">
+      <div className="flex flex-wrap gap-[26px] md:p-12 p-4 justify-center">
         {posts.map((post: any, index: number) => (
           <Link
             key={index}
