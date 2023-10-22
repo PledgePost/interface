@@ -64,8 +64,18 @@ async function setup() {
   await tx2.wait();
   console.log(`Round 1 activated`);
 }
+
+async function allocate() {
+  let contractAddress = "0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f";
+  const contract = await ethers.getContractAt("PledgePost", contractAddress);
+  const tx1 = await contract.Allocate(1);
+  const txreceipt = await tx1.wait();
+  console.log(`Round 1 Allocated`, txreceipt);
+}
+
 // main()
-setup()
+// setup()
+allocate()
   // getNonce()
   .then(() => process.exit(0))
   .catch((error) => {

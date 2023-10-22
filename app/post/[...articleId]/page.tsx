@@ -4,7 +4,6 @@ import Messages from "@/components/Comment/messages";
 import MessageInput from "@/components/Comment/messageInput";
 import { readComments, writeComment, Comment } from "@/hooks/useTableland";
 import { Button } from "@/components/ui/button";
-
 import { showErrorToast } from "@/hooks/useNotification";
 import { toChecksumAddress } from "ethereumjs-util";
 import { TokenType } from "@/lib/Token/token";
@@ -14,6 +13,17 @@ import { Pre } from "@/components/RichEditor";
 import { useSafeAA } from "@/hooks/AccountAbstractionContext";
 import { BigNumber, ethers } from "ethers";
 import TABLELAND_ABI from "../../../abis/Tableland.json";
+import { SalesCard, SubscriptionCard } from "@/components/Card";
+import {
+  GET_ARTICLES_BY_AUTHOR_ADDRESS,
+  GET_ARTICLES_BY_ID_AND_ADDRESS,
+} from "@/lib/query";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+const client = new ApolloClient({
+  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_mumbai/version/latest",
+  cache: new InMemoryCache(),
+});
+
 const ABI = require("../../../abis/PledgePost.json").abi;
 const TOKEN_ABI = require("../../../abis/Token.json").abi;
 // const TABLELAND_ABI = require("../../../abis/Tableland.json");
@@ -38,6 +48,10 @@ export default function ArticlePage({ params }: any) {
   const [amount, setAmount] = useState<any>(null);
   const [allowance, setAllowance] = useState<any>(null);
   const [donated, setDonated] = useState<boolean>();
+  const [donation, setDonation] = useState<any>(null);
+  const [donors, setDonors] = useState<any>(null);
+  const [estimatedAllocation, setEstimatedAllocation] = useState<any>(null);
+
   const {
     currentAddress,
     smartAccount,
@@ -140,6 +154,30 @@ export default function ArticlePage({ params }: any) {
       showErrorToast("Error donating to article");
     }
   }
+  async function getArticleByIdandAddress(address: string, id: string) {
+    const response = await client.query({
+      query: GET_ARTICLES_BY_ID_AND_ADDRESS,
+      variables: {
+        authorAddress: address,
+        articleId: id,
+      },
+      fetchPolicy: "no-cache",
+    });
+    if (!response || !response.data || !response.data.articles) return;
+    return response.data.articles[0];
+  }
+  useEffect(() => {
+    const fetchArticle = async () => {
+      const lowercaseAddress = params.articleId[0].toLowerCase();
+      const article = await getArticleByIdandAddress(
+        lowercaseAddress,
+        params.articleId[1]
+      );
+      if (!article) return;
+      console.log("article :>> ", article);
+    };
+    fetchArticle();
+  }, [params.articleId]);
   useEffect(() => {
     if (!amount || !token?.decimals) return;
     const inputAmount = ethers.utils.parseUnits(amount, token?.decimals);
@@ -155,7 +193,6 @@ export default function ArticlePage({ params }: any) {
           ABI,
           web3Provider
         );
-
         const donated = await contract.checkOwner(
           currentAddress,
           params.articleId[0],
@@ -230,6 +267,10 @@ export default function ArticlePage({ params }: any) {
       <h1 className="flex justify-center text-3xl font-bold mb-5">
         {content?.title}
       </h1>
+      <div className="flex flex-row gap-4 my-4 justify-center">
+        <SalesCard title="Recieved Donation" amount={donation || 0} />
+        <SalesCard title="Total Donors" amount={estimatedAllocation || 0} />
+      </div>
       <div className="flex flex-row gap-4">
         <div className="w-3/4 bg-white p-5 rounded shadow">
           <ReactMarkdown

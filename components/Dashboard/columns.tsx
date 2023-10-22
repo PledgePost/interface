@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import ApplicationModal from "./ApplicationModal";
+import { ethers } from "ethers";
 export type ArticleColumn = {
   articleId: string;
   author: {
@@ -33,6 +34,7 @@ export type AnalyticsColumn = {
   donation: number;
   matchingAmount: number;
   comments: number;
+  allocation: any;
 };
 
 export const columns: ColumnDef<ArticleColumn>[] = [
@@ -166,6 +168,21 @@ export const analyticsColumn: ColumnDef<AnalyticsColumn>[] = [
             Matching Amount
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => {
+      const article = row.original;
+      const allocated = ethers.utils.formatUnits(
+        article.allocation[0]?.amount,
+        18
+      );
+      const formattedMatchingAmount: any = parseFloat(
+        allocated.toString()
+      ).toFixed(2);
+      return (
+        <div className="text-center font-medium">
+          ${formattedMatchingAmount}
         </div>
       );
     },

@@ -88,7 +88,6 @@ export default function Dashboard() {
               recievedDonation = recievedDonation.add(amount);
             }
           }
-
           if (user.allocation) {
             for (let i = 0; i < user.allocation.length; i++) {
               let amount = ethers.BigNumber.from(user.allocation[i].amount);

@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "./ui/skeleton";
 export function SalesCard({ title, amount, isLoading }: any) {
-  console.log(amount);
+  const formatted = parseFloat(amount).toFixed(2);
   return (
     <Card className="w-[250px]">
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
@@ -26,7 +26,7 @@ export function SalesCard({ title, amount, isLoading }: any) {
         {isLoading ? (
           <Skeleton className="w-[100px] h-[50px]" />
         ) : (
-          <div className="text-2xl font-bold">${amount || 0}</div>
+          <div className="text-2xl font-bold">${formatted || 0}</div>
         )}
       </CardContent>
     </Card>
