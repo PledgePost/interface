@@ -4,12 +4,8 @@ import Messages from "@/components/Comment/messages";
 import MessageInput from "@/components/Comment/messageInput";
 import { readComments, writeComment, Comment } from "@/hooks/useTableland";
 import { Button } from "@/components/ui/button";
-import { Registry } from "@tableland/sdk";
-import {
-  showDefaultToast,
-  showErrorToast,
-  showSuccessToast,
-} from "@/hooks/useNotification";
+
+import { showErrorToast } from "@/hooks/useNotification";
 import { toChecksumAddress } from "ethereumjs-util";
 import { TokenType } from "@/lib/Token/token";
 import ReactMarkdown from "react-markdown";
@@ -123,17 +119,22 @@ export default function ArticlePage({ params }: any) {
     if (!currentAddress || !amount || !token || !smartAccount || !signer)
       return alert("Please connect wallet");
     const inputAmount = ethers.utils.parseUnits(amount, token.decimals);
+    const noLimitAllowance = ethers.utils.parseUnits(
+      "100000000000000000000",
+      18
+    );
     try {
+      if (!allowance) return;
       console.log("allowance :>> ", allowance);
       console.log("inputAmount :>> ", inputAmount);
-      if (!allowance) return;
       if (allowance < inputAmount) {
         console.log("allowance is less than inputAmount");
-        const approvalTx = await approve(inputAmount);
+        const approvalTx = await approve(noLimitAllowance);
         console.log("approvalTx :>> ", approvalTx);
         await donate(inputAmount);
+      } else {
+        donate(inputAmount);
       }
-      donate(inputAmount);
     } catch (e) {
       console.log("error: ", e);
       showErrorToast("Error donating to article");
@@ -143,9 +144,9 @@ export default function ArticlePage({ params }: any) {
     if (!amount || !token?.decimals) return;
     const inputAmount = ethers.utils.parseUnits(amount, token?.decimals);
     const bool = allowance < inputAmount ? false : true;
-    console.log("bool :>> ", bool);
+
     setIsApproved(bool);
-  }, [amount, allowance]);
+  }, [amount, allowance, token?.decimals]);
   useEffect(() => {
     const donationHistory = async () => {
       try {
