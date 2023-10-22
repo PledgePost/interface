@@ -97,19 +97,16 @@ export default function Dashboard() {
           }
           return {
             ...user,
-            tatalRecievedDonation: ethers.utils.formatUnits(
-              recievedDonation,
-              18
-            ),
-            totalDonor: totalDonor,
-            totalRecievedAllocation: ethers.utils.formatUnits(
-              recievedAllocation,
-              18
-            ),
+            totalRecievedDonation:
+              ethers.utils.formatUnits(recievedDonation, 18) || 0,
+            totalDonor: totalDonor || 0,
+            totalRecievedAllocation:
+              ethers.utils.formatUnits(recievedAllocation, 18) || 0,
           };
         })
       );
       console.log("UserInfo", UserInfo[0]);
+      console.log("AllPost", AllPost);
       setUserArticle(AllPost);
       setUser(UserInfo[0]);
     };
@@ -166,13 +163,13 @@ export default function Dashboard() {
       <div className="flex flex-row gap-4 my-4 ">
         <SalesCard
           title="Recieved Donation"
-          amount={user.tatalRecievedDonation}
+          amount={user?.totalRecievedDonation || 0}
         />
         <SalesCard
           title="Recieved Total Allocation"
-          amount={user.totalRecievedAllocation}
+          amount={user?.totalRecievedAllocation || 0}
         />
-        <SubscriptionCard title="Total Donors" amount={user.totalDonor} />
+        <SubscriptionCard title="Total Donors" amount={user?.totalDonor || 0} />
         <SubscriptionCard title="Total Comments" />
       </div>
       <div>

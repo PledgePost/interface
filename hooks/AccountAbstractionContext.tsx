@@ -128,7 +128,7 @@ export const AccountAbstractionProvider = ({
       if (!chain || !chain.id || !chain.hex) return;
       if (currentAddress) logoutWeb3Auth();
       setLoading(true);
-      const { safe, eoa } = await web3AuthModalPack.signIn();
+      const { eoa } = await web3AuthModalPack.signIn();
       const provider = new ethers.providers.Web3Provider(
         web3AuthModalPack.getProvider()
       );
@@ -160,7 +160,6 @@ export const AccountAbstractionProvider = ({
       setSmartAccount(biconomySmartAccount);
       setChainId(chain?.hex);
       setAddress(eoa);
-      setSafes(safe || []);
       setWeb3Provider(provider);
       setSigner(signer);
       setLoading(false);
@@ -183,7 +182,6 @@ export const AccountAbstractionProvider = ({
       setAddress("");
       setCurrentAddress("");
       setSmartAccount(null);
-      setSafes([]);
       setChainId(chain?.hex);
       setWeb3Provider(undefined);
       setSigner(undefined);
