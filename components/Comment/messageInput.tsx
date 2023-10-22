@@ -23,6 +23,7 @@ export default function MessageInput({
         placeholder="Write a comment..."
         value={messages}
         onChange={(e) => handleChange(e)}
+        disabled={!isDonated}
       />
       {!isDonated ? (
         <DonationModal
@@ -30,7 +31,7 @@ export default function MessageInput({
           setToken={setToken}
           setAmount={setAmount}
           loadingTx={loadingTx}
-					isApproved={isApproved}
+          isApproved={isApproved}
         />
       ) : (
         <Button onClick={() => handleSend()}>Submit Comment</Button>

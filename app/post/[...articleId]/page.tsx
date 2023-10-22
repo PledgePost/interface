@@ -4,7 +4,7 @@ import Messages from "@/components/Comment/messages";
 import MessageInput from "@/components/Comment/messageInput";
 import { readComments, writeComment, Comment } from "@/hooks/useTableland";
 import { Button } from "@/components/ui/button";
-
+import { Registry } from "@tableland/sdk";
 import {
   showDefaultToast,
   showErrorToast,
@@ -17,9 +17,10 @@ import remarkGfm from "remark-gfm";
 import { Pre } from "@/components/RichEditor";
 import { useSafeAA } from "@/hooks/AccountAbstractionContext";
 import { BigNumber, ethers } from "ethers";
-
+import TABLELAND_ABI from "../../../abis/Tableland.json";
 const ABI = require("../../../abis/PledgePost.json").abi;
 const TOKEN_ABI = require("../../../abis/Token.json").abi;
+// const TABLELAND_ABI = require("../../../abis/Tableland.json");
 const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string;
 
 async function fetchData(address: any, cid: string) {
@@ -54,20 +55,44 @@ export default function ArticlePage({ params }: any) {
   let timestamp = new Date();
   let unix = timestamp.getTime();
   let UNIXtimestamp = Math.floor(unix / 1000);
+  const tableName = "article_comment_v3_0_1_420_19";
+  const tableId = 19;
 
   async function handleSend() {
-    if (!currentAddress || messages === "") return;
+    if (!currentAddress || messages === "" || !signer) return;
     try {
-      showDefaultToast("Sending Transaction...");
-      const result = await writeComment({
-        author: params.articleId[0],
-        article_id: params.articleId[1],
-        message: messages,
-        user: smartAccount,
-        timestamp: UNIXtimestamp,
-      });
-      console.log("result :>> ", result);
-      showSuccessToast("Comment successfully posted");
+      // TODO: fix this
+      const contract = new ethers.Contract(
+        "0xC72E8a7Be04f2469f8C2dB3F1BdF69A7D516aBbA",
+        TABLELAND_ABI,
+        signer
+      );
+      const prefix = "article_comment_v3_0_1";
+      const statement = `INSERT INTO ${tableName} (author, article_id, user, message, timestamp) VALUES ('${params.articleId[0]}', '${params.articleId[1]}', '${currentAddress}', '${messages}', ${UNIXtimestamp}
+			)`;
+      /**
+ * 
+curl -X GET https://testnets.tableland.network/api/v1/receipt/420/0x6f261edc12ab19387b30d929f13dc863549375e58abb78aad38f829e61f578f3 \
+  -H 'Accept: application/json'
+
+*/
+
+      console.log("contract :>> ", contract);
+
+      console.log("currentAddress :>> ", currentAddress);
+      console.log("tableId :>> ", tableId);
+      console.log("statement :>> ", statement);
+      console.log("params.articleId[0] :>> ", params.articleId[0]);
+      console.log("params.articleId[1] :>> ", params.articleId[1]);
+      console.log("messages :>> ", messages);
+      console.log("UNIXtimestamp :>> ", UNIXtimestamp);
+
+      const tx = await contract.populateTransaction[
+        "mutate(address,uint256,string)"
+      ](currentAddress, tableId, statement);
+
+      console.log("tx :>> ", tx);
+      await handleUserOp(tx, smartAccount);
       setMessages("");
     } catch (e) {
       console.log("error: ", e);
@@ -100,7 +125,6 @@ export default function ArticlePage({ params }: any) {
     await handleUserOp(tx, smartAccount);
   };
 
-  // TODO: fix this
   async function handleClick() {
     if (!currentAddress || !amount || !token || !smartAccount || !signer)
       return alert("Please connect wallet");
@@ -186,17 +210,25 @@ export default function ArticlePage({ params }: any) {
     }
     fetchContent();
   }, [params.articleId]);
-  // useEffect(() => {
-  //   async function getComments() {
-  //     const result = await readComments(
-  //       params.articleId[0],
-  //       params.articleId[1]
-  //     );
-  //     setComments(result);
-  //     return result;
-  //   }
-  //   getComments();
-  // }, [comments, params.articleId]);
+  useEffect(() => {
+    async function getComments() {
+      const contract = new ethers.Contract(
+        "0xC72E8a7Be04f2469f8C2dB3F1BdF69A7D516aBbA",
+        TABLELAND_ABI,
+        web3Provider
+      );
+      const statement = `SELECT * FROM ${tableName} WHERE author = '${params.articleId[0]}' AND article_id = '${params.articleId[1]}'`;
+      const result = await readComments(
+        params.articleId[0],
+        params.articleId[1]
+        // "0x06aa005386f53ba7b980c61e0d067cabc7602a62",
+        // "1"
+      );
+      setComments(result);
+      return result;
+    }
+    // getComments();
+  }, [comments, params.articleId]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
