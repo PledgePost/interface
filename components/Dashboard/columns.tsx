@@ -62,9 +62,15 @@ export const columns: ColumnDef<ArticleColumn>[] = [
     cell: ({ row }) => {
       const article = row.original;
       return (
-        <div className=" font-normal text-center">
-          {`Round${article.associatedRound.id}: ${article.associatedRound.name}`}
-        </div>
+        <>
+          {article.associatedRound?.id ? (
+            <div className=" font-normal text-center">
+              {`Round${article.associatedRound?.id}: ${article.associatedRound.name}`}
+            </div>
+          ) : (
+            <div className=" font-normal text-center">No Round</div>
+          )}
+        </>
       );
     },
   },
