@@ -6,6 +6,8 @@
 
 [Presentation](https://docs.google.com/presentation/d/1HY48TkFsnS_vfCTnGCKlQfMWqQkiYJpAbFYhasSeOKM/edit#slide=id.p)
 
+To test PledgePost, go to `/dashboard` and get test USDC to donate! you can also post article without paying any gas!
+
 Happy to hear your feedback! feel free to say hi:)
 ## Description
 
