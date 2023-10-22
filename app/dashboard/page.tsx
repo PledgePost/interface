@@ -9,7 +9,7 @@ import { SalesCard, SubscriptionCard } from "@/components/Card";
 import { ethers } from "ethers";
 import { useSafeAA } from "@/hooks/AccountAbstractionContext";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
-import { GET_ARTICLE_BY_ID } from "../../lib/query";
+import { GET_ARTICLE_BY_ID, GET_DONATIONS_BY_USER } from "../../lib/query";
 
 const client = new ApolloClient({
   uri: "https://api.studio.thegraph.com/query/52298/pledgepost_v3/version/latest",
@@ -18,11 +18,10 @@ const client = new ApolloClient({
 const tokenABI = require("../../abis/Token.json").abi;
 
 export default function Dashboard() {
-  const [totalDonation, setTotalDonation] = useState<number>(0);
-  const [totalDonor, setTotalDonor] = useState<number>(0);
   const [tokenBalance, setTokenBalance] = useState<any>(0);
   const [minted, setMinted] = useState(false);
   const [userArticle, setUserArticle] = useState<any>([]);
+  const [user, setUser] = useState<any>({});
   const { currentAddress, smartAccount, web3Provider, signer, handleUserOp } =
     useSafeAA();
   async function getArticleByAddress(address: string) {
@@ -38,13 +37,25 @@ export default function Dashboard() {
     }
     return response.data.articles;
   }
+  async function getUserInfo(address: string) {
+    const response = await client.query({
+      query: GET_DONATIONS_BY_USER,
+      variables: {
+        id: address,
+      },
+      fetchPolicy: "no-cache",
+    });
+    if (!response || !response.data) {
+      throw new Error("No data returned from the query");
+    }
+    return response.data.users;
+  }
   useEffect(() => {
-    console.log("fetching userArticle");
     if (!currentAddress) return;
     const fetch = async () => {
       const lowercaseAddress = currentAddress.toLowerCase();
       const posts: any = await getArticleByAddress(lowercaseAddress);
-      console.log("UserPosts", posts);
+      const users = await getUserInfo(lowercaseAddress);
       const AllPost = await Promise.all(
         posts.map(async (post: any) => {
           let donation = ethers.BigNumber.from("0");
@@ -63,10 +74,47 @@ export default function Dashboard() {
         })
       );
 
+      const UserInfo = await Promise.all(
+        users.map(async (user: any) => {
+          let recievedDonation = ethers.BigNumber.from("0");
+          let recievedAllocation = ethers.BigNumber.from("0");
+          let totalDonor = 0;
+          if (user.recievedDonations) {
+            for (let i = 0; i < user.recievedDonations.length; i++) {
+              let amount = ethers.BigNumber.from(
+                user.recievedDonations[i].amount
+              );
+              totalDonor = totalDonor + 1;
+              recievedDonation = recievedDonation.add(amount);
+            }
+          }
+
+          if (user.allocation) {
+            for (let i = 0; i < user.allocation.length; i++) {
+              let amount = ethers.BigNumber.from(user.allocation[i].amount);
+              recievedAllocation = recievedAllocation.add(amount);
+            }
+          }
+          return {
+            ...user,
+            tatalRecievedDonation: ethers.utils.formatUnits(
+              recievedDonation,
+              18
+            ),
+            totalDonor: totalDonor,
+            totalRecievedAllocation: ethers.utils.formatUnits(
+              recievedAllocation,
+              18
+            ),
+          };
+        })
+      );
+      console.log("UserInfo", UserInfo[0]);
       setUserArticle(AllPost);
+      setUser(UserInfo[0]);
     };
     fetch();
-  }, [currentAddress]);
+  }, [currentAddress, smartAccount]);
 
   const handleMint = async () => {
     if (!currentAddress || !smartAccount) return alert("Please connect wallet");
@@ -116,8 +164,15 @@ export default function Dashboard() {
         </div>
       </div>
       <div className="flex flex-row gap-4 my-4 ">
-        <SalesCard title="Recieved Donation" amount={totalDonation} />
-        <SubscriptionCard title="Total Donors" amount={totalDonor} />
+        <SalesCard
+          title="Recieved Donation"
+          amount={user.tatalRecievedDonation}
+        />
+        <SalesCard
+          title="Recieved Total Allocation"
+          amount={user.totalRecievedAllocation}
+        />
+        <SubscriptionCard title="Total Donors" amount={user.totalDonor} />
         <SubscriptionCard title="Total Comments" />
       </div>
       <div>

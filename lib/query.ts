@@ -55,17 +55,26 @@ export const GET_ARTICLE_BY_ID = gql`
     }
   }
 `;
+// 0x3a28d5a8614a278a2df4117f1857e204cf884d63
 export const GET_DONATIONS_BY_USER = gql`
-  query GetDonationsByUser($userId: ID!) {
-    user(id: $userId) {
+  query GetDonationsByUser($id: ID!) {
+    users(where: { id: $id }) {
       id
       donations {
         id
         amount
-        article {
-          id
-          content
-        }
+      }
+      recievedDonations {
+        id
+        amount
+      }
+      allocation {
+        id
+        roundId
+        amount
+      }
+      articles {
+        id
       }
     }
   }

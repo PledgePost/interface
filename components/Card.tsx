@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "./ui/skeleton";
 export function SalesCard({ title, amount, isLoading }: any) {
+  console.log(amount);
   return (
     <Card className="w-[250px]">
       <CardHeader className="flex flex-row items-center justify-between space-y-0">

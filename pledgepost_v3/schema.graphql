@@ -1,6 +1,7 @@
 type User @entity {
   id: Bytes!
   donations: [Donation!]! @derivedFrom(field: "donor")
+  recievedDonations: [Donation!]! @derivedFrom(field: "author")
   articles: [Article!]! @derivedFrom(field: "author")
   allocation: [Allocated!]! @derivedFrom(field: "recipient")
 }
@@ -17,6 +18,7 @@ type Article @entity {
 }
 type Donation @entity {
   id: Bytes!
+  author: User!
   article: Article!
   donor: User!
   amount: BigInt!

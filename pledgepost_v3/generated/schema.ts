@@ -62,6 +62,16 @@ export class User extends Entity {
     );
   }
 
+  get recievedDonations(): DonationLoader {
+    return new DonationLoader(
+      "User",
+      this.get("id")!
+        .toBytes()
+        .toHexString(),
+      "recievedDonations"
+    );
+  }
+
   get articles(): ArticleLoader {
     return new ArticleLoader("User", this.get("id")!.toString(), "articles");
   }
@@ -252,6 +262,19 @@ export class Donation extends Entity {
 
   set id(value: Bytes) {
     this.set("id", Value.fromBytes(value));
+  }
+
+  get author(): Bytes {
+    let value = this.get("author");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set author(value: Bytes) {
+    this.set("author", Value.fromBytes(value));
   }
 
   get article(): string {

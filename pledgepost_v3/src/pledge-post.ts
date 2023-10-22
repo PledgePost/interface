@@ -57,6 +57,7 @@ export function handleArticleDonated(event: ArticleDonatedEvent): void {
   donation.article =
     event.params.articleId.toString() + "-" + event.params.author.toHexString();
   donation.donor = event.params.from;
+  donation.author = event.params.author;
   donation.save();
 
   let user = User.load(event.params.from);
@@ -131,7 +132,7 @@ export function handleRoundApplied(event: RoundAppliedEvent): void {
     );
     article.articleId = event.params.articleId;
     article.author = event.params.author;
-		article.authorAddress = event.params.author;
+    article.authorAddress = event.params.author;
     article.associatedRound = event.params.roundId.toString();
     article.save();
   }
