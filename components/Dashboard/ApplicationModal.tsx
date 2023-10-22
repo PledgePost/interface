@@ -34,7 +34,6 @@ export default function ApplicationModal({ id, round }: any) {
   const handleRound = (value: any) => {
     setRoundId(value);
   };
-  // TODO: figureout why roundId starts at 0
   const handleApply = async () => {
     console.log("params", selectedArticle, roundId);
     if (!selectedArticle || !roundId) return;

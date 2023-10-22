@@ -16,13 +16,14 @@ import ApplicationModal from "./ApplicationModal";
 export type ArticleColumn = {
   articleId: string;
   author: {
-    id: string;
+    id?: string;
   };
+  authorAddress: string;
   content: string;
   title: string;
   status: string;
   associatedRound: {
-    id: string;
+    id?: string;
     name: string;
   };
 };
@@ -71,7 +72,7 @@ export const columns: ColumnDef<ArticleColumn>[] = [
     id: "actions",
     cell: ({ row }) => {
       const article = row.original;
-      const author = toChecksumAddress(article.author.id);
+      const author = toChecksumAddress(article.authorAddress);
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -107,7 +108,7 @@ export const columns: ColumnDef<ArticleColumn>[] = [
       return (
         <ApplicationModal
           id={article.articleId}
-          round={article.associatedRound.id}
+          round={article.associatedRound?.id}
         />
       );
     },
