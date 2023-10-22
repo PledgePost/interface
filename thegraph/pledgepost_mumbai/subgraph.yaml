@@ -1,0 +1,36 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: PledgePost
+    network: mumbai
+    source:
+      address: "0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f"
+      abi: PledgePost
+      startBlock: 41474215
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Allocated
+        - ArticleDonated
+        - ArticlePosted
+        - RoundApplied
+        - RoundCreated
+      abis:
+        - name: PledgePost
+          file: ./abis/PledgePost.json
+      eventHandlers:
+        - event: Allocated(indexed uint256,address,uint256,uint256)
+          handler: handleAllocated
+        - event: ArticleDonated(indexed address,indexed address,uint256,uint256)
+          handler: handleArticleDonated
+        - event: ArticlePosted(indexed address,string,uint256)
+          handler: handleArticlePosted
+        - event: RoundApplied(indexed address,uint256,uint256)
+          handler: handleRoundApplied
+        - event: RoundCreated(indexed address,address,uint256,string,uint256,uint256)
+          handler: handleRoundCreated
+      file: ./src/pledge-post.ts
