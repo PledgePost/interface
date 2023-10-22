@@ -1,6 +1,36 @@
 # PledgePost
 
+**PledgePost: A Quadratic Funding Media Platform**
+
+[Submission](https://ethglobal.com/showcase/pledgepost-eeyus)
+
+[Presentation](https://docs.google.com/presentation/d/1HY48TkFsnS_vfCTnGCKlQfMWqQkiYJpAbFYhasSeOKM/edit#slide=id.p)
+
+Happy to hear your feedback! feel free to say hi:)
 ## Description
+
+**Introduction**:
+PledgePost is a platform where writers can publish their articles, collect donations, and receive extra funds based on those donations through [Quadratic Funding (QF)](https://www.wtfisqf.com/).
+QF is a unique model designed to allocate funds based on both the number of contributors and the amounts they contribute. Unlike traditional funding models where every contribution is valued equally, QF amplifies the influence of each individual donation, fostering broader participation.
+
+**Objective**:
+We envision a world where contributions to collective intelligence, a vital public good, are duly rewarded. PledgePost's primary objective is not only to promote open knowledge-sharing but also to ensure it's incentivized and esteemed. Our platform ensures writers are fairly compensated for their pivotal role in enriching our collective intelligence.
+
+**Core Features**:
+
+1. **Content Creation and Management**:
+   - Writers can effortlessly draft and publish their articles on the platform.
+   - Flexibility is offered to apply for grant rounds at any time.
+2. **Grant Rounds**:
+   - Grant rounds take place quarterly.
+   - Diverse grant rounds are available each quarter, allowing writers to match their articles with the most fitting rounds.
+   - At each quarter's end, funds from a matching pool are allocated according to QF principles, prioritizing both donation sizes and the number of donors.
+3. **Community Engagement**:
+   - Users can financially back articles that resonate with them or that they believe hold value.
+   - Only donors have the privilege to comment on an article. This system not only uplifts the quality of discourse by ensuring engaged and invested participants but also reduces the likelihood of spam or derogatory comments. Moreover, the opportunity to engage in discussions can act as an added incentive for donations, possibly encouraging more robust participation and higher contributions.
+4. **Dashboard Features**:
+   - A detailed dashboard enables writers to draft, edit, and publish their articles.
+   - It also provides insights into contribution amounts, donor counts, and comment statistics.
 
 ## How we have made
 
@@ -49,22 +79,22 @@ Here is a list of what we didn't make in the past two weeks for the future. We w
 
 ### PledgePost.sol
 
-0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f
+CntractAddress: 0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f
 
+[Polygon Mumbai](https://mumbai.polygonscan.com/address/0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f)
 
-### TestToken
+[PolygonZkevm Testnet](https://testnet-zkevm.polygonscan.com/address/0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f)
 
-https://goerli.etherscan.io/address/0x298005746ff8C64252c1398e24eA5C17541db1B5
+[Scroll Sepolia testnet](https://sepolia.scrollscan.com/address/0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f)
 
-https://sepolia.etherscan.io/address/0x298005746ff8C64252c1398e24eA5C17541db1B5
+[Op-goerli](https://goerli-optimistic.etherscan.io/address/0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f)
 
-https://goerli-optimistic.etherscan.io/address/0x298005746ff8C64252c1398e24eA5C17541db1B5
+[TheGraph Endpoint](https://thegraph.com/studio/subgraph/pledgepost_mumbai/playground)
 
-https://mumbai.polygonscan.com/address/0x298005746ff8C64252c1398e24eA5C17541db1B5
+[TheGraph Playground](https://thegraph.com/studio/subgraph/pledgepost_mumbai/playground)
 
-https://testnet-zkevm.polygonscan.com/address/0x298005746ff8C64252c1398e24eA5C17541db1B5
+[Tableland Studio](https://studio.tableland.xyz/shutanaka/eth-online2023/deployments/default/article_comment_v3_0_1)
 
-https://sepolia.scrollscan.com/address/0x298005746ff8C64252c1398e24eA5C17541db1B5
 
 ## Tech stack & Tools
 
@@ -77,22 +107,6 @@ https://sepolia.scrollscan.com/address/0x298005746ff8C64252c1398e24eA5C17541db1B
 - Tableland
 - Filecoin
 
-## Huge thanks to
-
-- EthGlobal team
-  - appreciate for this amazing oppotunity!!
-
-and some other refference:
-
--
-
-## Team
-
-Happy to hear your feedback! feel free to say hi:)
-
-- [hiromi](https://twitter.com)
-- [shutanaka.eth](https://twitter.com/shutanaka_jp)
-- [nabe](https://twitter.com)
 
 ## Getting Started
 

@@ -74,8 +74,8 @@ async function allocate() {
 }
 
 // main()
-// setup()
-allocate()
+setup()
+  // allocate()
   // getNonce()
   .then(() => process.exit(0))
   .catch((error) => {
@@ -96,6 +96,6 @@ npx hardhat verify --network goerli 0x298005746ff8C64252c1398e24eA5C17541db1B5
 npx hardhat verify --network sepolia 0x298005746ff8C64252c1398e24eA5C17541db1B5
 npx hardhat verify --network optimismGoerli 0xD4978Df429A81Fb2032C0416D6bD854E1f93EcAa
 npx hardhat verify --network polygonMumbai 0xD4978Df429A81Fb2032C0416D6bD854E1f93EcAa
-npx hardhat verify --network polygonZkEvmTestnet 0x298005746ff8C64252c1398e24eA5C17541db1B5
-npx hardhat verify --network scrollSepolia 0x298005746ff8C64252c1398e24eA5C17541db1B5
+npx hardhat verify --network polygonZkEvmTestnet 0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f
+npx hardhat verify --network scrollSepolia 0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f
 */
