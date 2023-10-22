@@ -51,8 +51,8 @@ export default function Dashboard() {
     return response.data.users;
   }
   useEffect(() => {
-    if (!currentAddress) return;
     const fetch = async () => {
+      if (!currentAddress || !smartAccount) return;
       const lowercaseAddress = currentAddress.toLowerCase();
       const posts: any = await getArticleByAddress(lowercaseAddress);
       const users = await getUserInfo(lowercaseAddress);
