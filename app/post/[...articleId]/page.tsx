@@ -70,12 +70,6 @@ export default function ArticlePage({ params }: any) {
       const prefix = "article_comment_v3_0_1";
       const statement = `INSERT INTO ${tableName} (author, article_id, user, message, timestamp) VALUES ('${params.articleId[0]}', '${params.articleId[1]}', '${currentAddress}', '${messages}', ${UNIXtimestamp}
 			)`;
-      /**
- * 
-curl -X GET https://testnets.tableland.network/api/v1/receipt/420/0x6f261edc12ab19387b30d929f13dc863549375e58abb78aad38f829e61f578f3 \
-  -H 'Accept: application/json'
-
-*/
 
       console.log("contract :>> ", contract);
 
