@@ -48,6 +48,11 @@ export const GET_ARTICLE_BY_ID = gql`
         id
         amount
       }
+      allocation {
+        id
+        amount
+        articleId
+      }
       associatedRound {
         id
         name
@@ -92,7 +97,21 @@ export const GET_ARTICLES_BY_AUTHOR_ADDRESS = gql`
     }
   }
 `;
-
+export const GET_ARTICLES_BY_ID_AND_ADDRESS = gql`
+  query GetArticlesByAuthorAddress(
+    $authorAddress: Bytes!
+    $articleId: BigInt!
+  ) {
+    articlePosteds(where: { author: $authorAddress, articleId: $articleId }) {
+      id
+      content
+      articleId
+      blockNumber
+      blockTimestamp
+      transactionHash
+    }
+  }
+`;
 export const GET_ALL_ROUNDS = gql`
   query GetAllRounds {
     rounds {

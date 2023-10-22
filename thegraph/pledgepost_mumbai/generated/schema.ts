@@ -188,21 +188,14 @@ export class Article extends Entity {
     );
   }
 
-  get allocation(): Bytes | null {
-    let value = this.get("allocation");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set allocation(value: Bytes | null) {
-    if (!value) {
-      this.unset("allocation");
-    } else {
-      this.set("allocation", Value.fromBytes(<Bytes>value));
-    }
+  get allocation(): AllocatedLoader {
+    return new AllocatedLoader(
+      "Article",
+      this.get("id")!
+        .toBytes()
+        .toHexString(),
+      "allocation"
+    );
   }
 
   get associatedRound(): string | null {
