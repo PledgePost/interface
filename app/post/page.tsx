@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { makeFileObjects, storeFiles } from "@/hooks/useweb3Storage";
 import { showDefaultToast } from "@/hooks/useNotification";
 import dynamic from "next/dynamic";
-import { useSafeAA } from "@/hooks/AccountAbstractionContext";
+import { useSafeAA } from "@/providers/AccountAbstractionContext";
 import { CIDString } from "web3.storage";
 
 const ABI = require("../../abis/PledgePost.json").abi;

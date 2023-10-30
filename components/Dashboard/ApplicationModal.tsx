@@ -19,7 +19,7 @@ import {
 import { ethers } from "ethers";
 const ABI = require("../../abis/PledgePost.json").abi;
 import React, { use, useState } from "react";
-import { useSafeAA } from "@/hooks/AccountAbstractionContext";
+import { useSafeAA } from "@/providers/AccountAbstractionContext";
 import { getAllRoundData } from "@/lib/fetchData";
 import { Button } from "@/components/ui/button";
 

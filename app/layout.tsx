@@ -1,12 +1,12 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { RainbowProviders } from "./rainbowproviders";
-import { AccountAbstractionProvider } from "@/hooks/AccountAbstractionContext";
+import { RainbowProviders } from "../providers/rainbowproviders";
+import { AccountAbstractionProvider } from "@/providers/AccountAbstractionContext";
 import Header from "../components/Header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { WagmiContextProvider } from "@/hooks/WagmiContextProvider";
+import { WagmiContextProvider } from "@/providers/WagmiContextProvider";
 
 export const metadata: Metadata = {
   title: "PledgePost",

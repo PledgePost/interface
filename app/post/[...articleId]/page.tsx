@@ -9,7 +9,7 @@ import { TokenType } from "@/lib/Token/token";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Pre } from "@/components/RichEditor";
-import { useSafeAA } from "@/hooks/AccountAbstractionContext";
+import { useSafeAA } from "@/providers/AccountAbstractionContext";
 import { BigNumber, ethers } from "ethers";
 import { SalesCard } from "@/components/Card";
 import { GET_ARTICLES_BY_ID_AND_ADDRESS } from "@/lib/query";

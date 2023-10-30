@@ -7,7 +7,7 @@ import polygonLogo from "../public/polygon-logo-colored.svg";
 import polygonToken from "../public/polygon-token.svg";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useEffect, use } from "react";
-import { useSafeAA } from "@/hooks/AccountAbstractionContext";
+import { useSafeAA } from "@/providers/AccountAbstractionContext";
 import { BiconomySmartAccount } from "@biconomy/account";
 import { getAllRoundData } from "@/lib/fetchData";
 import Link from "next/link";

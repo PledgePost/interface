@@ -5,7 +5,7 @@ import { ReloadIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { useSafeAA } from "@/hooks/AccountAbstractionContext";
+import { useSafeAA } from "@/providers/AccountAbstractionContext";
 import {
   Select,
   SelectContent,

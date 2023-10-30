@@ -33,7 +33,7 @@ import {
   showDefaultToast,
   showErrorToast,
   showSuccessToast,
-} from "./useNotification";
+} from "../hooks/useNotification";
 const clientId: string = (process.env.NEXT_PUBLIC_CLIENT_ID as string) || "";
 const AccountAbstractionContext = createContext<any>(null);
 export const AccountAbstractionProvider = ({

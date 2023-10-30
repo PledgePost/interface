@@ -7,7 +7,7 @@ import { fetchData } from "@/lib/fetchData";
 import { Button } from "@/components/ui/button";
 import { SalesCard, SubscriptionCard } from "@/components/Card";
 import { ethers } from "ethers";
-import { useSafeAA } from "@/hooks/AccountAbstractionContext";
+import { useSafeAA } from "@/providers/AccountAbstractionContext";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { GET_ARTICLE_BY_ID, GET_DONATIONS_BY_USER } from "../../lib/query";
 
