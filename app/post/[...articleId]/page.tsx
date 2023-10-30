@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import Messages from "@/components/Comment/messages";
 import MessageInput from "@/components/Comment/messageInput";
-import { readComments, writeComment, Comment } from "@/hooks/useTableland";
 import { Button } from "@/components/ui/button";
 import { showErrorToast } from "@/hooks/useNotification";
 import { toChecksumAddress } from "ethereumjs-util";
@@ -13,21 +12,19 @@ import { Pre } from "@/components/RichEditor";
 import { useSafeAA } from "@/hooks/AccountAbstractionContext";
 import { BigNumber, ethers } from "ethers";
 import TABLELAND_ABI from "../../../abis/Tableland.json";
-import { SalesCard, SubscriptionCard } from "@/components/Card";
-import {
-  GET_ARTICLES_BY_AUTHOR_ADDRESS,
-  GET_ARTICLES_BY_ID_AND_ADDRESS,
-} from "@/lib/query";
+import { SalesCard } from "@/components/Card";
+import { GET_ARTICLES_BY_ID_AND_ADDRESS } from "@/lib/query";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { Comment, getComments, insertComment } from "@/hooks/useSupabase";
+
+const ABI = require("../../../abis/PledgePost.json").abi;
+const TOKEN_ABI = require("../../../abis/Token.json").abi;
+const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string;
+
 const client = new ApolloClient({
   uri: "https://api.studio.thegraph.com/query/52298/pledgepost_mumbai/version/latest",
   cache: new InMemoryCache(),
 });
-
-const ABI = require("../../../abis/PledgePost.json").abi;
-const TOKEN_ABI = require("../../../abis/Token.json").abi;
-// const TABLELAND_ABI = require("../../../abis/Tableland.json");
-const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string;
 
 async function fetchData(address: any, cid: string) {
   const checksumAddress = toChecksumAddress(address);
@@ -61,43 +58,25 @@ export default function ArticlePage({ params }: any) {
     handleUserOp,
     loadingTx,
   } = useSafeAA();
-
-  let timestamp = new Date();
-  let unix = timestamp.getTime();
-  let UNIXtimestamp = Math.floor(unix / 1000);
-  const tableName = "article_comment_v3_0_1_420_19";
-  const tableId = 19;
-
+  async function fetchComments() {
+    const comments = await getComments(
+      params.articleId[0],
+      params.articleId[1]
+    );
+    console.log("comments :>> ", comments);
+    setComments(comments);
+  }
   async function handleSend() {
     if (!currentAddress || messages === "" || !signer) return;
     try {
-      // TODO: fix this
-      const contract = new ethers.Contract(
-        "0xC72E8a7Be04f2469f8C2dB3F1BdF69A7D516aBbA",
-        TABLELAND_ABI,
-        signer
+      await insertComment(
+        params.articleId[0],
+        params.articleId[1],
+        currentAddress,
+        messages
       );
-      const prefix = "article_comment_v3_0_1";
-      const statement = `INSERT INTO ${tableName} (author, article_id, user, message, timestamp) VALUES ('${params.articleId[0]}', '${params.articleId[1]}', '${currentAddress}', '${messages}', ${UNIXtimestamp}
-			)`;
-
-      console.log("contract :>> ", contract);
-
-      console.log("currentAddress :>> ", currentAddress);
-      console.log("tableId :>> ", tableId);
-      console.log("statement :>> ", statement);
-      console.log("params.articleId[0] :>> ", params.articleId[0]);
-      console.log("params.articleId[1] :>> ", params.articleId[1]);
-      console.log("messages :>> ", messages);
-      console.log("UNIXtimestamp :>> ", UNIXtimestamp);
-
-      const tx = await contract.populateTransaction[
-        "mutate(address,uint256,string)"
-      ](currentAddress, tableId, statement);
-
-      console.log("tx :>> ", tx);
-      await handleUserOp(tx, smartAccount);
       setMessages("");
+      await fetchComments();
     } catch (e) {
       console.log("error: ", e);
       showErrorToast("Error posting comment");
@@ -216,10 +195,6 @@ export default function ArticlePage({ params }: any) {
           currentAddress,
           contractAddress
         );
-        const tokenAllowance = ethers.utils.formatUnits(
-          allowance,
-          token?.decimals
-        );
         setAllowance(allowance);
       } catch (e) {
         console.log("error :>> ", e);
@@ -242,25 +217,10 @@ export default function ArticlePage({ params }: any) {
     }
     fetchContent();
   }, [params.articleId]);
+
   useEffect(() => {
-    async function getComments() {
-      const contract = new ethers.Contract(
-        "0xC72E8a7Be04f2469f8C2dB3F1BdF69A7D516aBbA",
-        TABLELAND_ABI,
-        web3Provider
-      );
-      const statement = `SELECT * FROM ${tableName} WHERE author = '${params.articleId[0]}' AND article_id = '${params.articleId[1]}'`;
-      const result = await readComments(
-        params.articleId[0],
-        params.articleId[1]
-        // "0x06aa005386f53ba7b980c61e0d067cabc7602a62",
-        // "1"
-      );
-      setComments(result);
-      return result;
-    }
-    // getComments();
-  }, [comments, params.articleId]);
+    fetchComments();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
