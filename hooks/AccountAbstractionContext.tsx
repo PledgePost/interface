@@ -55,7 +55,7 @@ export const AccountAbstractionProvider = ({
   const [chainId, setChainId] = useState<any>("0x13881");
   // initial chain: op-goerli
   const chain = getChain(chainId);
-  console.log("currentchain: ", chain);
+
   // safes owned by the user
   const [safes, setSafes] = useState<string[]>([]);
   const [signer, setSigner] = useState<any>(undefined);
@@ -64,7 +64,6 @@ export const AccountAbstractionProvider = ({
   useEffect(() => {
     const init = async () => {
       if (!chain || !chain.id || !chain.hex) return;
-      console.log("chain:", chain);
       try {
         const web3AuthOptions: Web3AuthOptions = {
           clientId: clientId,
@@ -112,7 +111,6 @@ export const AccountAbstractionProvider = ({
           modalConfig: modalConfig,
         });
         setWeb3AuthModalPack(web3AuthModalPack);
-        console.log("web3AuthModalPack: ", web3AuthModalPack);
       } catch (error) {
         console.error(error);
       }
@@ -230,7 +228,6 @@ export const AccountAbstractionProvider = ({
       userOp.paymasterAndData = paymasterAndDataResponse.paymasterAndData;
       const userOpResponse = await account.sendUserOp(userOp);
       const { receipt } = await userOpResponse.wait(1);
-      console.log("txHash", receipt?.transactionHash);
       console.log(`${chain?.blockExplorerUrl}/tx/${receipt?.transactionHash}`);
       showSuccessToast(
         `${chain?.blockExplorerUrl}/tx/${receipt?.transactionHash}`

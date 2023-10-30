@@ -11,7 +11,6 @@ import remarkGfm from "remark-gfm";
 import { Pre } from "@/components/RichEditor";
 import { useSafeAA } from "@/hooks/AccountAbstractionContext";
 import { BigNumber, ethers } from "ethers";
-import TABLELAND_ABI from "../../../abis/Tableland.json";
 import { SalesCard } from "@/components/Card";
 import { GET_ARTICLES_BY_ID_AND_ADDRESS } from "@/lib/query";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
@@ -63,7 +62,6 @@ export default function ArticlePage({ params }: any) {
       params.articleId[0],
       params.articleId[1]
     );
-    console.log("comments :>> ", comments);
     setComments(comments);
   }
   async function handleSend() {
@@ -118,12 +116,9 @@ export default function ArticlePage({ params }: any) {
     );
     try {
       if (!allowance) return;
-      console.log("allowance :>> ", allowance);
-      console.log("inputAmount :>> ", inputAmount);
       if (allowance < inputAmount) {
         console.log("allowance is less than inputAmount");
         const approvalTx = await approve(noLimitAllowance);
-        console.log("approvalTx :>> ", approvalTx);
         await donate(inputAmount);
       } else {
         donate(inputAmount);
@@ -153,7 +148,6 @@ export default function ArticlePage({ params }: any) {
         params.articleId[1]
       );
       if (!article) return;
-      console.log("article :>> ", article);
     };
     fetchArticle();
   }, [params.articleId]);
@@ -190,7 +184,6 @@ export default function ArticlePage({ params }: any) {
           TOKEN_ABI,
           web3Provider
         );
-        console.log("tokenContract :>> ", tokenContract);
         const allowance: BigNumber = await tokenContract.allowance(
           currentAddress,
           contractAddress
@@ -216,11 +209,8 @@ export default function ArticlePage({ params }: any) {
       return result;
     }
     fetchContent();
-  }, [params.articleId]);
-
-  useEffect(() => {
     fetchComments();
-  }, []);
+  }, [params.articleId]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
