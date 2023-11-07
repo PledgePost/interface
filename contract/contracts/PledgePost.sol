@@ -62,6 +62,7 @@ contract PledgePost {
     // array of rounds
     Round[] public rounds;
     uint256 roundLength = 0;
+    uint256 constant MINIMUM_AMOUNT = 0.001 ether;
 
     event ArticlePosted(
         address indexed author,
@@ -133,7 +134,11 @@ contract PledgePost {
         address payable _author,
         uint256 _articleId
     ) external payable {
-        require(msg.value > 0, "donation must be greater than 0");
+        require(msg.sender != _author, "author cannot donate to self");
+        require(
+            msg.value > MINIMUM_AMOUNT,
+            "donation must be greater than minimum amount"
+        );
         require(
             _articleId < authorArticles[_author].length,
             "Article does not exist"
@@ -305,14 +310,13 @@ contract PledgePost {
             matchingAmounts[_roundId][article.author][article.id] = matching;
             // transfer matching to author address if matching > 0
             if (matching > 0) {
-                IPoolContract(round.poolAddress).poolTransfer(
-                    article.author,
-                    matching
-                );
+                bool transferSuccessful = IPoolContract(round.poolAddress)
+                    .poolTransfer(article.author, matching);
+                require(transferSuccessful, "Allocation transfer failed");
+
                 emit Allocated(_roundId, article.author, article.id, matching);
             }
         }
-        round.isActive = false;
     }
 
     // TODO: add access control
