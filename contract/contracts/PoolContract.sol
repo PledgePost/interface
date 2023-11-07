@@ -26,7 +26,7 @@ contract PoolContract {
     function poolTransfer(
         address payable _to,
         uint256 _amount
-    ) external payable onlyOwner returns (bool) {
+    ) external onlyOwner returns (bool) {
         require(address(this).balance >= _amount, "Not enough pool balance");
         require(_to != address(0), "Invalid address");
         (bool sent, ) = _to.call{value: _amount}("");

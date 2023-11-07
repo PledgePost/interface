@@ -7,12 +7,14 @@ import {QF} from "./libraries/QF.sol";
 import {IPledgePostERC721} from "./interface/IPledgePostERC721.sol";
 import {PledgePostERC721} from "./PledgePostERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 // TODO: add on-chain verification of Gitcoin passport with EAS Attestation
 // schema UID(OP): 0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89
 // https://docs.passport.gitcoin.co/building-with-passport/contract-reference
-contract PledgePost {
+contract PledgePost is AccessControl {
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
     struct Article {
         uint256 id;
         address payable author;
@@ -75,7 +77,6 @@ contract PledgePost {
         uint256 articleId,
         uint256 amount
     );
-
     event RoundCreated(
         address indexed owner,
         address ipoolAddress,
@@ -101,6 +102,7 @@ contract PledgePost {
 
     constructor() {
         owner = msg.sender;
+        _setupRole(ADMIN_ROLE, msg.sender);
         // TODO: change token URI
         nft = new PledgePostERC721(
             address(this),
@@ -109,8 +111,21 @@ contract PledgePost {
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner can call this function.");
+        require(
+            msg.sender == owner || hasRole(ADMIN_ROLE, msg.sender),
+            "Only owner or admin can call this function."
+        );
         _;
+    }
+
+    function addAdmin(address _admin) external {
+        require(msg.sender == owner, "Only owner can call this function.");
+        _setupRole(ADMIN_ROLE, _admin);
+    }
+
+    function removeAdmin(address _admin) external {
+        require(msg.sender == owner, "Only owner can call this function.");
+        revokeRole(ADMIN_ROLE, _admin);
     }
 
     function postArticle(string memory _content) public returns (uint256) {
@@ -319,7 +334,7 @@ contract PledgePost {
         }
     }
 
-    // TODO: add access control
+    // deposit should be done via deposit function
     function deposit(uint256 _roundId) external payable returns (bool) {
         require(_roundId <= roundLength, "Round does not exist");
         require(_roundId > 0, "RoundId 0 does not exist");
