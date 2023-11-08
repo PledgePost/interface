@@ -30,22 +30,11 @@ We envision a world where contributions to collective intelligence, a vital publ
    - A detailed dashboard enables writers to draft, edit, and publish their articles.
    - It also provides insights into contribution amounts, donor counts, and comment statistics.
 
-## How we have made
-
 ### Core Components of PledgePost
 
 PledgePost consists of a core contract (PledgePost.sol) and a peripheral PoolContract.sol that is generated for each grant and a contract that mints ERC721NFT for each donation.
 For QuadraticFunding, MatchingFunds calculation and Distribution are calculated automatically
 There is a Pool that is the source for distributing funds for each Round, and the allocation is automatically calculated based on the amount of donations to each article. This allows for a more equitable distribution of funds and returns value to creators.
-
-### Future Work
-
-Here is a list of what we didn't make in the past two weeks for the future. We will keep building something cool OSS, so PR and discussion are gladly welcome :)
-
-- Anti Sybil attacks: Implementation of on-chain verification Gitcoin Passort, Ethereum Attestation Service, or using human verification such as WorldID etc.
-- Specific frontend for grant manager: Specific frontend for grant manager, distribution, etc.
-- Search/ Share features: Custom queries for article search and share features on Socialmedia such as Lens and Farcaster
-- Notification: Notification of comments and new articles from content creators you follow
 
 ## Deployed contracts and links
 
@@ -60,18 +49,6 @@ CntractAddress: 0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f
 [Scroll Sepolia testnet](https://sepolia.scrollscan.com/address/0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f)
 
 [Op-goerli](https://goerli-optimistic.etherscan.io/address/0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f)
-
-
-## Tech stack & Tools
-
-- Next.js13, Typescript, React, TailwindCSS, solidity
-- Ethers.js
-- Hardhat
-- TheGraph
-- Safe AA SDK
-- Biconomy SDK
-- Tableland
-- Filecoin
 
 
 ## Getting Started
