@@ -7,15 +7,17 @@ import {QF} from "./libraries/QF.sol";
 import {IPledgePostERC721} from "./interface/IPledgePostERC721.sol";
 import {PledgePostERC721} from "./PledgePostERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 // TODO: add on-chain verification of Gitcoin passport with EAS Attestation
 // schema UID(OP): 0x6ab5d34260fca0cfcf0e76e96d439cace6aa7c3c019d7c4580ed52c6845e9c89
 // https://docs.passport.gitcoin.co/building-with-passport/contract-reference
-contract PledgePost {
+contract PledgePost is AccessControl {
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
     struct Article {
         uint256 id;
-        address author;
+        address payable author;
         string content; // IPFS hash
         uint256 donationsReceived;
     }
@@ -24,8 +26,7 @@ contract PledgePost {
         address owner;
         string name;
         bytes description;
-        address poolAddress;
-        IERC20 poolToken;
+        address payable poolAddress;
         uint256 poolAmount;
         uint256 startDate;
         uint256 endDate;
@@ -63,8 +64,8 @@ contract PledgePost {
     // array of rounds
     Round[] public rounds;
     uint256 roundLength = 0;
+    uint256 constant MINIMUM_AMOUNT = 0.001 ether;
 
-    // TODO: initialize token
     event ArticlePosted(
         address indexed author,
         string content,
@@ -76,7 +77,6 @@ contract PledgePost {
         uint256 articleId,
         uint256 amount
     );
-
     event RoundCreated(
         address indexed owner,
         address ipoolAddress,
@@ -100,10 +100,9 @@ contract PledgePost {
     address public owner;
     IPledgePostERC721 public nft;
 
-    // IERC20 public token;
-
     constructor() {
         owner = msg.sender;
+        _setupRole(ADMIN_ROLE, msg.sender);
         // TODO: change token URI
         nft = new PledgePostERC721(
             address(this),
@@ -112,8 +111,21 @@ contract PledgePost {
     }
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner can call this function.");
+        require(
+            msg.sender == owner || hasRole(ADMIN_ROLE, msg.sender),
+            "Only owner or admin can call this function."
+        );
         _;
+    }
+
+    function addAdmin(address _admin) external {
+        require(msg.sender == owner, "Only owner can call this function.");
+        _setupRole(ADMIN_ROLE, _admin);
+    }
+
+    function removeAdmin(address _admin) external {
+        require(msg.sender == owner, "Only owner can call this function.");
+        revokeRole(ADMIN_ROLE, _admin);
     }
 
     function postArticle(string memory _content) public returns (uint256) {
@@ -121,7 +133,7 @@ contract PledgePost {
         uint articleId = authorArticles[msg.sender].length;
         Article memory newArticle = Article({
             id: articleId,
-            author: msg.sender,
+            author: payable(msg.sender),
             content: _content,
             donationsReceived: 0
         });
@@ -134,49 +146,38 @@ contract PledgePost {
     }
 
     function donateToArticle(
-        address _author,
-        uint256 _articleId,
-        IERC20 _token,
-        uint256 _amount
-    ) external {
-        // require(_token == token, "Token not supported");
-
-        // check if amount of token is approved for this contract
+        address payable _author,
+        uint256 _articleId
+    ) external payable {
+        require(msg.sender != _author, "author cannot donate to self");
         require(
-            IERC20(address(_token)).allowance(msg.sender, address(this)) >=
-                _amount,
-            "Not enough allowance"
+            msg.value > MINIMUM_AMOUNT,
+            "donation must be greater than minimum amount"
         );
-        require(
-            IERC20(address(_token)).balanceOf(msg.sender) >= _amount,
-            "Not enough balance"
-        );
-        require(_amount > 0, "Amount must be greater than 0");
         require(
             _articleId < authorArticles[_author].length,
             "Article does not exist"
         );
         Article storage article = authorArticles[_author][_articleId];
         // Transfer tokens from the sender to the author
-        IERC20(address(_token)).transferFrom(
-            msg.sender,
-            article.author,
-            _amount
-        );
+
+        (bool sent, ) = _author.call{value: msg.value}("");
+        require(sent, "Failed to donate Ether");
+
         // Add donator to the list
         articleDonators[_author][_articleId].push(msg.sender);
         // Update donation amounts
-        article.donationsReceived += _amount;
-        authorTotalDonations[_author] += _amount;
+        article.donationsReceived += msg.value;
+        authorTotalDonations[_author] += msg.value;
 
         // check if author has applied for round
         // if yes, add amount
         Round storage round = authorToArticleIdToRound[_author][_articleId];
         if (round.id >= 0 && round.isActive) {
             recievedDonationsWithinRound[_author][_articleId][round.id] += QF
-                .sqrt(_amount);
+                .sqrt(msg.value);
         }
-        emit ArticleDonated(_author, msg.sender, _articleId, _amount);
+        emit ArticleDonated(_author, msg.sender, _articleId, msg.value);
         nft.mint(msg.sender, _author, _articleId, article.content);
     }
 
@@ -233,22 +234,19 @@ contract PledgePost {
     }
 
     function _createPool(
-        IERC20 _token,
         string memory _name,
         uint256 _startDate,
         uint256 _endDate
-    ) internal returns (address poolAddress) {
+    ) internal returns (address payable poolAddress) {
         bytes memory bytecode = type(PoolContract).creationCode;
         bytes32 salt = keccak256(abi.encodePacked(_name, _startDate, _endDate));
         assembly {
             poolAddress := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
-        PoolContract(poolAddress).initialize(IERC20(address(_token)));
         return poolAddress;
     }
 
     function createRound(
-        IERC20 _token,
         string memory _name,
         string memory _description,
         uint256 _startDate,
@@ -261,7 +259,7 @@ contract PledgePost {
         // );
         require(_endDate > block.timestamp, "End date must be in the future");
 
-        address pool = _createPool(_token, _name, _startDate, _endDate);
+        address payable pool = _createPool(_name, _startDate, _endDate);
         bytes memory description = abi.encodePacked(_description);
 
         Round memory newRound = Round({
@@ -270,7 +268,6 @@ contract PledgePost {
             name: _name,
             description: description,
             poolAddress: pool,
-            poolToken: _token,
             poolAmount: 0,
             startDate: _startDate,
             endDate: _endDate,
@@ -326,30 +323,31 @@ contract PledgePost {
             uint256 matching = (round.poolAmount * suquareSqrtSum) /
                 totalSquareSqrtSum;
             matchingAmounts[_roundId][article.author][article.id] = matching;
-            // transfer matching to author address
-            IPoolContract(round.poolAddress).poolTransfer(
-                article.author,
-                matching
-            );
-            emit Allocated(_roundId, article.author, article.id, matching);
+            // transfer matching to author address if matching > 0
+            if (matching > 0) {
+                bool transferSuccessful = IPoolContract(round.poolAddress)
+                    .poolTransfer(article.author, matching);
+                require(transferSuccessful, "Allocation transfer failed");
+
+                emit Allocated(_roundId, article.author, article.id, matching);
+            }
         }
     }
 
-    // TODO: add access control
-    function deposit(
-        uint256 _roundId,
-        uint256 _amount
-    ) external returns (bool success) {
+    // deposit should be done via deposit function
+    function deposit(uint256 _roundId) external payable returns (bool) {
         require(_roundId <= roundLength, "Round does not exist");
         require(_roundId > 0, "RoundId 0 does not exist");
-        Round storage round = rounds[_roundId - 1];
-        success = IERC20(address(round.poolToken)).transferFrom(
-            msg.sender,
-            round.poolAddress,
-            _amount
+        require(
+            address(msg.sender).balance >= msg.value,
+            "Not enough balance to deposit"
         );
-        round.poolAmount += _amount;
-        return success;
+        Round storage round = rounds[_roundId - 1];
+        address pool = address(IPoolContract(round.poolAddress));
+        (bool sent, ) = payable(pool).call{value: msg.value}("");
+        require(sent, "Failed to deposit Ether");
+        round.poolAmount += msg.value;
+        return sent;
     }
 
     function getTotalSquareSqrtSum(
