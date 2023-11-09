@@ -2,9 +2,9 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import * as dotenv from "dotenv";
 dotenv.config();
-const providerApiKey = process.env.PROVIDER_API_KEY as string;
-const deployerPrivateKey = process.env.DEPLOYER_PRIVATE_KEY as string;
-const etherscanApiKey = process.env.ETHERSCAN_API_KEY as string;
+const providerApiKey = process.env.PROVIDER_API_KEY!;
+const deployerPrivateKey = process.env.DEPLOYER_PRIVATE_KEY!;
+const etherscanApiKey = process.env.ETHERSCAN_API_KEY!;
 const gasLimit = 60000000;
 
 const config: HardhatUserConfig = {
@@ -68,6 +68,11 @@ const config: HardhatUserConfig = {
       accounts: [deployerPrivateKey],
       blockGasLimit: gasLimit,
     },
+    baseGoerli: {
+      url: "https://goerli.base.org",
+      accounts: [deployerPrivateKey],
+      blockGasLimit: gasLimit,
+    },
   },
   etherscan: {
     apiKey: {
@@ -122,6 +127,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api-sepolia.scrollscan.dev/api",
           browserURL: "https://sepolia.scrollscan.com",
+        },
+      },
+      {
+        network: "baseGoerli",
+        chainId: 84531,
+        urls: {
+          apiURL: "https://api-goerli.basescan.com/api",
+          browserURL: "https://goerli.basescan.org",
         },
       },
     ],
