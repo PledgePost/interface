@@ -27,7 +27,7 @@ const client = new ApolloClient({
 
 async function fetchData(address: any, cid: string) {
   const checksumAddress = toChecksumAddress(address);
-  const url = `https://${cid}.ipfs.dweb.link/pledgepost:${checksumAddress}`;
+  const url = `https://ipfs.io/ipfs/${cid}/pledgepost:${checksumAddress}`;
   const res = await fetch(url, {
     cache: "force-cache",
   });
