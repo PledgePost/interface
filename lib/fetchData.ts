@@ -32,7 +32,7 @@ export const getArticle = cache(async (query: any) => {
 export const fetchData = cache(async (address: string, cid: string) => {
   const checksumAddress = toChecksumAddress(address);
 
-  const url = `https://${cid}.ipfs.dweb.link/pledgepost:${checksumAddress}`;
+  const url = `https://ipfs.io/ipfs/${cid}/pledgepost:${checksumAddress}`;
   const res = await fetch(url);
   const content = await res.json();
   return content;
