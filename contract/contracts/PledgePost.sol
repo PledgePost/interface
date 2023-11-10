@@ -118,6 +118,10 @@ contract PledgePost is AccessControl {
         _setupRole(ADMIN_ROLE, _admin);
     }
 
+    function checkAdminRole(address _admin) external view returns (bool) {
+        return hasRole(ADMIN_ROLE, _admin);
+    }
+
     function removeAdmin(address _admin) external {
         require(msg.sender == owner, "Only owner can call this function.");
         revokeRole(ADMIN_ROLE, _admin);
@@ -138,6 +142,20 @@ contract PledgePost is AccessControl {
         emit ArticlePosted(msg.sender, _content, articleId);
 
         return articleId;
+    }
+
+    function updateArticle(uint256 _articleId, string memory _content) public {
+        require(
+            msg.sender == authorArticles[msg.sender][_articleId].author,
+            "Only author can update article"
+        );
+        require(bytes(_content).length > 0, "Content cannot be empty");
+        require(
+            _articleId < authorArticles[msg.sender].length,
+            "Article does not exist"
+        );
+        Article storage article = authorArticles[msg.sender][_articleId];
+        article.content = _content;
     }
 
     function donateToArticle(
