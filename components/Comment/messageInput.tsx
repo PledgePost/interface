@@ -8,7 +8,7 @@ export default function MessageInput({
   handleSend,
   isDonated,
   handleClick,
-  setToken,
+  
   isApproved,
   setAmount,
   loadingTx,
@@ -28,7 +28,7 @@ export default function MessageInput({
       {!isDonated ? (
         <DonationModal
           handleClick={handleClick}
-          setToken={setToken}
+          
           setAmount={setAmount}
           loadingTx={loadingTx}
           isApproved={isApproved}

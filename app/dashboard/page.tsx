@@ -12,7 +12,7 @@ import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { GET_ARTICLE_BY_ID, GET_DONATIONS_BY_USER } from "../../lib/query";
 
 const client = new ApolloClient({
-  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_mumbai/version/latest",
+  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_opgoerli/version/latest",
   cache: new InMemoryCache(),
 });
 const tokenABI = require("../../abis/Token.json").abi;
@@ -111,7 +111,7 @@ export default function Dashboard() {
     };
     fetch();
   }, [currentAddress, smartAccount]);
-
+  /*
   const handleMint = async () => {
     if (!currentAddress || !smartAccount) return alert("Please connect wallet");
     const contract = new ethers.Contract(
@@ -132,6 +132,7 @@ export default function Dashboard() {
       console.log(e);
     }
   };
+	
   async function updateTokenbalance() {
     const contract = new ethers.Contract(
       process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as string,
@@ -148,16 +149,17 @@ export default function Dashboard() {
     if (!currentAddress) return;
     updateTokenbalance();
   }, [currentAddress]);
+	*/
   return (
     <div className="p-12">
       <div className="flex justify-between">
         <h1 className="text-3xl font-bold">Dashboard</h1>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <p className="text-lg font-medium">{tokenBalance}USDC</p>
           <Button onClick={handleMint} disabled={minted}>
             Faucet
           </Button>
-        </div>
+        </div> */}
       </div>
       <div className="flex flex-row gap-4 my-4 ">
         <SalesCard

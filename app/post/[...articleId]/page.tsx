@@ -5,7 +5,6 @@ import MessageInput from "@/components/Comment/messageInput";
 import { Button } from "@/components/ui/button";
 import { showErrorToast } from "@/hooks/useNotification";
 import { toChecksumAddress } from "ethereumjs-util";
-import { TokenType } from "@/lib/Token/token";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Pre } from "@/components/RichEditor";
@@ -21,7 +20,7 @@ const TOKEN_ABI = require("../../../abis/Token.json").abi;
 const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string;
 
 const client = new ApolloClient({
-  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_mumbai/version/latest",
+  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_opgoerli/version/latest",
   cache: new InMemoryCache(),
 });
 
@@ -38,7 +37,6 @@ async function fetchData(address: any, cid: string) {
 export default function ArticlePage({ params }: any) {
   const [content, setContent] = useState<any>(null);
   const [messages, setMessages] = useState<string>("");
-  const [token, setToken] = useState<TokenType | undefined>(undefined); //erc20 token
   const [isApproved, setIsApproved] = useState<boolean>();
   const [comments, setComments] = useState<Comment[] | undefined>(undefined);
   const [amount, setAmount] = useState<any>(null);
@@ -58,9 +56,6 @@ export default function ArticlePage({ params }: any) {
     handleUserOp,
     loadingTx,
   } = useSafeAA();
-
-  console.log("provider :>> ", provider);
-
   async function fetchComments() {
     const comments = await getComments(
       params.articleId[0],
@@ -86,48 +81,46 @@ export default function ArticlePage({ params }: any) {
     }
   }
   const donate = async (inputAmount: any) => {
-    if (!token?.address) return;
     const contract = new ethers.Contract(contractAddress, ABI, signer);
     const tx = await contract.populateTransaction.donateToArticle(
       params.articleId[0],
       params.articleId[1],
-      token.address,
       inputAmount
     );
     await handleUserOp(tx, smartAccount);
   };
-  const approve = async (inputAmount: any) => {
-    if (!token?.address) return;
-    const tokenAddress = process.env
-      .NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as string;
-    const contract = new ethers.Contract(tokenAddress, TOKEN_ABI, signer);
-    console.log("inputAmount :>> ", inputAmount);
+  // const approve = async (inputAmount: any) => {
+  //   const tokenAddress = process.env
+  //     .NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as string;
+  //   const contract = new ethers.Contract(tokenAddress, TOKEN_ABI, signer);
+  //   console.log("inputAmount :>> ", inputAmount);
 
-    const tx = await contract.populateTransaction.approve(
-      contractAddress,
-      inputAmount
-    );
-    console.log("tx :>> ", tx);
-    await handleUserOp(tx, smartAccount);
-  };
+  //   const tx = await contract.populateTransaction.approve(
+  //     contractAddress,
+  //     inputAmount
+  //   );
+  //   console.log("tx :>> ", tx);
+  //   await handleUserOp(tx, smartAccount);
+  // };
 
   async function handleClick() {
-    if (!currentAddress || !amount || !token || !smartAccount || !signer)
+    if (!currentAddress || !amount || !smartAccount || !signer)
       return alert("Please connect wallet");
-    const inputAmount = ethers.utils.parseUnits(amount, token.decimals);
-    const noLimitAllowance = ethers.utils.parseUnits(
-      "100000000000000000000",
-      18
-    );
+    const inputAmount = ethers.utils.parseUnits(amount, 18);
+    // const noLimitAllowance = ethers.utils.parseUnits(
+    //   "100000000000000000000",
+    //   18
+    // );
     try {
-      if (!allowance) return;
-      if (allowance < inputAmount) {
-        console.log("allowance is less than inputAmount");
-        const approvalTx = await approve(noLimitAllowance);
-        await donate(inputAmount);
-      } else {
-        donate(inputAmount);
-      }
+      // if (!allowance) return;
+      donate(inputAmount);
+      // if (allowance < inputAmount) {
+      //   console.log("allowance is less than inputAmount");
+      //   const approvalTx = await approve(noLimitAllowance);
+      //   await donate(inputAmount);
+      // } else {
+      //   donate(inputAmount);
+      // }
     } catch (e) {
       console.log("error: ", e);
       showErrorToast("Error donating to article");
@@ -156,13 +149,13 @@ export default function ArticlePage({ params }: any) {
     };
     fetchArticle();
   }, [params.articleId]);
-  useEffect(() => {
-    if (!amount || !token?.decimals) return;
-    const inputAmount = ethers.utils.parseUnits(amount, token?.decimals);
-    const bool = allowance < inputAmount ? false : true;
+  // useEffect(() => {
+  //   if (!amount || !token?.decimals) return;
+  //   const inputAmount = ethers.utils.parseUnits(amount, token?.decimals);
+  //   const bool = allowance < inputAmount ? false : true;
 
-    setIsApproved(bool);
-  }, [amount, allowance, token?.decimals]);
+  //   setIsApproved(bool);
+  // }, [amount, allowance, token?.decimals]);
   useEffect(() => {
     const donationHistory = async () => {
       try {
@@ -177,6 +170,7 @@ export default function ArticlePage({ params }: any) {
         console.log("error :>> ", e);
       }
     };
+    /*
     const checkAllowance = async () => {
       if (!token?.address) return;
       setIsLoading(true);
@@ -196,15 +190,10 @@ export default function ArticlePage({ params }: any) {
         console.log("error :>> ", e);
       }
     };
+		*/
     donationHistory();
-    checkAllowance();
-  }, [
-    currentAddress,
-    params.articleId,
-    token?.address,
-    token?.decimals,
-    provider,
-  ]);
+    // checkAllowance();
+  }, [currentAddress, params.articleId, provider]);
   useEffect(() => {
     async function fetchContent() {
       const result = await fetchData(params.articleId[0], params.articleId[2]);
@@ -287,7 +276,6 @@ export default function ArticlePage({ params }: any) {
               <MessageInput
                 messages={messages}
                 setMessages={setMessages}
-                setToken={setToken}
                 setAmount={setAmount}
                 handleSend={handleSend}
                 handleClick={handleClick}

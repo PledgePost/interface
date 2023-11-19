@@ -136,16 +136,16 @@ export const scrollSepolia: Chain = {
 };
 
 export const chains: Chain[] = [
-  gnosisChain,
-  goerliChain,
-  mainnetChain,
-  mumbaiChain,
-  polygonChain,
-  polygonZkEVMTestnet,
-  polygonZkEVM,
+  // gnosisChain,
+  // goerliChain,
+  // mainnetChain,
+  // mumbaiChain,
+  // polygonChain,
+  // polygonZkEVMTestnet,
+  // polygonZkEVM,
+  // scrollSepolia,
   optimismChain,
   optimismGoerliChain,
-  scrollSepolia,
 ];
 
 export const initialChain = mumbaiChain;
