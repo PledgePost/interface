@@ -11,7 +11,7 @@ import remarkGfm from "remark-gfm";
 import { Pre } from "@/components/RichEditor";
 import { useSafeAA } from "@/providers/AccountAbstractionContext";
 import { BigNumber, ethers } from "ethers";
-import { SalesCard } from "@/components/Card";
+import { SalesCard, SubscriptionCard } from "@/components/Card";
 import { GET_ARTICLES_BY_ID_AND_ADDRESS } from "@/lib/query";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { Comment, getComments, insertComment } from "@/hooks/useSupabase";
@@ -46,17 +46,21 @@ export default function ArticlePage({ params }: any) {
   const [donated, setDonated] = useState<boolean>();
   const [donation, setDonation] = useState<any>(null);
   const [donors, setDonors] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [estimatedAllocation, setEstimatedAllocation] = useState<any>(null);
 
   const {
     currentAddress,
     smartAccount,
     loginWeb3Auth,
-    web3Provider,
+    provider,
     signer,
     handleUserOp,
     loadingTx,
   } = useSafeAA();
+
+  console.log("provider :>> ", provider);
+
   async function fetchComments() {
     const comments = await getComments(
       params.articleId[0],
@@ -64,6 +68,7 @@ export default function ArticlePage({ params }: any) {
     );
     setComments(comments);
   }
+
   async function handleSend() {
     if (!currentAddress || messages === "" || !signer) return;
     try {
@@ -161,11 +166,7 @@ export default function ArticlePage({ params }: any) {
   useEffect(() => {
     const donationHistory = async () => {
       try {
-        const contract = new ethers.Contract(
-          contractAddress,
-          ABI,
-          web3Provider
-        );
+        const contract = new ethers.Contract(contractAddress, ABI, provider);
         const donated = await contract.checkOwner(
           currentAddress,
           params.articleId[0],
@@ -178,17 +179,19 @@ export default function ArticlePage({ params }: any) {
     };
     const checkAllowance = async () => {
       if (!token?.address) return;
+      setIsLoading(true);
       try {
         const tokenContract = new ethers.Contract(
           token?.address,
           TOKEN_ABI,
-          web3Provider
+          provider
         );
         const allowance: BigNumber = await tokenContract.allowance(
           currentAddress,
           contractAddress
         );
         setAllowance(allowance);
+        setIsLoading(false);
       } catch (e) {
         console.log("error :>> ", e);
       }
@@ -200,7 +203,7 @@ export default function ArticlePage({ params }: any) {
     params.articleId,
     token?.address,
     token?.decimals,
-    web3Provider,
+    provider,
   ]);
   useEffect(() => {
     async function fetchContent() {
@@ -208,9 +211,27 @@ export default function ArticlePage({ params }: any) {
       setContent(result);
       return result;
     }
+    async function fetchDonationHistory() {
+      if (!provider) return;
+
+      const contract = new ethers.Contract(contractAddress, ABI, provider);
+      const donation = await contract.getDonatedAmount(
+        params.articleId[0],
+        params.articleId[1]
+      );
+
+      const amount = await contract.getMatchingAmount(
+        1, // TODO: fetch roundId
+        params.articleId[0],
+        params.articleId[1]
+      );
+      setDonation(ethers.utils.formatUnits(donation, 18));
+      setEstimatedAllocation(ethers.utils.formatUnits(amount, 18));
+    }
+    fetchDonationHistory();
     fetchContent();
     fetchComments();
-  }, [params.articleId]);
+  }, [params.articleId, provider]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
@@ -218,8 +239,21 @@ export default function ArticlePage({ params }: any) {
         {content?.title}
       </h1>
       <div className="flex flex-row gap-4 my-4 justify-center">
-        <SalesCard title="Recieved Donation" amount={donation || 0} />
-        <SalesCard title="Total Donors" amount={estimatedAllocation || 0} />
+        <SalesCard
+          title="Recieved Donation"
+          amount={donation || 0}
+          isLoading={isLoading}
+        />
+        <SalesCard
+          title="Estimated Matching"
+          isLoading={isLoading}
+          amount={estimatedAllocation || 0}
+        />
+        <SubscriptionCard
+          title="Contributors"
+          amount={donors || 0}
+          isLoading={isLoading}
+        />
       </div>
       <div className="flex flex-row gap-4">
         <div className="w-3/4 bg-white p-5 rounded shadow">

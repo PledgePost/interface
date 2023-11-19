@@ -239,6 +239,8 @@ export const AccountAbstractionProvider = ({
       showErrorToast('Error: "Transaction failed"');
     }
   };
+  const url = `https://polygon-mumbai.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_KEY}`;
+  const provider: any = new ethers.providers.JsonRpcProvider(url);
   return (
     <AccountAbstractionContext.Provider
       value={{
@@ -248,6 +250,7 @@ export const AccountAbstractionProvider = ({
         smartAccount,
         sliceAddress,
         web3Provider,
+        provider,
         signer,
         chainId,
         loading,
