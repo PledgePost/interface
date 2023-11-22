@@ -26,6 +26,7 @@ type Donation @entity {
 
 type Round @entity {
   id: ID!
+	roundId: BigInt! # uint256
   owner: Bytes! # address
   ipoolAddress: Bytes! # address
   name: String! # string

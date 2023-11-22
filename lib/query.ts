@@ -60,8 +60,22 @@ export const GET_ARTICLE_BY_ID = gql`
     }
   }
 `;
-// 0x3a28d5a8614a278a2df4117f1857e204cf884d63
-export const GET_DONATIONS_BY_USER = gql`
+export const GET_DONATION_BY_ARTICLE = gql`
+  query GetDonationById($donorId: ID!, $articleId: BigInt!) {
+    donations(where: { donor: { id: $donorId }, article: { id: $articleId } }) {
+      id
+      amount
+      donor {
+        id
+      }
+      article {
+        articleId
+      }
+    }
+  }
+`;
+
+export const GET_USER_BY_ID = gql`
   query GetDonationsByUser($id: ID!) {
     users(where: { id: $id }) {
       id
@@ -85,30 +99,39 @@ export const GET_DONATIONS_BY_USER = gql`
   }
 `;
 
-export const GET_ARTICLES_BY_AUTHOR_ADDRESS = gql`
-  query GetArticlesByAuthorAddress($authorAddress: Bytes!) {
-    articlePosteds(where: { author: $authorAddress }) {
-      id
-      content
-      articleId
-      blockNumber
-      blockTimestamp
-      transactionHash
-    }
-  }
-`;
 export const GET_ARTICLES_BY_ID_AND_ADDRESS = gql`
   query GetArticlesByAuthorAddress(
     $authorAddress: Bytes!
     $articleId: BigInt!
   ) {
-    articlePosteds(where: { author: $authorAddress, articleId: $articleId }) {
+    articles(
+      where: {
+        AND: [
+          { authorAddress: { equals: $authorAddress } }
+          { articleId: { equals: $articleId } }
+        ]
+      }
+    ) {
       id
       content
       articleId
-      blockNumber
-      blockTimestamp
-      transactionHash
+      authorAddress
+      donations {
+        id
+        donor {
+          id
+        }
+        amount
+      }
+      allocation {
+        id
+        amount
+      }
+      associatedRound {
+        id
+        owner
+        roundId
+      }
     }
   }
 `;
