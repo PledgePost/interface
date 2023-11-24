@@ -9,7 +9,7 @@ import { SalesCard, SubscriptionCard } from "@/components/Card";
 import { ethers } from "ethers";
 import { useSafeAA } from "@/providers/AccountAbstractionContext";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
-import { GET_ARTICLE_BY_ID, GET_DONATIONS_BY_USER } from "../../lib/query";
+import { GET_ARTICLE_BY_ID, GET_USER_BY_ID } from "../../lib/query";
 
 const client = new ApolloClient({
   uri: "https://api.studio.thegraph.com/query/52298/pledgepost_opgoerli/version/latest",
@@ -39,7 +39,7 @@ export default function Dashboard() {
   }
   async function getUserInfo(address: string) {
     const response = await client.query({
-      query: GET_DONATIONS_BY_USER,
+      query: GET_USER_BY_ID,
       variables: {
         id: address,
       },
