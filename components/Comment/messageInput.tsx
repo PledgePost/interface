@@ -8,7 +8,6 @@ export default function MessageInput({
   handleSend,
   isDonated,
   handleClick,
-  isApproved,
   setAmount,
   loadingTx,
 }: any) {
@@ -29,7 +28,6 @@ export default function MessageInput({
           handleClick={handleClick}
           setAmount={setAmount}
           loadingTx={loadingTx}
-          isApproved={isApproved}
         />
       ) : (
         <Button onClick={() => handleSend()}>Submit Comment</Button>

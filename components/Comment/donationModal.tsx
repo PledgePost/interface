@@ -26,7 +26,6 @@ export default function DonationModal({
   amount,
   setAmount,
   loadingTx,
-  isApproved,
 }: any) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAmount(e.target.value);

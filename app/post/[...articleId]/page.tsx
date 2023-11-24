@@ -20,6 +20,7 @@ import { Comment, getComments, insertComment } from "@/hooks/useSupabase";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { parseEther } from "viem";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
+import useDefaultProvider from "@/hooks/useDefaultProvider";
 
 const ABI = require("../../../abis/PledgePost.json").abi;
 const contractAddress: any = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
@@ -45,20 +46,29 @@ async function fetchData(address: any, cid: string) {
 export default function ArticlePage({ params }: any) {
   const [content, setContent] = useState<any>(null);
   const [messages, setMessages] = useState<string>("");
-  const [isApproved, setIsApproved] = useState<boolean>();
   const [comments, setComments] = useState<Comment[] | undefined>(undefined);
   const [amount, setAmount] = useState<any>(null);
   const [donation, setDonation] = useState<any>(null);
   const [donors, setDonors] = useState<any>(null);
+  const [isDonated, setIsDonated] = useState<any>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [estimatedAllocation, setEstimatedAllocation] = useState<any>(null);
   const { openConnectModal } = useConnectModal();
   const { address: currentAddress } = useAccount();
-  const { data: history } = useContractRead({
-    ...PledgeContract,
-    functionName: "checkOwner",
-    args: [currentAddress, params.articleId[0], params.articleId[1]],
-  });
+  const provider = useDefaultProvider();
+  useEffect(() => {
+    if (!currentAddress || !provider) return;
+    async function checkDonation() {
+      const contract = new ethers.Contract(contractAddress, ABI, provider);
+      const data = await contract.checkOwner(
+        currentAddress,
+        params.articleId[0],
+        params.articleId[1]
+      );
+      setIsDonated(data);
+    }
+    checkDonation();
+  }, [currentAddress, params.articleId, provider]);
   const {
     data,
     isLoading: isLoadingTx,
@@ -218,8 +228,7 @@ export default function ArticlePage({ params }: any) {
                 setAmount={setAmount}
                 handleSend={handleComment}
                 handleClick={handleDonate}
-                isDonated={history}
-                isApproved={isApproved}
+                isDonated={isDonated}
                 loadingTx={isLoadingTx}
               />
             )}
