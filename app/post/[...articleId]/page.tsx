@@ -72,7 +72,7 @@ export default function ArticlePage({ params }: any) {
     setComments(comments);
   }
 
-  async function handleSend() {
+  async function handleComment() {
     if (!currentAddress || messages === "") return;
     try {
       await insertComment(
@@ -90,7 +90,11 @@ export default function ArticlePage({ params }: any) {
   }
 
   const handleDonate = async () => {
-    if (!currentAddress || !amount) return alert("Please connect wallet");
+    if (!currentAddress) return alert("Please connect wallet");
+    if (!amount) return alert("Please enter amount");
+    let lowercaseAddress = params.articleId[0].toLowerCase();
+    if (lowercaseAddress === params.articleId[0])
+      return alert("You cannot donate to your own article");
     try {
       showDefaultToast("Sending Transaction...");
       write({
@@ -208,7 +212,7 @@ export default function ArticlePage({ params }: any) {
                 messages={messages}
                 setMessages={setMessages}
                 setAmount={setAmount}
-                handleSend={handleSend}
+                handleSend={handleComment}
                 handleClick={handleDonate}
                 isDonated={history}
                 isApproved={isApproved}
