@@ -148,6 +148,6 @@ export const chains: Chain[] = [
   optimismGoerliChain,
 ];
 
-export const initialChain = mumbaiChain;
+export const initialChain = optimismChain;
 
 export default chains;
