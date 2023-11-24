@@ -16,33 +16,16 @@ import {
 
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import {
-  mainnet,
   polygon,
   optimism,
-  zora,
-  polygonZkEvm,
   sepolia,
   goerli,
   optimismGoerli,
-  base,
-  polygonZkEvmTestnet,
-  scrollSepolia,
   polygonMumbai,
 } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [
-    mainnet,
-    polygon,
-    optimism,
-    polygonZkEvm,
-    sepolia,
-    goerli,
-    polygonMumbai,
-    optimismGoerli,
-    polygonZkEvmTestnet,
-    scrollSepolia,
-  ],
+  [optimism, polygonMumbai, optimismGoerli],
   [publicProvider()]
 );
 const appName: string = "PledgePost";

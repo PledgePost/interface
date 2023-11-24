@@ -88,7 +88,7 @@ const Header = () => {
             <Button asChild variant="secondary">
               <Link href="/post">New Post</Link>
             </Button>
-            <Select onValueChange={(value) => handleChain(value)}>
+            {/* <Select onValueChange={(value) => handleChain(value)}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder={chainConfig.label} />
               </SelectTrigger>
@@ -103,11 +103,8 @@ const Header = () => {
                     </SelectItem>
                   ))}
               </SelectContent>
-            </Select>
+            </Select> 
             {address ? (
-              // <Button variant="default" onClick={logoutWeb3Auth}>
-              //   {sliceAddress}
-              // </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="default">{sliceAddress}</Button>
@@ -141,6 +138,11 @@ const Header = () => {
                 )}
               </>
             )}
+						*/}
+            <ConnectButton
+              showBalance={false}
+              accountStatus={{ smallScreen: "address", largeScreen: "full" }}
+            />
           </div>
         </div>
       </nav>
