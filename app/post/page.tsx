@@ -2,16 +2,20 @@
 import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 import { makeFileObjects, storeFiles } from "@/hooks/useweb3Storage";
-import { showDefaultToast } from "@/hooks/useNotification";
+import {
+  showDefaultToast,
+  showErrorToast,
+  showSuccessToast,
+} from "@/hooks/useNotification";
 import dynamic from "next/dynamic";
-import { useSafeAA } from "@/providers/AccountAbstractionContext";
 import { CIDString } from "web3.storage";
+import { useAccount, useContractWrite } from "wagmi";
 
 const ABI = require("../../abis/PledgePost.json").abi;
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
-const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string;
+const contractAddress: any = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!;
 
 const Post = () => {
   const [value, setValue] = useState(``);
@@ -20,33 +24,37 @@ const Post = () => {
   let timestamp = new Date();
   let unix = timestamp.getTime();
   let UNIXtimestamp = Math.floor(unix / 1000);
-  const { currentAddress, smartAccount, signer, handleUserOp } = useSafeAA();
 
+  const { address: currentAddress } = useAccount();
+  const { data, isLoading, isSuccess, write } = useContractWrite({
+    address: contractAddress,
+    abi: ABI,
+    functionName: "postArticle",
+  });
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setValue(e.target.value);
   };
   const handleSubmit = async () => {
     try {
       showDefaultToast("Uploading...");
-      if (!currentAddress || !title || !value) return;
+      if (!title || !value) return;
       const files = makeFileObjects(obj, currentAddress);
-      const cid = await storeFiles(files);
-      handleSend(cid);
+      const cid: CIDString | undefined = await storeFiles(files);
+      showDefaultToast("Sending Transaction...");
+      write({ args: [cid] });
     } catch (e) {
       console.log(e);
+      showErrorToast("Error Failed to Post");
     }
   };
+  useEffect(() => {
+    if (isSuccess && data) {
+      console.log("data: ", data);
+      console.log("issuccess", isSuccess);
+      showSuccessToast(`https://goerli-optimism.etherscan.io/tx/${data.hash}`);
+    }
+  }, [data, isSuccess]);
 
-  const handleSend = async (cid: CIDString | undefined) => {
-    const contract = new ethers.Contract(contractAddress, ABI, signer);
-    console.log("contract: ", contract);
-    try {
-      const tx = await contract.populateTransaction.postArticle(cid);
-      await handleUserOp(tx, smartAccount);
-    } catch (e) {
-      console.log(e);
-    }
-  };
   useEffect(() => {
     const object = { title, value, currentAddress, UNIXtimestamp };
     setObj(object);
