@@ -104,14 +104,7 @@ export const GET_ARTICLES_BY_ID_AND_ADDRESS = gql`
     $authorAddress: Bytes!
     $articleId: BigInt!
   ) {
-    articles(
-      where: {
-        AND: [
-          { authorAddress: { equals: $authorAddress } }
-          { articleId: { equals: $articleId } }
-        ]
-      }
-    ) {
+    articles(where: { authorAddress: $authorAddress, articleId: $articleId }) {
       id
       content
       articleId
