@@ -10,12 +10,11 @@ import {
 import dynamic from "next/dynamic";
 import { CIDString } from "web3.storage";
 import { useAccount, useContractWrite } from "wagmi";
-
-const ABI = require("../../abis/PledgePost.json").abi;
+import { ABIs as ABI } from "@/constants";
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
-const contractAddress: any = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!;
+
 
 const Post = () => {
   const [value, setValue] = useState(``);
@@ -27,8 +26,8 @@ const Post = () => {
 
   const { address: currentAddress } = useAccount();
   const { data, isLoading, isSuccess, write } = useContractWrite({
-    address: contractAddress,
-    abi: ABI,
+    address: ABI.contractAddress as any,
+    abi: ABI.abi,
     functionName: "postArticle",
   });
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

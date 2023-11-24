@@ -6,7 +6,7 @@ export type TokenType = {
 export const TokenConfig: TokenType[] = [
   {
     symbol: "USDC",
-    address: process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS,
+    address: "",
     decimals: 18,
   },
 ];

@@ -21,12 +21,10 @@ import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { parseEther } from "viem";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import useDefaultProvider from "@/hooks/useDefaultProvider";
-
-const ABI = require("../../../abis/PledgePost.json").abi;
-const contractAddress: any = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+import { ABIs as ABI } from "@/constants";
 const PledgeContract = {
-  address: contractAddress,
-  abi: ABI,
+  address: ABI.contractAddress as any,
+  abi: ABI.abi,
 };
 const client = new ApolloClient({
   uri: "https://api.studio.thegraph.com/query/52298/pledgepost_opgoerli/version/latest",
@@ -59,7 +57,11 @@ export default function ArticlePage({ params }: any) {
   useEffect(() => {
     if (!currentAddress || !provider) return;
     async function checkDonation() {
-      const contract = new ethers.Contract(contractAddress, ABI, provider);
+      const contract = new ethers.Contract(
+        ABI.contractAddress,
+        ABI.abi,
+        provider
+      );
       const data = await contract.checkOwner(
         currentAddress,
         params.articleId[0],

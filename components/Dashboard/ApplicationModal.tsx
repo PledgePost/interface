@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-const ABI = require("../../abis/PledgePost.json").abi;
+import { ABIs as ABI } from "@/constants";
 import React, { use, useEffect, useState } from "react";
 import { getAllRoundData } from "@/lib/fetchData";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,6 @@ import {
 
 export default function ApplicationModal({ id, round }: any) {
   const rounds = use(getAllRoundData());
-  console.log("rounds", rounds);
   const [roundId, setRoundId] = useState<number>(0);
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
   const { address: currentAddress } = useAccount();
@@ -44,8 +43,8 @@ export default function ApplicationModal({ id, round }: any) {
     isSuccess,
     write: apply,
   } = useContractWrite({
-    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
-    abi: ABI,
+    address: ABI.contractAddress as any,
+    abi: ABI.abi,
     functionName: "applyForRound",
   });
 
