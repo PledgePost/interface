@@ -52,7 +52,7 @@ const Post = () => {
     if (isSuccess && data && chain) {
       showSuccessToast(`${chain.blockExplorers?.etherscan}/tx/${data.hash}`);
     }
-  }, [data, isSuccess]);
+  }, [chain, data, isSuccess]);
 
   useEffect(() => {
     const object = { title, value, currentAddress, UNIXtimestamp };
