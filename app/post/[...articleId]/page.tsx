@@ -12,7 +12,6 @@ import { toChecksumAddress } from "ethereumjs-util";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Pre } from "@/components/RichEditor";
-import { useSafeAA } from "@/providers/AccountAbstractionContext";
 import { ethers } from "ethers";
 import { SalesCard, SubscriptionCard } from "@/components/Card";
 import { GET_ARTICLES_BY_ID_AND_ADDRESS } from "@/lib/query";
@@ -20,6 +19,7 @@ import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { Comment, getComments, insertComment } from "@/hooks/useSupabase";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { parseEther } from "viem";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 const ABI = require("../../../abis/PledgePost.json").abi;
 const contractAddress: any = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
@@ -52,15 +52,19 @@ export default function ArticlePage({ params }: any) {
   const [donors, setDonors] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [estimatedAllocation, setEstimatedAllocation] = useState<any>(null);
-
-  const { loginWeb3Auth, loadingTx } = useSafeAA();
+  const { openConnectModal } = useConnectModal();
   const { address: currentAddress } = useAccount();
   const { data: history } = useContractRead({
     ...PledgeContract,
     functionName: "checkOwner",
     args: [currentAddress, params.articleId[0], params.articleId[1]],
   });
-  const { data, isSuccess, write } = useContractWrite({
+  const {
+    data,
+    isLoading: isLoadingTx,
+    isSuccess,
+    write,
+  } = useContractWrite({
     ...PledgeContract,
     functionName: "donateToArticle",
   });
@@ -204,7 +208,7 @@ export default function ArticlePage({ params }: any) {
               </>
             )}
             {!currentAddress ? (
-              <Button onClick={loginWeb3Auth} className="w-full">
+              <Button onClick={openConnectModal} className="w-full">
                 Connect Wallet
               </Button>
             ) : (
@@ -216,7 +220,7 @@ export default function ArticlePage({ params }: any) {
                 handleClick={handleDonate}
                 isDonated={history}
                 isApproved={isApproved}
-                loadingTx={loadingTx}
+                loadingTx={isLoadingTx}
               />
             )}
           </div>
