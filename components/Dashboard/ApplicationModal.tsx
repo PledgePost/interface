@@ -20,7 +20,7 @@ import { ABIs as ABI } from "@/constants";
 import React, { use, useEffect, useState } from "react";
 import { getAllRoundData } from "@/lib/fetchData";
 import { Button } from "@/components/ui/button";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount, useContractWrite, useNetwork } from "wagmi";
 import {
   showDefaultToast,
   showErrorToast,
@@ -32,6 +32,7 @@ export default function ApplicationModal({ id, round }: any) {
   const [roundId, setRoundId] = useState<number>(0);
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
   const { address: currentAddress } = useAccount();
+  const { chain } = useNetwork();
   const handleArticle = () => {
     setSelectedArticle(id);
   };
@@ -61,8 +62,8 @@ export default function ApplicationModal({ id, round }: any) {
   };
   useEffect(() => {
     if (!isSuccess || !data) return;
-    showSuccessToast(`https://goerli-optimism.etherscan.io/tx/${data.hash}`);
-  }, [data, isSuccess]);
+    showSuccessToast(`${chain?.blockExplorers?.etherscan}/tx/${data.hash}`);
+  }, [chain, data, isSuccess]);
 
   return (
     <>

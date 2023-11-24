@@ -17,7 +17,12 @@ import { SalesCard, SubscriptionCard } from "@/components/Card";
 import { GET_ARTICLES_BY_ID_AND_ADDRESS } from "@/lib/query";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { Comment, getComments, insertComment } from "@/hooks/useSupabase";
-import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import {
+  useAccount,
+  useContractRead,
+  useContractWrite,
+  useNetwork,
+} from "wagmi";
 import { parseEther } from "viem";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import useDefaultProvider from "@/hooks/useDefaultProvider";
@@ -53,6 +58,7 @@ export default function ArticlePage({ params }: any) {
   const [estimatedAllocation, setEstimatedAllocation] = useState<any>(null);
   const { openConnectModal } = useConnectModal();
   const { address: currentAddress } = useAccount();
+  const { chain } = useNetwork();
   const provider = useDefaultProvider();
   useEffect(() => {
     if (!currentAddress || !provider) return;
@@ -135,13 +141,13 @@ export default function ArticlePage({ params }: any) {
     return response.data.articles[0];
   }
   useEffect(() => {
-    if (!data || isSuccess) return;
+    if (!data || !chain) return;
     if (isSuccess) {
-      showSuccessToast(`https://goerli-optimism.etherscan.io/tx/${data.hash}`);
+      showSuccessToast(`${chain?.blockExplorers?.etherscan}/tx/${data.hash}`);
     } else {
       showErrorToast("Error donating to article");
     }
-  }, [data, isSuccess]);
+  }, [chain, data, isSuccess]);
 
   useEffect(() => {
     async function fetchContent() {

@@ -9,12 +9,12 @@ import {
 } from "@/hooks/useNotification";
 import dynamic from "next/dynamic";
 import { CIDString } from "web3.storage";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount, useContractWrite, useNetwork } from "wagmi";
 import { ABIs as ABI } from "@/constants";
+
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
-
 
 const Post = () => {
   const [value, setValue] = useState(``);
@@ -25,6 +25,8 @@ const Post = () => {
   let UNIXtimestamp = Math.floor(unix / 1000);
 
   const { address: currentAddress } = useAccount();
+  const { chain } = useNetwork();
+  console.log("chain", chain);
   const { data, isLoading, isSuccess, write } = useContractWrite({
     address: ABI.contractAddress as any,
     abi: ABI.abi,
@@ -47,10 +49,8 @@ const Post = () => {
     }
   };
   useEffect(() => {
-    if (isSuccess && data) {
-      console.log("data: ", data);
-      console.log("issuccess", isSuccess);
-      showSuccessToast(`https://goerli-optimism.etherscan.io/tx/${data.hash}`);
+    if (isSuccess && data && chain) {
+      showSuccessToast(`${chain.blockExplorers?.etherscan}/tx/${data.hash}`);
     }
   }, [data, isSuccess]);
 
