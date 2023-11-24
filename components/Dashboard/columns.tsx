@@ -173,6 +173,8 @@ export const analyticsColumn: ColumnDef<AnalyticsColumn>[] = [
     },
     cell: ({ row }) => {
       const article = row.original;
+      if (!article.allocation[0]?.amount)
+        return <div className="text-center font-medium">$0</div>;
       const allocated = ethers.utils.formatUnits(
         article.allocation[0]?.amount,
         18

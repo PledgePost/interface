@@ -4,26 +4,21 @@ import ArticleBoard from "@/components/Dashboard/ArticleBoard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { columns, analyticsColumn } from "@/components/Dashboard/columns";
 import { fetchData } from "@/lib/fetchData";
-import { Button } from "@/components/ui/button";
 import { SalesCard, SubscriptionCard } from "@/components/Card";
 import { ethers } from "ethers";
-import { useSafeAA } from "@/providers/AccountAbstractionContext";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { GET_ARTICLE_BY_ID, GET_USER_BY_ID } from "../../lib/query";
+import { useAccount } from "wagmi";
 
 const client = new ApolloClient({
   uri: "https://api.studio.thegraph.com/query/52298/pledgepost_opgoerli/version/latest",
   cache: new InMemoryCache(),
 });
-const tokenABI = require("../../abis/Token.json").abi;
 
 export default function Dashboard() {
-  const [tokenBalance, setTokenBalance] = useState<any>(0);
-  const [minted, setMinted] = useState(false);
   const [userArticle, setUserArticle] = useState<any>([]);
   const [user, setUser] = useState<any>({});
-  const { currentAddress, smartAccount, web3Provider, signer, handleUserOp } =
-    useSafeAA();
+  const { address: currentAddress } = useAccount();
   async function getArticleByAddress(address: string) {
     const response = await client.query({
       query: GET_ARTICLE_BY_ID,
@@ -52,7 +47,7 @@ export default function Dashboard() {
   }
   useEffect(() => {
     const fetch = async () => {
-      if (!currentAddress || !smartAccount) return;
+      if (!currentAddress) return;
       const lowercaseAddress = currentAddress.toLowerCase();
       const posts: any = await getArticleByAddress(lowercaseAddress);
       const users = await getUserInfo(lowercaseAddress);
@@ -110,56 +105,12 @@ export default function Dashboard() {
       setUser(UserInfo[0]);
     };
     fetch();
-  }, [currentAddress, smartAccount]);
-  /*
-  const handleMint = async () => {
-    if (!currentAddress || !smartAccount) return alert("Please connect wallet");
-    const contract = new ethers.Contract(
-      process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as string,
-      tokenABI,
-      signer
-    );
-    const amount = ethers.utils.parseEther("1000000");
-    try {
-      const mintTx = await contract.populateTransaction.mint(
-        currentAddress,
-        amount
-      );
-      await handleUserOp(mintTx, smartAccount);
-      setMinted(true);
-      await updateTokenbalance();
-    } catch (e) {
-      console.log(e);
-    }
-  };
-	
-  async function updateTokenbalance() {
-    const contract = new ethers.Contract(
-      process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as string,
-      tokenABI,
-      web3Provider
-    );
-    contract.balanceOf(currentAddress).then((balance: any) => {
-      let tokenbalance = ethers.utils.formatEther(balance);
-      const formatted = parseFloat(tokenbalance).toFixed(2);
-      setTokenBalance(formatted);
-    });
-  }
-  useEffect(() => {
-    if (!currentAddress) return;
-    updateTokenbalance();
   }, [currentAddress]);
-	*/
+
   return (
     <div className="p-12">
       <div className="flex justify-between">
         <h1 className="text-3xl font-bold">Dashboard</h1>
-        {/* <div className="flex items-center gap-2">
-          <p className="text-lg font-medium">{tokenBalance}USDC</p>
-          <Button onClick={handleMint} disabled={minted}>
-            Faucet
-          </Button>
-        </div> */}
       </div>
       <div className="flex flex-row gap-4 my-4 ">
         <SalesCard

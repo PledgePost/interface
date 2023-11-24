@@ -16,50 +16,61 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ethers } from "ethers";
 const ABI = require("../../abis/PledgePost.json").abi;
-import React, { use, useState } from "react";
-import { useSafeAA } from "@/providers/AccountAbstractionContext";
+import React, { use, useEffect, useState } from "react";
 import { getAllRoundData } from "@/lib/fetchData";
 import { Button } from "@/components/ui/button";
+import { useAccount, useContractWrite } from "wagmi";
+import {
+  showDefaultToast,
+  showErrorToast,
+  showSuccessToast,
+} from "@/hooks/useNotification";
 
 export default function ApplicationModal({ id, round }: any) {
   const rounds = use(getAllRoundData());
   console.log("rounds", rounds);
   const [roundId, setRoundId] = useState<number>(0);
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
-  const { smartAccount, web3Provider, signer, handleUserOp } = useSafeAA();
+  const { address: currentAddress } = useAccount();
   const handleArticle = () => {
     setSelectedArticle(id);
   };
   const handleRound = (value: any) => {
     setRoundId(value);
   };
+  const {
+    data,
+    isSuccess,
+    write: apply,
+  } = useContractWrite({
+    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as any,
+    abi: ABI,
+    functionName: "applyForRound",
+  });
+
   const handleApply = async () => {
     console.log("params", selectedArticle, roundId);
-    if (!selectedArticle || !roundId) return;
-    const contract = new ethers.Contract(
-      process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string,
-      ABI,
-      signer
-    );
+    if (!selectedArticle || !roundId || !currentAddress) return;
     try {
-      const applyTx = await contract.populateTransaction.applyForRound(
-        roundId,
-        selectedArticle
-      );
-      await handleUserOp(applyTx, smartAccount);
+      showDefaultToast("Applying for grant...");
+      apply({ args: [selectedArticle, roundId] });
     } catch (e) {
       console.log(e);
+      showErrorToast("Error applying for grant");
     }
   };
+  useEffect(() => {
+    if (!isSuccess || !data) return;
+    showSuccessToast(`https://goerli-optimism.etherscan.io/tx/${data.hash}`);
+  }, [data, isSuccess]);
 
   return (
     <>
       <Dialog>
         {!round ? (
           <DialogTrigger>
-            <Button onClick={() => handleArticle()}>Apply</Button>
+            <Button onClick={() => handleArticle()}>Apply Grant</Button>
           </DialogTrigger>
         ) : (
           <Button disabled>Appied</Button>
