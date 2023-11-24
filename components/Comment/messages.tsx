@@ -1,8 +1,8 @@
 import React from "react";
 import { Avatar } from "../ui/avatar";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import sliceAddress from "@/lib/sliceAddress";
-import { dateFromISO } from "@/lib/dateConvert";
+import sliceAddress from "@/utils/sliceAddress";
+import { dateFromISO } from "@/utils/dateConvert";
 
 export default function Messages({ params }: any) {
   const ImageUrl = "https://picsum.photos/200/";
