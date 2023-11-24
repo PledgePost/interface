@@ -31,14 +31,6 @@ export default function DonationModal({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAmount(e.target.value);
   };
-  // const handleToken = (token_address: string) => {
-  //   const token: TokenType | undefined = TokenConfig.find(
-  //     (token) => token.address === token_address
-  //   );
-  //   if (!token) return;
-  //   console.log("token :>> ", token);
-  //   setToken(token);
-  // };
   return (
     <>
       <Dialog>

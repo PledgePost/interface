@@ -3,22 +3,30 @@ import React, { useState, useEffect } from "react";
 import Messages from "@/components/Comment/messages";
 import MessageInput from "@/components/Comment/messageInput";
 import { Button } from "@/components/ui/button";
-import { showErrorToast } from "@/hooks/useNotification";
+import {
+  showDefaultToast,
+  showErrorToast,
+  showSuccessToast,
+} from "@/hooks/useNotification";
 import { toChecksumAddress } from "ethereumjs-util";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Pre } from "@/components/RichEditor";
 import { useSafeAA } from "@/providers/AccountAbstractionContext";
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 import { SalesCard, SubscriptionCard } from "@/components/Card";
 import { GET_ARTICLES_BY_ID_AND_ADDRESS } from "@/lib/query";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { Comment, getComments, insertComment } from "@/hooks/useSupabase";
+import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { parseEther } from "viem";
 
 const ABI = require("../../../abis/PledgePost.json").abi;
-const TOKEN_ABI = require("../../../abis/Token.json").abi;
-const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string;
-
+const contractAddress: any = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+const PledgeContract = {
+  address: contractAddress,
+  abi: ABI,
+};
 const client = new ApolloClient({
   uri: "https://api.studio.thegraph.com/query/52298/pledgepost_opgoerli/version/latest",
   cache: new InMemoryCache(),
@@ -40,22 +48,22 @@ export default function ArticlePage({ params }: any) {
   const [isApproved, setIsApproved] = useState<boolean>();
   const [comments, setComments] = useState<Comment[] | undefined>(undefined);
   const [amount, setAmount] = useState<any>(null);
-  const [allowance, setAllowance] = useState<any>(null);
-  const [donated, setDonated] = useState<boolean>();
   const [donation, setDonation] = useState<any>(null);
   const [donors, setDonors] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [estimatedAllocation, setEstimatedAllocation] = useState<any>(null);
 
-  const {
-    currentAddress,
-    smartAccount,
-    loginWeb3Auth,
-    provider,
-    signer,
-    handleUserOp,
-    loadingTx,
-  } = useSafeAA();
+  const { loginWeb3Auth, loadingTx } = useSafeAA();
+  const { address: currentAddress } = useAccount();
+  const { data: history } = useContractRead({
+    ...PledgeContract,
+    functionName: "checkOwner",
+    args: [currentAddress, params.articleId[0], params.articleId[1]],
+  });
+  const { data, isSuccess, write } = useContractWrite({
+    ...PledgeContract,
+    functionName: "donateToArticle",
+  });
   async function fetchComments() {
     const comments = await getComments(
       params.articleId[0],
@@ -65,7 +73,7 @@ export default function ArticlePage({ params }: any) {
   }
 
   async function handleSend() {
-    if (!currentAddress || messages === "" || !signer) return;
+    if (!currentAddress || messages === "") return;
     try {
       await insertComment(
         params.articleId[0],
@@ -80,53 +88,21 @@ export default function ArticlePage({ params }: any) {
       showErrorToast("Error posting comment");
     }
   }
-  const donate = async (inputAmount: any) => {
-    const contract = new ethers.Contract(contractAddress, ABI, signer);
-    const tx = await contract.populateTransaction.donateToArticle(
-      params.articleId[0],
-      params.articleId[1],
-      inputAmount
-    );
-    await handleUserOp(tx, smartAccount);
-  };
-  // const approve = async (inputAmount: any) => {
-  //   const tokenAddress = process.env
-  //     .NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as string;
-  //   const contract = new ethers.Contract(tokenAddress, TOKEN_ABI, signer);
-  //   console.log("inputAmount :>> ", inputAmount);
 
-  //   const tx = await contract.populateTransaction.approve(
-  //     contractAddress,
-  //     inputAmount
-  //   );
-  //   console.log("tx :>> ", tx);
-  //   await handleUserOp(tx, smartAccount);
-  // };
-
-  async function handleClick() {
-    if (!currentAddress || !amount || !smartAccount || !signer)
-      return alert("Please connect wallet");
-    const inputAmount = ethers.utils.parseUnits(amount, 18);
-    // const noLimitAllowance = ethers.utils.parseUnits(
-    //   "100000000000000000000",
-    //   18
-    // );
+  const handleDonate = async () => {
+    if (!currentAddress || !amount) return alert("Please connect wallet");
     try {
-      // if (!allowance) return;
-      donate(inputAmount);
-      // if (allowance < inputAmount) {
-      //   console.log("allowance is less than inputAmount");
-      //   const approvalTx = await approve(noLimitAllowance);
-      //   await donate(inputAmount);
-      // } else {
-      //   donate(inputAmount);
-      // }
+      showDefaultToast("Sending Transaction...");
+      write({
+        args: [params.articleId[0], params.articleId[1]],
+        value: parseEther(amount),
+      });
     } catch (e) {
       console.log("error: ", e);
       showErrorToast("Error donating to article");
     }
-  }
-  async function getArticleByIdandAddress(address: string, id: string) {
+  };
+  async function getArticleByIdandAddress(address: any, id: any) {
     const response = await client.query({
       query: GET_ARTICLES_BY_ID_AND_ADDRESS,
       variables: {
@@ -139,88 +115,43 @@ export default function ArticlePage({ params }: any) {
     return response.data.articles[0];
   }
   useEffect(() => {
-    const fetchArticle = async () => {
-      const lowercaseAddress = params.articleId[0].toLowerCase();
-      const article = await getArticleByIdandAddress(
-        lowercaseAddress,
-        params.articleId[1]
-      );
-      if (!article) return;
-    };
-    fetchArticle();
-  }, [params.articleId]);
-  // useEffect(() => {
-  //   if (!amount || !token?.decimals) return;
-  //   const inputAmount = ethers.utils.parseUnits(amount, token?.decimals);
-  //   const bool = allowance < inputAmount ? false : true;
+    if (!data || isSuccess) return;
+    if (isSuccess) {
+      showSuccessToast(`https://goerli-optimism.etherscan.io/tx/${data.hash}`);
+    } else {
+      showErrorToast("Error donating to article");
+    }
+  }, [data, isSuccess]);
 
-  //   setIsApproved(bool);
-  // }, [amount, allowance, token?.decimals]);
-  useEffect(() => {
-    const donationHistory = async () => {
-      try {
-        const contract = new ethers.Contract(contractAddress, ABI, provider);
-        const donated = await contract.checkOwner(
-          currentAddress,
-          params.articleId[0],
-          params.articleId[1]
-        );
-        setDonated(donated);
-      } catch (e) {
-        console.log("error :>> ", e);
-      }
-    };
-    /*
-    const checkAllowance = async () => {
-      if (!token?.address) return;
-      setIsLoading(true);
-      try {
-        const tokenContract = new ethers.Contract(
-          token?.address,
-          TOKEN_ABI,
-          provider
-        );
-        const allowance: BigNumber = await tokenContract.allowance(
-          currentAddress,
-          contractAddress
-        );
-        setAllowance(allowance);
-        setIsLoading(false);
-      } catch (e) {
-        console.log("error :>> ", e);
-      }
-    };
-		*/
-    donationHistory();
-    // checkAllowance();
-  }, [currentAddress, params.articleId, provider]);
   useEffect(() => {
     async function fetchContent() {
       const result = await fetchData(params.articleId[0], params.articleId[2]);
       setContent(result);
       return result;
     }
-    async function fetchDonationHistory() {
-      if (!provider) return;
-
-      const contract = new ethers.Contract(contractAddress, ABI, provider);
-      const donation = await contract.getDonatedAmount(
-        params.articleId[0],
+    const fetchArticleInfo = async () => {
+      const lowercaseAddress = params.articleId[0].toLowerCase();
+      const article = await getArticleByIdandAddress(
+        lowercaseAddress,
         params.articleId[1]
       );
+      if (article.donations.length > 0) {
+        let totalAmount = 0;
+        for (let i = 0; i < article.donations.length; i++) {
+          let donationAmount = ethers.utils.formatEther(
+            article.donations[i].amount
+          );
+          totalAmount += parseFloat(donationAmount);
+        }
+        setDonation(totalAmount);
+        setDonors(article.donations.length);
+      }
+    };
 
-      const amount = await contract.getMatchingAmount(
-        1, // TODO: fetch roundId
-        params.articleId[0],
-        params.articleId[1]
-      );
-      setDonation(ethers.utils.formatUnits(donation, 18));
-      setEstimatedAllocation(ethers.utils.formatUnits(amount, 18));
-    }
-    fetchDonationHistory();
     fetchContent();
     fetchComments();
-  }, [params.articleId, provider]);
+    fetchArticleInfo();
+  }, [params.articleId]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
@@ -278,8 +209,8 @@ export default function ArticlePage({ params }: any) {
                 setMessages={setMessages}
                 setAmount={setAmount}
                 handleSend={handleSend}
-                handleClick={handleClick}
-                isDonated={donated}
+                handleClick={handleDonate}
+                isDonated={history}
                 isApproved={isApproved}
                 loadingTx={loadingTx}
               />
