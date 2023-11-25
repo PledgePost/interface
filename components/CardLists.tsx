@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import sliceAddress from "@/lib/sliceAddress";
+import sliceAddress from "@/utils/sliceAddress";
 import { Badge } from "@/components/ui/badge";
 
 const CardLists = ({

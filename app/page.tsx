@@ -1,22 +1,13 @@
 "use client";
-const ABI = require("../abis/Token.json").abi;
 import { ethers } from "ethers";
 import Image from "next/image";
-import vercel from "../public/vercel.svg";
 import polygonLogo from "../public/polygon-logo-colored.svg";
 import polygonToken from "../public/polygon-token.svg";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState, useEffect, use } from "react";
-import { useSafeAA } from "@/providers/AccountAbstractionContext";
+import { use } from "react";
 import { BiconomySmartAccount } from "@biconomy/account";
 import { getAllRoundData } from "@/lib/fetchData";
-import Link from "next/link";
 
-interface Props {
-  smartAccount: BiconomySmartAccount;
-  address: string;
-  provider: ethers.providers.Provider;
-}
 export default function Home() {
   const rounds = use(getAllRoundData());
 

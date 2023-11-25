@@ -92,6 +92,81 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "previousAdminRole",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "newAdminRole",
+        "type": "bytes32"
+      }
+    ],
+    "name": "RoleAdminChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleGranted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "RoleRevoked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "address",
         "name": "author",
         "type": "address"
@@ -156,12 +231,26 @@
     "type": "event"
   },
   {
+    "inputs": [],
+    "name": "ADMIN_ROLE",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       { "internalType": "uint256", "name": "_roundId", "type": "uint256" }
     ],
     "name": "Allocate",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DEFAULT_ADMIN_ROLE",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -180,6 +269,15 @@
       { "internalType": "uint256", "name": "_roundId", "type": "uint256" }
     ],
     "name": "activateRound",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_admin", "type": "address" }
+    ],
+    "name": "addAdmin",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -230,7 +328,11 @@
     "name": "authorArticles",
     "outputs": [
       { "internalType": "uint256", "name": "id", "type": "uint256" },
-      { "internalType": "address", "name": "author", "type": "address" },
+      {
+        "internalType": "address payable",
+        "name": "author",
+        "type": "address"
+      },
       { "internalType": "string", "name": "content", "type": "string" },
       {
         "internalType": "uint256",
@@ -252,10 +354,9 @@
       { "internalType": "address", "name": "owner", "type": "address" },
       { "internalType": "string", "name": "name", "type": "string" },
       { "internalType": "bytes", "name": "description", "type": "bytes" },
-      { "internalType": "address", "name": "poolAddress", "type": "address" },
       {
-        "internalType": "contract IERC20",
-        "name": "poolToken",
+        "internalType": "address payable",
+        "name": "poolAddress",
         "type": "address"
       },
       { "internalType": "uint256", "name": "poolAmount", "type": "uint256" },
@@ -280,6 +381,15 @@
   },
   {
     "inputs": [
+      { "internalType": "address", "name": "_admin", "type": "address" }
+    ],
+    "name": "checkAdminRole",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
       { "internalType": "address", "name": "_sender", "type": "address" },
       { "internalType": "address", "name": "_author", "type": "address" },
       { "internalType": "uint256", "name": "_articleId", "type": "uint256" }
@@ -291,11 +401,6 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "_token",
-        "type": "address"
-      },
       { "internalType": "string", "name": "_name", "type": "string" },
       { "internalType": "string", "name": "_description", "type": "string" },
       { "internalType": "uint256", "name": "_startDate", "type": "uint256" },
@@ -310,13 +415,8 @@
           { "internalType": "string", "name": "name", "type": "string" },
           { "internalType": "bytes", "name": "description", "type": "bytes" },
           {
-            "internalType": "address",
+            "internalType": "address payable",
             "name": "poolAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "contract IERC20",
-            "name": "poolToken",
             "type": "address"
           },
           {
@@ -363,28 +463,25 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_roundId", "type": "uint256" },
-      { "internalType": "uint256", "name": "_amount", "type": "uint256" }
+      { "internalType": "uint256", "name": "_roundId", "type": "uint256" }
     ],
     "name": "deposit",
-    "outputs": [{ "internalType": "bool", "name": "success", "type": "bool" }],
-    "stateMutability": "nonpayable",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "payable",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "_author", "type": "address" },
-      { "internalType": "uint256", "name": "_articleId", "type": "uint256" },
       {
-        "internalType": "contract IERC20",
-        "name": "_token",
+        "internalType": "address payable",
+        "name": "_author",
         "type": "address"
       },
-      { "internalType": "uint256", "name": "_amount", "type": "uint256" }
+      { "internalType": "uint256", "name": "_articleId", "type": "uint256" }
     ],
     "name": "donateToArticle",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -396,7 +493,11 @@
       {
         "components": [
           { "internalType": "uint256", "name": "id", "type": "uint256" },
-          { "internalType": "address", "name": "author", "type": "address" },
+          {
+            "internalType": "address payable",
+            "name": "author",
+            "type": "address"
+          },
           { "internalType": "string", "name": "content", "type": "string" },
           {
             "internalType": "uint256",
@@ -423,13 +524,8 @@
           { "internalType": "string", "name": "name", "type": "string" },
           { "internalType": "bytes", "name": "description", "type": "bytes" },
           {
-            "internalType": "address",
+            "internalType": "address payable",
             "name": "poolAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "contract IERC20",
-            "name": "poolToken",
             "type": "address"
           },
           {
@@ -492,7 +588,11 @@
       {
         "components": [
           { "internalType": "uint256", "name": "id", "type": "uint256" },
-          { "internalType": "address", "name": "author", "type": "address" },
+          {
+            "internalType": "address payable",
+            "name": "author",
+            "type": "address"
+          },
           { "internalType": "string", "name": "content", "type": "string" },
           {
             "internalType": "uint256",
@@ -522,13 +622,8 @@
           { "internalType": "string", "name": "name", "type": "string" },
           { "internalType": "bytes", "name": "description", "type": "bytes" },
           {
-            "internalType": "address",
+            "internalType": "address payable",
             "name": "poolAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "contract IERC20",
-            "name": "poolToken",
             "type": "address"
           },
           {
@@ -563,7 +658,11 @@
       {
         "components": [
           { "internalType": "uint256", "name": "id", "type": "uint256" },
-          { "internalType": "address", "name": "author", "type": "address" },
+          {
+            "internalType": "address payable",
+            "name": "author",
+            "type": "address"
+          },
           { "internalType": "string", "name": "content", "type": "string" },
           {
             "internalType": "uint256",
@@ -625,6 +724,15 @@
   },
   {
     "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" }
+    ],
+    "name": "getRoleAdmin",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
       { "internalType": "uint256", "name": "_roundId", "type": "uint256" }
     ],
     "name": "getRound",
@@ -636,13 +744,8 @@
           { "internalType": "string", "name": "name", "type": "string" },
           { "internalType": "bytes", "name": "description", "type": "bytes" },
           {
-            "internalType": "address",
+            "internalType": "address payable",
             "name": "poolAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "contract IERC20",
-            "name": "poolToken",
             "type": "address"
           },
           {
@@ -687,6 +790,26 @@
     ],
     "name": "getTotalSquareSqrtSum",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "grantRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "hasRole",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -743,13 +866,46 @@
   },
   {
     "inputs": [
+      { "internalType": "address", "name": "_admin", "type": "address" }
+    ],
+    "name": "removeAdmin",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "renounceRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes32", "name": "role", "type": "bytes32" },
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "revokeRole",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
       { "internalType": "uint256", "name": "", "type": "uint256" },
       { "internalType": "uint256", "name": "", "type": "uint256" }
     ],
     "name": "roundArticles",
     "outputs": [
       { "internalType": "uint256", "name": "id", "type": "uint256" },
-      { "internalType": "address", "name": "author", "type": "address" },
+      {
+        "internalType": "address payable",
+        "name": "author",
+        "type": "address"
+      },
       { "internalType": "string", "name": "content", "type": "string" },
       {
         "internalType": "uint256",
@@ -768,10 +924,9 @@
       { "internalType": "address", "name": "owner", "type": "address" },
       { "internalType": "string", "name": "name", "type": "string" },
       { "internalType": "bytes", "name": "description", "type": "bytes" },
-      { "internalType": "address", "name": "poolAddress", "type": "address" },
       {
-        "internalType": "contract IERC20",
-        "name": "poolToken",
+        "internalType": "address payable",
+        "name": "poolAddress",
         "type": "address"
       },
       { "internalType": "uint256", "name": "poolAmount", "type": "uint256" },
@@ -785,6 +940,25 @@
       { "internalType": "bool", "name": "isActive", "type": "bool" }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" }
+    ],
+    "name": "supportsInterface",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_articleId", "type": "uint256" },
+      { "internalType": "string", "name": "_content", "type": "string" }
+    ],
+    "name": "updateArticle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]

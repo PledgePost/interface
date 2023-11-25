@@ -16,7 +16,6 @@ import {
   RoundApplied,
   RoundCreated,
 } from "../generated/schema";
-
 export function handleAllocated(event: AllocatedEvent): void {
   let entity = new Allocated(
     event.transaction.hash.concatI32(event.logIndex.toI32())
@@ -168,6 +167,7 @@ export function handleRoundCreated(event: RoundCreatedEvent): void {
   let round = Round.load(event.params.roundId.toString());
   if (!round) {
     round = new Round(event.params.roundId.toString());
+    round.roundId = event.params.roundId;
     round.owner = event.params.owner;
     round.ipoolAddress = event.params.ipoolAddress;
     round.name = event.params.name;
@@ -176,6 +176,7 @@ export function handleRoundCreated(event: RoundCreatedEvent): void {
     round.save();
   }
   round.owner = event.params.owner;
+  round.roundId = event.params.roundId;
   round.ipoolAddress = event.params.ipoolAddress;
   round.name = event.params.name;
   round.startDate = event.params.startDate;

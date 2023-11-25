@@ -19,27 +19,16 @@ import {
 import { Button } from "../ui/button";
 
 import React from "react";
-import { TokenConfig, TokenType } from "@/lib/Token/token";
 import { ReloadIcon } from "@radix-ui/react-icons";
 
 export default function DonationModal({
   handleClick,
   amount,
   setAmount,
-  setToken,
   loadingTx,
-  isApproved,
 }: any) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAmount(e.target.value);
-  };
-  const handleToken = (token_address: string) => {
-    const token: TokenType | undefined = TokenConfig.find(
-      (token) => token.address === token_address
-    );
-    if (!token) return;
-    console.log("token :>> ", token);
-    setToken(token);
   };
   return (
     <>
@@ -63,20 +52,20 @@ export default function DonationModal({
               onChange={(e) => handleChange(e)}
             />
 
-            <Select onValueChange={(value) => handleToken(value)}>
+            <Select /*onValueChange={(value) => handleToken(value)}*/>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Token" />
               </SelectTrigger>
               <SelectContent>
-                {TokenConfig.map((token, index) => (
-                  <SelectItem key={index} value={token.address}>
-                    {token.symbol}
-                  </SelectItem>
-                ))}
+                {/* {TokenConfig.map((token, index) => ( */}
+                <SelectItem value={"ETH"} /*key={index} value={token.address}*/>
+                  {/* {token.symbol} */}
+                  ETH
+                </SelectItem>
+                {/* ))} */}
               </SelectContent>
             </Select>
           </div>
-
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="secondary">
@@ -84,9 +73,7 @@ export default function DonationModal({
               </Button>
             </DialogClose>
             {!loadingTx ? (
-              <Button onClick={() => handleClick()}>
-                {isApproved ? "Donate" : "Approve"}
-              </Button>
+              <Button onClick={() => handleClick()}>Confirm</Button>
             ) : (
               <Button disabled>
                 <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />

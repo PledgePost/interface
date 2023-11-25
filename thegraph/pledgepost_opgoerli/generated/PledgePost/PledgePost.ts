@@ -96,6 +96,84 @@ export class ArticlePosted__Params {
   }
 }
 
+export class RoleAdminChanged extends ethereum.Event {
+  get params(): RoleAdminChanged__Params {
+    return new RoleAdminChanged__Params(this);
+  }
+}
+
+export class RoleAdminChanged__Params {
+  _event: RoleAdminChanged;
+
+  constructor(event: RoleAdminChanged) {
+    this._event = event;
+  }
+
+  get role(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+
+  get previousAdminRole(): Bytes {
+    return this._event.parameters[1].value.toBytes();
+  }
+
+  get newAdminRole(): Bytes {
+    return this._event.parameters[2].value.toBytes();
+  }
+}
+
+export class RoleGranted extends ethereum.Event {
+  get params(): RoleGranted__Params {
+    return new RoleGranted__Params(this);
+  }
+}
+
+export class RoleGranted__Params {
+  _event: RoleGranted;
+
+  constructor(event: RoleGranted) {
+    this._event = event;
+  }
+
+  get role(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+
+  get account(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get sender(): Address {
+    return this._event.parameters[2].value.toAddress();
+  }
+}
+
+export class RoleRevoked extends ethereum.Event {
+  get params(): RoleRevoked__Params {
+    return new RoleRevoked__Params(this);
+  }
+}
+
+export class RoleRevoked__Params {
+  _event: RoleRevoked;
+
+  constructor(event: RoleRevoked) {
+    this._event = event;
+  }
+
+  get role(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+
+  get account(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get sender(): Address {
+    return this._event.parameters[2].value.toAddress();
+  }
+}
+
 export class RoundApplied extends ethereum.Event {
   get params(): RoundApplied__Params {
     return new RoundApplied__Params(this);
@@ -205,12 +283,11 @@ export class PledgePost__authorToArticleIdToRoundResult {
   value2: string;
   value3: Bytes;
   value4: Address;
-  value5: Address;
+  value5: BigInt;
   value6: BigInt;
   value7: BigInt;
   value8: BigInt;
-  value9: BigInt;
-  value10: boolean;
+  value9: boolean;
 
   constructor(
     value0: BigInt,
@@ -218,12 +295,11 @@ export class PledgePost__authorToArticleIdToRoundResult {
     value2: string,
     value3: Bytes,
     value4: Address,
-    value5: Address,
+    value5: BigInt,
     value6: BigInt,
     value7: BigInt,
     value8: BigInt,
-    value9: BigInt,
-    value10: boolean
+    value9: boolean
   ) {
     this.value0 = value0;
     this.value1 = value1;
@@ -235,7 +311,6 @@ export class PledgePost__authorToArticleIdToRoundResult {
     this.value7 = value7;
     this.value8 = value8;
     this.value9 = value9;
-    this.value10 = value10;
   }
 
   toMap(): TypedMap<string, ethereum.Value> {
@@ -245,12 +320,11 @@ export class PledgePost__authorToArticleIdToRoundResult {
     map.set("value2", ethereum.Value.fromString(this.value2));
     map.set("value3", ethereum.Value.fromBytes(this.value3));
     map.set("value4", ethereum.Value.fromAddress(this.value4));
-    map.set("value5", ethereum.Value.fromAddress(this.value5));
+    map.set("value5", ethereum.Value.fromUnsignedBigInt(this.value5));
     map.set("value6", ethereum.Value.fromUnsignedBigInt(this.value6));
     map.set("value7", ethereum.Value.fromUnsignedBigInt(this.value7));
     map.set("value8", ethereum.Value.fromUnsignedBigInt(this.value8));
-    map.set("value9", ethereum.Value.fromUnsignedBigInt(this.value9));
-    map.set("value10", ethereum.Value.fromBoolean(this.value10));
+    map.set("value9", ethereum.Value.fromBoolean(this.value9));
     return map;
   }
 
@@ -274,28 +348,24 @@ export class PledgePost__authorToArticleIdToRoundResult {
     return this.value4;
   }
 
-  getPoolToken(): Address {
+  getPoolAmount(): BigInt {
     return this.value5;
   }
 
-  getPoolAmount(): BigInt {
+  getStartDate(): BigInt {
     return this.value6;
   }
 
-  getStartDate(): BigInt {
+  getEndDate(): BigInt {
     return this.value7;
   }
 
-  getEndDate(): BigInt {
+  getCreatedTimestamp(): BigInt {
     return this.value8;
   }
 
-  getCreatedTimestamp(): BigInt {
-    return this.value9;
-  }
-
   getIsActive(): boolean {
-    return this.value10;
+    return this.value9;
   }
 }
 
@@ -320,28 +390,24 @@ export class PledgePost__createRoundResultValue0Struct extends ethereum.Tuple {
     return this[4].toAddress();
   }
 
-  get poolToken(): Address {
-    return this[5].toAddress();
-  }
-
   get poolAmount(): BigInt {
-    return this[6].toBigInt();
+    return this[5].toBigInt();
   }
 
   get startDate(): BigInt {
-    return this[7].toBigInt();
+    return this[6].toBigInt();
   }
 
   get endDate(): BigInt {
-    return this[8].toBigInt();
+    return this[7].toBigInt();
   }
 
   get createdTimestamp(): BigInt {
-    return this[9].toBigInt();
+    return this[8].toBigInt();
   }
 
   get isActive(): boolean {
-    return this[10].toBoolean();
+    return this[9].toBoolean();
   }
 }
 
@@ -384,28 +450,24 @@ export class PledgePost__getAllRoundResultValue0Struct extends ethereum.Tuple {
     return this[4].toAddress();
   }
 
-  get poolToken(): Address {
-    return this[5].toAddress();
-  }
-
   get poolAmount(): BigInt {
-    return this[6].toBigInt();
+    return this[5].toBigInt();
   }
 
   get startDate(): BigInt {
-    return this[7].toBigInt();
+    return this[6].toBigInt();
   }
 
   get endDate(): BigInt {
-    return this[8].toBigInt();
+    return this[7].toBigInt();
   }
 
   get createdTimestamp(): BigInt {
-    return this[9].toBigInt();
+    return this[8].toBigInt();
   }
 
   get isActive(): boolean {
-    return this[10].toBoolean();
+    return this[9].toBoolean();
   }
 }
 
@@ -448,28 +510,24 @@ export class PledgePost__getAppliedRoundResultValue0Struct extends ethereum.Tupl
     return this[4].toAddress();
   }
 
-  get poolToken(): Address {
-    return this[5].toAddress();
-  }
-
   get poolAmount(): BigInt {
-    return this[6].toBigInt();
+    return this[5].toBigInt();
   }
 
   get startDate(): BigInt {
-    return this[7].toBigInt();
+    return this[6].toBigInt();
   }
 
   get endDate(): BigInt {
-    return this[8].toBigInt();
+    return this[7].toBigInt();
   }
 
   get createdTimestamp(): BigInt {
-    return this[9].toBigInt();
+    return this[8].toBigInt();
   }
 
   get isActive(): boolean {
-    return this[10].toBoolean();
+    return this[9].toBoolean();
   }
 }
 
@@ -512,28 +570,24 @@ export class PledgePost__getRoundResultValue0Struct extends ethereum.Tuple {
     return this[4].toAddress();
   }
 
-  get poolToken(): Address {
-    return this[5].toAddress();
-  }
-
   get poolAmount(): BigInt {
-    return this[6].toBigInt();
+    return this[5].toBigInt();
   }
 
   get startDate(): BigInt {
-    return this[7].toBigInt();
+    return this[6].toBigInt();
   }
 
   get endDate(): BigInt {
-    return this[8].toBigInt();
+    return this[7].toBigInt();
   }
 
   get createdTimestamp(): BigInt {
-    return this[9].toBigInt();
+    return this[8].toBigInt();
   }
 
   get isActive(): boolean {
-    return this[10].toBoolean();
+    return this[9].toBoolean();
   }
 }
 
@@ -582,12 +636,11 @@ export class PledgePost__roundsResult {
   value2: string;
   value3: Bytes;
   value4: Address;
-  value5: Address;
+  value5: BigInt;
   value6: BigInt;
   value7: BigInt;
   value8: BigInt;
-  value9: BigInt;
-  value10: boolean;
+  value9: boolean;
 
   constructor(
     value0: BigInt,
@@ -595,12 +648,11 @@ export class PledgePost__roundsResult {
     value2: string,
     value3: Bytes,
     value4: Address,
-    value5: Address,
+    value5: BigInt,
     value6: BigInt,
     value7: BigInt,
     value8: BigInt,
-    value9: BigInt,
-    value10: boolean
+    value9: boolean
   ) {
     this.value0 = value0;
     this.value1 = value1;
@@ -612,7 +664,6 @@ export class PledgePost__roundsResult {
     this.value7 = value7;
     this.value8 = value8;
     this.value9 = value9;
-    this.value10 = value10;
   }
 
   toMap(): TypedMap<string, ethereum.Value> {
@@ -622,12 +673,11 @@ export class PledgePost__roundsResult {
     map.set("value2", ethereum.Value.fromString(this.value2));
     map.set("value3", ethereum.Value.fromBytes(this.value3));
     map.set("value4", ethereum.Value.fromAddress(this.value4));
-    map.set("value5", ethereum.Value.fromAddress(this.value5));
+    map.set("value5", ethereum.Value.fromUnsignedBigInt(this.value5));
     map.set("value6", ethereum.Value.fromUnsignedBigInt(this.value6));
     map.set("value7", ethereum.Value.fromUnsignedBigInt(this.value7));
     map.set("value8", ethereum.Value.fromUnsignedBigInt(this.value8));
-    map.set("value9", ethereum.Value.fromUnsignedBigInt(this.value9));
-    map.set("value10", ethereum.Value.fromBoolean(this.value10));
+    map.set("value9", ethereum.Value.fromBoolean(this.value9));
     return map;
   }
 
@@ -651,34 +701,68 @@ export class PledgePost__roundsResult {
     return this.value4;
   }
 
-  getPoolToken(): Address {
+  getPoolAmount(): BigInt {
     return this.value5;
   }
 
-  getPoolAmount(): BigInt {
+  getStartDate(): BigInt {
     return this.value6;
   }
 
-  getStartDate(): BigInt {
+  getEndDate(): BigInt {
     return this.value7;
   }
 
-  getEndDate(): BigInt {
+  getCreatedTimestamp(): BigInt {
     return this.value8;
   }
 
-  getCreatedTimestamp(): BigInt {
-    return this.value9;
-  }
-
   getIsActive(): boolean {
-    return this.value10;
+    return this.value9;
   }
 }
 
 export class PledgePost extends ethereum.SmartContract {
   static bind(address: Address): PledgePost {
     return new PledgePost("PledgePost", address);
+  }
+
+  ADMIN_ROLE(): Bytes {
+    let result = super.call("ADMIN_ROLE", "ADMIN_ROLE():(bytes32)", []);
+
+    return result[0].toBytes();
+  }
+
+  try_ADMIN_ROLE(): ethereum.CallResult<Bytes> {
+    let result = super.tryCall("ADMIN_ROLE", "ADMIN_ROLE():(bytes32)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBytes());
+  }
+
+  DEFAULT_ADMIN_ROLE(): Bytes {
+    let result = super.call(
+      "DEFAULT_ADMIN_ROLE",
+      "DEFAULT_ADMIN_ROLE():(bytes32)",
+      []
+    );
+
+    return result[0].toBytes();
+  }
+
+  try_DEFAULT_ADMIN_ROLE(): ethereum.CallResult<Bytes> {
+    let result = super.tryCall(
+      "DEFAULT_ADMIN_ROLE",
+      "DEFAULT_ADMIN_ROLE():(bytes32)",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBytes());
   }
 
   applicationStatusForRound(
@@ -808,7 +892,7 @@ export class PledgePost extends ethereum.SmartContract {
   ): PledgePost__authorToArticleIdToRoundResult {
     let result = super.call(
       "authorToArticleIdToRound",
-      "authorToArticleIdToRound(address,uint256):(uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool)",
+      "authorToArticleIdToRound(address,uint256):(uint256,address,string,bytes,address,uint256,uint256,uint256,uint256,bool)",
       [
         ethereum.Value.fromAddress(param0),
         ethereum.Value.fromUnsignedBigInt(param1)
@@ -821,12 +905,11 @@ export class PledgePost extends ethereum.SmartContract {
       result[2].toString(),
       result[3].toBytes(),
       result[4].toAddress(),
-      result[5].toAddress(),
+      result[5].toBigInt(),
       result[6].toBigInt(),
       result[7].toBigInt(),
       result[8].toBigInt(),
-      result[9].toBigInt(),
-      result[10].toBoolean()
+      result[9].toBoolean()
     );
   }
 
@@ -836,7 +919,7 @@ export class PledgePost extends ethereum.SmartContract {
   ): ethereum.CallResult<PledgePost__authorToArticleIdToRoundResult> {
     let result = super.tryCall(
       "authorToArticleIdToRound",
-      "authorToArticleIdToRound(address,uint256):(uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool)",
+      "authorToArticleIdToRound(address,uint256):(uint256,address,string,bytes,address,uint256,uint256,uint256,uint256,bool)",
       [
         ethereum.Value.fromAddress(param0),
         ethereum.Value.fromUnsignedBigInt(param1)
@@ -853,12 +936,11 @@ export class PledgePost extends ethereum.SmartContract {
         value[2].toString(),
         value[3].toBytes(),
         value[4].toAddress(),
-        value[5].toAddress(),
+        value[5].toBigInt(),
         value[6].toBigInt(),
         value[7].toBigInt(),
         value[8].toBigInt(),
-        value[9].toBigInt(),
-        value[10].toBoolean()
+        value[9].toBoolean()
       )
     );
   }
@@ -884,6 +966,29 @@ export class PledgePost extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  checkAdminRole(_admin: Address): boolean {
+    let result = super.call(
+      "checkAdminRole",
+      "checkAdminRole(address):(bool)",
+      [ethereum.Value.fromAddress(_admin)]
+    );
+
+    return result[0].toBoolean();
+  }
+
+  try_checkAdminRole(_admin: Address): ethereum.CallResult<boolean> {
+    let result = super.tryCall(
+      "checkAdminRole",
+      "checkAdminRole(address):(bool)",
+      [ethereum.Value.fromAddress(_admin)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBoolean());
   }
 
   checkOwner(_sender: Address, _author: Address, _articleId: BigInt): boolean {
@@ -922,7 +1027,6 @@ export class PledgePost extends ethereum.SmartContract {
   }
 
   createRound(
-    _token: Address,
     _name: string,
     _description: string,
     _startDate: BigInt,
@@ -930,9 +1034,8 @@ export class PledgePost extends ethereum.SmartContract {
   ): PledgePost__createRoundResultValue0Struct {
     let result = super.call(
       "createRound",
-      "createRound(address,string,string,uint256,uint256):((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool))",
+      "createRound(string,string,uint256,uint256):((uint256,address,string,bytes,address,uint256,uint256,uint256,uint256,bool))",
       [
-        ethereum.Value.fromAddress(_token),
         ethereum.Value.fromString(_name),
         ethereum.Value.fromString(_description),
         ethereum.Value.fromUnsignedBigInt(_startDate),
@@ -946,7 +1049,6 @@ export class PledgePost extends ethereum.SmartContract {
   }
 
   try_createRound(
-    _token: Address,
     _name: string,
     _description: string,
     _startDate: BigInt,
@@ -954,9 +1056,8 @@ export class PledgePost extends ethereum.SmartContract {
   ): ethereum.CallResult<PledgePost__createRoundResultValue0Struct> {
     let result = super.tryCall(
       "createRound",
-      "createRound(address,string,string,uint256,uint256):((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool))",
+      "createRound(string,string,uint256,uint256):((uint256,address,string,bytes,address,uint256,uint256,uint256,uint256,bool))",
       [
-        ethereum.Value.fromAddress(_token),
         ethereum.Value.fromString(_name),
         ethereum.Value.fromString(_description),
         ethereum.Value.fromUnsignedBigInt(_startDate),
@@ -970,27 +1071,6 @@ export class PledgePost extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(
       changetype<PledgePost__createRoundResultValue0Struct>(value[0].toTuple())
     );
-  }
-
-  deposit(_roundId: BigInt, _amount: BigInt): boolean {
-    let result = super.call("deposit", "deposit(uint256,uint256):(bool)", [
-      ethereum.Value.fromUnsignedBigInt(_roundId),
-      ethereum.Value.fromUnsignedBigInt(_amount)
-    ]);
-
-    return result[0].toBoolean();
-  }
-
-  try_deposit(_roundId: BigInt, _amount: BigInt): ethereum.CallResult<boolean> {
-    let result = super.tryCall("deposit", "deposit(uint256,uint256):(bool)", [
-      ethereum.Value.fromUnsignedBigInt(_roundId),
-      ethereum.Value.fromUnsignedBigInt(_amount)
-    ]);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBoolean());
   }
 
   getAllAuthorArticle(
@@ -1029,7 +1109,7 @@ export class PledgePost extends ethereum.SmartContract {
   getAllRound(): Array<PledgePost__getAllRoundResultValue0Struct> {
     let result = super.call(
       "getAllRound",
-      "getAllRound():((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool)[])",
+      "getAllRound():((uint256,address,string,bytes,address,uint256,uint256,uint256,uint256,bool)[])",
       []
     );
 
@@ -1041,7 +1121,7 @@ export class PledgePost extends ethereum.SmartContract {
   > {
     let result = super.tryCall(
       "getAllRound",
-      "getAllRound():((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool)[])",
+      "getAllRound():((uint256,address,string,bytes,address,uint256,uint256,uint256,uint256,bool)[])",
       []
     );
     if (result.reverted) {
@@ -1178,7 +1258,7 @@ export class PledgePost extends ethereum.SmartContract {
   ): PledgePost__getAppliedRoundResultValue0Struct {
     let result = super.call(
       "getAppliedRound",
-      "getAppliedRound(address,uint256):((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool))",
+      "getAppliedRound(address,uint256):((uint256,address,string,bytes,address,uint256,uint256,uint256,uint256,bool))",
       [
         ethereum.Value.fromAddress(_author),
         ethereum.Value.fromUnsignedBigInt(_articleId)
@@ -1196,7 +1276,7 @@ export class PledgePost extends ethereum.SmartContract {
   ): ethereum.CallResult<PledgePost__getAppliedRoundResultValue0Struct> {
     let result = super.tryCall(
       "getAppliedRound",
-      "getAppliedRound(address,uint256):((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool))",
+      "getAppliedRound(address,uint256):((uint256,address,string,bytes,address,uint256,uint256,uint256,uint256,bool))",
       [
         ethereum.Value.fromAddress(_author),
         ethereum.Value.fromUnsignedBigInt(_articleId)
@@ -1407,10 +1487,31 @@ export class PledgePost extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
+  getRoleAdmin(role: Bytes): Bytes {
+    let result = super.call("getRoleAdmin", "getRoleAdmin(bytes32):(bytes32)", [
+      ethereum.Value.fromFixedBytes(role)
+    ]);
+
+    return result[0].toBytes();
+  }
+
+  try_getRoleAdmin(role: Bytes): ethereum.CallResult<Bytes> {
+    let result = super.tryCall(
+      "getRoleAdmin",
+      "getRoleAdmin(bytes32):(bytes32)",
+      [ethereum.Value.fromFixedBytes(role)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBytes());
+  }
+
   getRound(_roundId: BigInt): PledgePost__getRoundResultValue0Struct {
     let result = super.call(
       "getRound",
-      "getRound(uint256):((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool))",
+      "getRound(uint256):((uint256,address,string,bytes,address,uint256,uint256,uint256,uint256,bool))",
       [ethereum.Value.fromUnsignedBigInt(_roundId)]
     );
 
@@ -1424,7 +1525,7 @@ export class PledgePost extends ethereum.SmartContract {
   ): ethereum.CallResult<PledgePost__getRoundResultValue0Struct> {
     let result = super.tryCall(
       "getRound",
-      "getRound(uint256):((uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool))",
+      "getRound(uint256):((uint256,address,string,bytes,address,uint256,uint256,uint256,uint256,bool))",
       [ethereum.Value.fromUnsignedBigInt(_roundId)]
     );
     if (result.reverted) {
@@ -1499,6 +1600,27 @@ export class PledgePost extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  hasRole(role: Bytes, account: Address): boolean {
+    let result = super.call("hasRole", "hasRole(bytes32,address):(bool)", [
+      ethereum.Value.fromFixedBytes(role),
+      ethereum.Value.fromAddress(account)
+    ]);
+
+    return result[0].toBoolean();
+  }
+
+  try_hasRole(role: Bytes, account: Address): ethereum.CallResult<boolean> {
+    let result = super.tryCall("hasRole", "hasRole(bytes32,address):(bool)", [
+      ethereum.Value.fromFixedBytes(role),
+      ethereum.Value.fromAddress(account)
+    ]);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBoolean());
   }
 
   matchingAmounts(param0: BigInt, param1: Address, param2: BigInt): BigInt {
@@ -1674,7 +1796,7 @@ export class PledgePost extends ethereum.SmartContract {
   rounds(param0: BigInt): PledgePost__roundsResult {
     let result = super.call(
       "rounds",
-      "rounds(uint256):(uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool)",
+      "rounds(uint256):(uint256,address,string,bytes,address,uint256,uint256,uint256,uint256,bool)",
       [ethereum.Value.fromUnsignedBigInt(param0)]
     );
 
@@ -1684,19 +1806,18 @@ export class PledgePost extends ethereum.SmartContract {
       result[2].toString(),
       result[3].toBytes(),
       result[4].toAddress(),
-      result[5].toAddress(),
+      result[5].toBigInt(),
       result[6].toBigInt(),
       result[7].toBigInt(),
       result[8].toBigInt(),
-      result[9].toBigInt(),
-      result[10].toBoolean()
+      result[9].toBoolean()
     );
   }
 
   try_rounds(param0: BigInt): ethereum.CallResult<PledgePost__roundsResult> {
     let result = super.tryCall(
       "rounds",
-      "rounds(uint256):(uint256,address,string,bytes,address,address,uint256,uint256,uint256,uint256,bool)",
+      "rounds(uint256):(uint256,address,string,bytes,address,uint256,uint256,uint256,uint256,bool)",
       [ethereum.Value.fromUnsignedBigInt(param0)]
     );
     if (result.reverted) {
@@ -1710,14 +1831,36 @@ export class PledgePost extends ethereum.SmartContract {
         value[2].toString(),
         value[3].toBytes(),
         value[4].toAddress(),
-        value[5].toAddress(),
+        value[5].toBigInt(),
         value[6].toBigInt(),
         value[7].toBigInt(),
         value[8].toBigInt(),
-        value[9].toBigInt(),
-        value[10].toBoolean()
+        value[9].toBoolean()
       )
     );
+  }
+
+  supportsInterface(interfaceId: Bytes): boolean {
+    let result = super.call(
+      "supportsInterface",
+      "supportsInterface(bytes4):(bool)",
+      [ethereum.Value.fromFixedBytes(interfaceId)]
+    );
+
+    return result[0].toBoolean();
+  }
+
+  try_supportsInterface(interfaceId: Bytes): ethereum.CallResult<boolean> {
+    let result = super.tryCall(
+      "supportsInterface",
+      "supportsInterface(bytes4):(bool)",
+      [ethereum.Value.fromFixedBytes(interfaceId)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBoolean());
   }
 }
 
@@ -1845,6 +1988,36 @@ export class ActivateRoundCall__Outputs {
   }
 }
 
+export class AddAdminCall extends ethereum.Call {
+  get inputs(): AddAdminCall__Inputs {
+    return new AddAdminCall__Inputs(this);
+  }
+
+  get outputs(): AddAdminCall__Outputs {
+    return new AddAdminCall__Outputs(this);
+  }
+}
+
+export class AddAdminCall__Inputs {
+  _call: AddAdminCall;
+
+  constructor(call: AddAdminCall) {
+    this._call = call;
+  }
+
+  get _admin(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+}
+
+export class AddAdminCall__Outputs {
+  _call: AddAdminCall;
+
+  constructor(call: AddAdminCall) {
+    this._call = call;
+  }
+}
+
 export class ApplyForRoundCall extends ethereum.Call {
   get inputs(): ApplyForRoundCall__Inputs {
     return new ApplyForRoundCall__Inputs(this);
@@ -1896,24 +2069,20 @@ export class CreateRoundCall__Inputs {
     this._call = call;
   }
 
-  get _token(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-
   get _name(): string {
-    return this._call.inputValues[1].value.toString();
+    return this._call.inputValues[0].value.toString();
   }
 
   get _description(): string {
-    return this._call.inputValues[2].value.toString();
+    return this._call.inputValues[1].value.toString();
   }
 
   get _startDate(): BigInt {
-    return this._call.inputValues[3].value.toBigInt();
+    return this._call.inputValues[2].value.toBigInt();
   }
 
   get _endDate(): BigInt {
-    return this._call.inputValues[4].value.toBigInt();
+    return this._call.inputValues[3].value.toBigInt();
   }
 }
 
@@ -1952,28 +2121,24 @@ export class CreateRoundCallValue0Struct extends ethereum.Tuple {
     return this[4].toAddress();
   }
 
-  get poolToken(): Address {
-    return this[5].toAddress();
-  }
-
   get poolAmount(): BigInt {
-    return this[6].toBigInt();
+    return this[5].toBigInt();
   }
 
   get startDate(): BigInt {
-    return this[7].toBigInt();
+    return this[6].toBigInt();
   }
 
   get endDate(): BigInt {
-    return this[8].toBigInt();
+    return this[7].toBigInt();
   }
 
   get createdTimestamp(): BigInt {
-    return this[9].toBigInt();
+    return this[8].toBigInt();
   }
 
   get isActive(): boolean {
-    return this[10].toBoolean();
+    return this[9].toBoolean();
   }
 }
 
@@ -2065,10 +2230,6 @@ export class DepositCall__Inputs {
   get _roundId(): BigInt {
     return this._call.inputValues[0].value.toBigInt();
   }
-
-  get _amount(): BigInt {
-    return this._call.inputValues[1].value.toBigInt();
-  }
 }
 
 export class DepositCall__Outputs {
@@ -2078,7 +2239,7 @@ export class DepositCall__Outputs {
     this._call = call;
   }
 
-  get success(): boolean {
+  get value0(): boolean {
     return this._call.outputValues[0].value.toBoolean();
   }
 }
@@ -2107,20 +2268,46 @@ export class DonateToArticleCall__Inputs {
   get _articleId(): BigInt {
     return this._call.inputValues[1].value.toBigInt();
   }
-
-  get _token(): Address {
-    return this._call.inputValues[2].value.toAddress();
-  }
-
-  get _amount(): BigInt {
-    return this._call.inputValues[3].value.toBigInt();
-  }
 }
 
 export class DonateToArticleCall__Outputs {
   _call: DonateToArticleCall;
 
   constructor(call: DonateToArticleCall) {
+    this._call = call;
+  }
+}
+
+export class GrantRoleCall extends ethereum.Call {
+  get inputs(): GrantRoleCall__Inputs {
+    return new GrantRoleCall__Inputs(this);
+  }
+
+  get outputs(): GrantRoleCall__Outputs {
+    return new GrantRoleCall__Outputs(this);
+  }
+}
+
+export class GrantRoleCall__Inputs {
+  _call: GrantRoleCall;
+
+  constructor(call: GrantRoleCall) {
+    this._call = call;
+  }
+
+  get role(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
+  }
+
+  get account(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+}
+
+export class GrantRoleCall__Outputs {
+  _call: GrantRoleCall;
+
+  constructor(call: GrantRoleCall) {
     this._call = call;
   }
 }
@@ -2156,5 +2343,137 @@ export class PostArticleCall__Outputs {
 
   get value0(): BigInt {
     return this._call.outputValues[0].value.toBigInt();
+  }
+}
+
+export class RemoveAdminCall extends ethereum.Call {
+  get inputs(): RemoveAdminCall__Inputs {
+    return new RemoveAdminCall__Inputs(this);
+  }
+
+  get outputs(): RemoveAdminCall__Outputs {
+    return new RemoveAdminCall__Outputs(this);
+  }
+}
+
+export class RemoveAdminCall__Inputs {
+  _call: RemoveAdminCall;
+
+  constructor(call: RemoveAdminCall) {
+    this._call = call;
+  }
+
+  get _admin(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+}
+
+export class RemoveAdminCall__Outputs {
+  _call: RemoveAdminCall;
+
+  constructor(call: RemoveAdminCall) {
+    this._call = call;
+  }
+}
+
+export class RenounceRoleCall extends ethereum.Call {
+  get inputs(): RenounceRoleCall__Inputs {
+    return new RenounceRoleCall__Inputs(this);
+  }
+
+  get outputs(): RenounceRoleCall__Outputs {
+    return new RenounceRoleCall__Outputs(this);
+  }
+}
+
+export class RenounceRoleCall__Inputs {
+  _call: RenounceRoleCall;
+
+  constructor(call: RenounceRoleCall) {
+    this._call = call;
+  }
+
+  get role(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
+  }
+
+  get account(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+}
+
+export class RenounceRoleCall__Outputs {
+  _call: RenounceRoleCall;
+
+  constructor(call: RenounceRoleCall) {
+    this._call = call;
+  }
+}
+
+export class RevokeRoleCall extends ethereum.Call {
+  get inputs(): RevokeRoleCall__Inputs {
+    return new RevokeRoleCall__Inputs(this);
+  }
+
+  get outputs(): RevokeRoleCall__Outputs {
+    return new RevokeRoleCall__Outputs(this);
+  }
+}
+
+export class RevokeRoleCall__Inputs {
+  _call: RevokeRoleCall;
+
+  constructor(call: RevokeRoleCall) {
+    this._call = call;
+  }
+
+  get role(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
+  }
+
+  get account(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+}
+
+export class RevokeRoleCall__Outputs {
+  _call: RevokeRoleCall;
+
+  constructor(call: RevokeRoleCall) {
+    this._call = call;
+  }
+}
+
+export class UpdateArticleCall extends ethereum.Call {
+  get inputs(): UpdateArticleCall__Inputs {
+    return new UpdateArticleCall__Inputs(this);
+  }
+
+  get outputs(): UpdateArticleCall__Outputs {
+    return new UpdateArticleCall__Outputs(this);
+  }
+}
+
+export class UpdateArticleCall__Inputs {
+  _call: UpdateArticleCall;
+
+  constructor(call: UpdateArticleCall) {
+    this._call = call;
+  }
+
+  get _articleId(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+
+  get _content(): string {
+    return this._call.inputValues[1].value.toString();
+  }
+}
+
+export class UpdateArticleCall__Outputs {
+  _call: UpdateArticleCall;
+
+  constructor(call: UpdateArticleCall) {
+    this._call = call;
   }
 }

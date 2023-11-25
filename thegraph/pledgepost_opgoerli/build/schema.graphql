@@ -13,7 +13,7 @@ type Article @entity {
   authorAddress: Bytes!
   content: String!
   donations: [Donation!]! @derivedFrom(field: "article")
-  allocation: Allocated
+  allocation: [Allocated!]! @derivedFrom(field: "articleId")
   associatedRound: Round
 }
 type Donation @entity {
@@ -26,6 +26,7 @@ type Donation @entity {
 
 type Round @entity {
   id: ID!
+	roundId: BigInt! # uint256
   owner: Bytes! # address
   ipoolAddress: Bytes! # address
   name: String! # string

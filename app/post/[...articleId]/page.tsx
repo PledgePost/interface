@@ -3,25 +3,36 @@ import React, { useState, useEffect } from "react";
 import Messages from "@/components/Comment/messages";
 import MessageInput from "@/components/Comment/messageInput";
 import { Button } from "@/components/ui/button";
-import { showErrorToast } from "@/hooks/useNotification";
+import {
+  showDefaultToast,
+  showErrorToast,
+  showSuccessToast,
+} from "@/hooks/useNotification";
 import { toChecksumAddress } from "ethereumjs-util";
-import { TokenType } from "@/lib/Token/token";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Pre } from "@/components/RichEditor";
-import { useSafeAA } from "@/providers/AccountAbstractionContext";
-import { BigNumber, ethers } from "ethers";
-import { SalesCard } from "@/components/Card";
+import { ethers } from "ethers";
+import { SalesCard, SubscriptionCard } from "@/components/Card";
 import { GET_ARTICLES_BY_ID_AND_ADDRESS } from "@/lib/query";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { Comment, getComments, insertComment } from "@/hooks/useSupabase";
-
-const ABI = require("../../../abis/PledgePost.json").abi;
-const TOKEN_ABI = require("../../../abis/Token.json").abi;
-const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as string;
-
+import {
+  useAccount,
+  useContractRead,
+  useContractWrite,
+  useNetwork,
+} from "wagmi";
+import { parseEther } from "viem";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+import useDefaultProvider from "@/hooks/useDefaultProvider";
+import { ABIs as ABI } from "@/constants";
+const PledgeContract = {
+  address: ABI.contractAddress as any,
+  abi: ABI.abi,
+};
 const client = new ApolloClient({
-  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_mumbai/version/latest",
+  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_opgoerli/version/latest",
   cache: new InMemoryCache(),
 });
 
@@ -38,25 +49,43 @@ async function fetchData(address: any, cid: string) {
 export default function ArticlePage({ params }: any) {
   const [content, setContent] = useState<any>(null);
   const [messages, setMessages] = useState<string>("");
-  const [token, setToken] = useState<TokenType | undefined>(undefined); //erc20 token
-  const [isApproved, setIsApproved] = useState<boolean>();
   const [comments, setComments] = useState<Comment[] | undefined>(undefined);
   const [amount, setAmount] = useState<any>(null);
-  const [allowance, setAllowance] = useState<any>(null);
-  const [donated, setDonated] = useState<boolean>();
   const [donation, setDonation] = useState<any>(null);
   const [donors, setDonors] = useState<any>(null);
+  const [isDonated, setIsDonated] = useState<any>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [estimatedAllocation, setEstimatedAllocation] = useState<any>(null);
-
+  const { openConnectModal } = useConnectModal();
+  const { address: currentAddress } = useAccount();
+  const { chain } = useNetwork();
+  const provider = useDefaultProvider();
+  useEffect(() => {
+    if (!currentAddress || !provider) return;
+    async function checkDonation() {
+      const contract = new ethers.Contract(
+        ABI.contractAddress,
+        ABI.abi,
+        provider
+      );
+      const data = await contract.checkOwner(
+        currentAddress,
+        params.articleId[0],
+        params.articleId[1]
+      );
+      setIsDonated(data);
+    }
+    checkDonation();
+  }, [currentAddress, params.articleId, provider]);
   const {
-    currentAddress,
-    smartAccount,
-    loginWeb3Auth,
-    web3Provider,
-    signer,
-    handleUserOp,
-    loadingTx,
-  } = useSafeAA();
+    data,
+    isLoading: isLoadingTx,
+    isSuccess,
+    write,
+  } = useContractWrite({
+    ...PledgeContract,
+    functionName: "donateToArticle",
+  });
   async function fetchComments() {
     const comments = await getComments(
       params.articleId[0],
@@ -64,8 +93,9 @@ export default function ArticlePage({ params }: any) {
     );
     setComments(comments);
   }
-  async function handleSend() {
-    if (!currentAddress || messages === "" || !signer) return;
+
+  async function handleComment() {
+    if (!currentAddress || messages === "") return;
     try {
       await insertComment(
         params.articleId[0],
@@ -80,55 +110,25 @@ export default function ArticlePage({ params }: any) {
       showErrorToast("Error posting comment");
     }
   }
-  const donate = async (inputAmount: any) => {
-    if (!token?.address) return;
-    const contract = new ethers.Contract(contractAddress, ABI, signer);
-    const tx = await contract.populateTransaction.donateToArticle(
-      params.articleId[0],
-      params.articleId[1],
-      token.address,
-      inputAmount
-    );
-    await handleUserOp(tx, smartAccount);
-  };
-  const approve = async (inputAmount: any) => {
-    if (!token?.address) return;
-    const tokenAddress = process.env
-      .NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS as string;
-    const contract = new ethers.Contract(tokenAddress, TOKEN_ABI, signer);
-    console.log("inputAmount :>> ", inputAmount);
 
-    const tx = await contract.populateTransaction.approve(
-      contractAddress,
-      inputAmount
-    );
-    console.log("tx :>> ", tx);
-    await handleUserOp(tx, smartAccount);
-  };
-
-  async function handleClick() {
-    if (!currentAddress || !amount || !token || !smartAccount || !signer)
-      return alert("Please connect wallet");
-    const inputAmount = ethers.utils.parseUnits(amount, token.decimals);
-    const noLimitAllowance = ethers.utils.parseUnits(
-      "100000000000000000000",
-      18
-    );
+  const handleDonate = async () => {
+    if (!currentAddress) return alert("Please connect wallet");
+    if (!amount) return alert("Please enter amount");
+    let lowercaseAddress = params.articleId[0].toLowerCase();
+    if (lowercaseAddress === params.articleId[0])
+      return alert("You cannot donate to your own article");
     try {
-      if (!allowance) return;
-      if (allowance < inputAmount) {
-        console.log("allowance is less than inputAmount");
-        const approvalTx = await approve(noLimitAllowance);
-        await donate(inputAmount);
-      } else {
-        donate(inputAmount);
-      }
+      showDefaultToast("Sending Transaction...");
+      write({
+        args: [params.articleId[0], params.articleId[1]],
+        value: parseEther(amount),
+      });
     } catch (e) {
       console.log("error: ", e);
       showErrorToast("Error donating to article");
     }
-  }
-  async function getArticleByIdandAddress(address: string, id: string) {
+  };
+  async function getArticleByIdandAddress(address: any, id: any) {
     const response = await client.query({
       query: GET_ARTICLES_BY_ID_AND_ADDRESS,
       variables: {
@@ -141,75 +141,42 @@ export default function ArticlePage({ params }: any) {
     return response.data.articles[0];
   }
   useEffect(() => {
-    const fetchArticle = async () => {
-      const lowercaseAddress = params.articleId[0].toLowerCase();
-      const article = await getArticleByIdandAddress(
-        lowercaseAddress,
-        params.articleId[1]
-      );
-      if (!article) return;
-    };
-    fetchArticle();
-  }, [params.articleId]);
-  useEffect(() => {
-    if (!amount || !token?.decimals) return;
-    const inputAmount = ethers.utils.parseUnits(amount, token?.decimals);
-    const bool = allowance < inputAmount ? false : true;
+    if (!data || !chain) return;
+    if (isSuccess) {
+      showSuccessToast(`${chain?.blockExplorers?.etherscan}/tx/${data.hash}`);
+    } else {
+      showErrorToast("Error donating to article");
+    }
+  }, [chain, data, isSuccess]);
 
-    setIsApproved(bool);
-  }, [amount, allowance, token?.decimals]);
-  useEffect(() => {
-    const donationHistory = async () => {
-      try {
-        const contract = new ethers.Contract(
-          contractAddress,
-          ABI,
-          web3Provider
-        );
-        const donated = await contract.checkOwner(
-          currentAddress,
-          params.articleId[0],
-          params.articleId[1]
-        );
-        setDonated(donated);
-      } catch (e) {
-        console.log("error :>> ", e);
-      }
-    };
-    const checkAllowance = async () => {
-      if (!token?.address) return;
-      try {
-        const tokenContract = new ethers.Contract(
-          token?.address,
-          TOKEN_ABI,
-          web3Provider
-        );
-        const allowance: BigNumber = await tokenContract.allowance(
-          currentAddress,
-          contractAddress
-        );
-        setAllowance(allowance);
-      } catch (e) {
-        console.log("error :>> ", e);
-      }
-    };
-    donationHistory();
-    checkAllowance();
-  }, [
-    currentAddress,
-    params.articleId,
-    token?.address,
-    token?.decimals,
-    web3Provider,
-  ]);
   useEffect(() => {
     async function fetchContent() {
       const result = await fetchData(params.articleId[0], params.articleId[2]);
       setContent(result);
       return result;
     }
+    const fetchArticleInfo = async () => {
+      const lowercaseAddress = params.articleId[0].toLowerCase();
+      const article = await getArticleByIdandAddress(
+        lowercaseAddress,
+        params.articleId[1]
+      );
+      if (article.donations.length > 0) {
+        let totalAmount = 0;
+        for (let i = 0; i < article.donations.length; i++) {
+          let donationAmount = ethers.utils.formatEther(
+            article.donations[i].amount
+          );
+          totalAmount += parseFloat(donationAmount);
+        }
+        setDonation(totalAmount);
+        setDonors(article.donations.length);
+      }
+    };
+
     fetchContent();
     fetchComments();
+    fetchArticleInfo();
   }, [params.articleId]);
 
   return (
@@ -218,8 +185,21 @@ export default function ArticlePage({ params }: any) {
         {content?.title}
       </h1>
       <div className="flex flex-row gap-4 my-4 justify-center">
-        <SalesCard title="Recieved Donation" amount={donation || 0} />
-        <SalesCard title="Total Donors" amount={estimatedAllocation || 0} />
+        <SalesCard
+          title="Recieved Donation"
+          amount={donation || 0}
+          isLoading={isLoading}
+        />
+        <SalesCard
+          title="Estimated Matching"
+          isLoading={isLoading}
+          amount={estimatedAllocation || 0}
+        />
+        <SubscriptionCard
+          title="Contributors"
+          amount={donors || 0}
+          isLoading={isLoading}
+        />
       </div>
       <div className="flex flex-row gap-4">
         <div className="w-3/4 bg-white p-5 rounded shadow">
@@ -246,20 +226,18 @@ export default function ArticlePage({ params }: any) {
               </>
             )}
             {!currentAddress ? (
-              <Button onClick={loginWeb3Auth} className="w-full">
+              <Button onClick={openConnectModal} className="w-full">
                 Connect Wallet
               </Button>
             ) : (
               <MessageInput
                 messages={messages}
                 setMessages={setMessages}
-                setToken={setToken}
                 setAmount={setAmount}
-                handleSend={handleSend}
-                handleClick={handleClick}
-                isDonated={donated}
-                isApproved={isApproved}
-                loadingTx={loadingTx}
+                handleSend={handleComment}
+                handleClick={handleDonate}
+                isDonated={isDonated}
+                loadingTx={isLoadingTx}
               />
             )}
           </div>

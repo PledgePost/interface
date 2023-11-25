@@ -52,7 +52,7 @@ export const AccountAbstractionProvider = ({
 
   // chainId should be selected by the user
 
-  const [chainId, setChainId] = useState<any>("0x13881");
+  const [chainId, setChainId] = useState<any>("0x1a4");
   // initial chain: op-goerli
   const chain = getChain(chainId);
 
@@ -239,6 +239,7 @@ export const AccountAbstractionProvider = ({
       showErrorToast('Error: "Transaction failed"');
     }
   };
+
   return (
     <AccountAbstractionContext.Provider
       value={{

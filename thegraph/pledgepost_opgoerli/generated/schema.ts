@@ -188,21 +188,14 @@ export class Article extends Entity {
     );
   }
 
-  get allocation(): Bytes | null {
-    let value = this.get("allocation");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set allocation(value: Bytes | null) {
-    if (!value) {
-      this.unset("allocation");
-    } else {
-      this.set("allocation", Value.fromBytes(<Bytes>value));
-    }
+  get allocation(): AllocatedLoader {
+    return new AllocatedLoader(
+      "Article",
+      this.get("id")!
+        .toBytes()
+        .toHexString(),
+      "allocation"
+    );
   }
 
   get associatedRound(): string | null {
@@ -354,6 +347,19 @@ export class Round extends Entity {
 
   set id(value: string) {
     this.set("id", Value.fromString(value));
+  }
+
+  get roundId(): BigInt {
+    let value = this.get("roundId");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set roundId(value: BigInt) {
+    this.set("roundId", Value.fromBigInt(value));
   }
 
   get owner(): Bytes {

@@ -8,8 +8,6 @@ export default function MessageInput({
   handleSend,
   isDonated,
   handleClick,
-  setToken,
-  isApproved,
   setAmount,
   loadingTx,
 }: any) {
@@ -28,10 +26,8 @@ export default function MessageInput({
       {!isDonated ? (
         <DonationModal
           handleClick={handleClick}
-          setToken={setToken}
           setAmount={setAmount}
           loadingTx={loadingTx}
-          isApproved={isApproved}
         />
       ) : (
         <Button onClick={() => handleSend()}>Submit Comment</Button>
