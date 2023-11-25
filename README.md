@@ -1,10 +1,9 @@
-# PledgePost
 
-**PledgePost: A Quadratic Funding Media Platform**
+## PledgePost: A Quadratic Funding Media Platform**
 
-To test PledgePost, go to `/dashboard` and get test USDC to donate! you can also post article without paying any gas!
+<img width="1104" alt="Screenshot 2023-11-25 at 20 30 26" src="https://github.com/PledgePost/interface/assets/67859510/4623c0ae-540e-4a9d-ba95-365e4bad5bc1">
 
-Happy to hear your feedback! feel free to say hi:)
+
 ## Description
 
 **Introduction**:
@@ -40,15 +39,9 @@ There is a Pool that is the source for distributing funds for each Round, and th
 
 ### PledgePost.sol
 
-CntractAddress: 0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f
+CntractAddress: 0xdDA61E11e796543dA1498F17257Ff4C94E80bcC0
 
-[Polygon Mumbai](https://mumbai.polygonscan.com/address/0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f)
-
-[PolygonZkevm Testnet](https://testnet-zkevm.polygonscan.com/address/0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f)
-
-[Scroll Sepolia testnet](https://sepolia.scrollscan.com/address/0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f)
-
-[Op-goerli](https://goerli-optimistic.etherscan.io/address/0x7c1a2f6bb2E01fc051298bCB279008ffC256d35f)
+[Op-goerli](https://goerli-optimistic.etherscan.io/address/0xdDA61E11e796543dA1498F17257Ff4C94E80bcC0)
 
 
 ## Getting Started
