@@ -246,3 +246,4 @@ export default function ArticlePage({ params }: any) {
     </div>
   );
 }
+
