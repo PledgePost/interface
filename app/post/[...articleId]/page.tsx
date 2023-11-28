@@ -27,6 +27,7 @@ import { parseEther } from "viem";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import useDefaultProvider from "@/hooks/useDefaultProvider";
 import { ABIs as ABI } from "@/constants";
+import { fetchETHprice } from "@/lib/coingecko";
 const PledgeContract = {
   address: ABI.contractAddress as any,
   abi: ABI.abi,
@@ -114,7 +115,7 @@ export default function ArticlePage({ params }: any) {
   const handleDonate = async () => {
     if (!currentAddress) return alert("Please connect wallet");
     if (!amount) return alert("Please enter amount");
-    let lowercaseAddress = params.articleId[0].toLowerCase();
+    let lowercaseAddress = currentAddress.toLowerCase();
     if (lowercaseAddress === params.articleId[0])
       return alert("You cannot donate to your own article");
     try {
@@ -169,7 +170,9 @@ export default function ArticlePage({ params }: any) {
           );
           totalAmount += parseFloat(donationAmount);
         }
-        setDonation(totalAmount);
+        const ETHUSDC = await fetchETHprice();
+        const USDValue = totalAmount * ETHUSDC;
+        setDonation(USDValue);
         setDonors(article.donations.length);
       }
     };
@@ -246,4 +249,3 @@ export default function ArticlePage({ params }: any) {
     </div>
   );
 }
-

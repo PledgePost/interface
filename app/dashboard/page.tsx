@@ -9,6 +9,7 @@ import { ethers } from "ethers";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { GET_ARTICLE_BY_ID, GET_USER_BY_ID } from "../../lib/query";
 import { useAccount } from "wagmi";
+import { fetchETHprice } from "@/lib/coingecko";
 
 const client = new ApolloClient({
   uri: "https://api.studio.thegraph.com/query/52298/pledgepost_opgoerli/version/latest",
@@ -51,56 +52,58 @@ export default function Dashboard() {
       const lowercaseAddress = currentAddress.toLowerCase();
       const posts: any = await getArticleByAddress(lowercaseAddress);
       const users = await getUserInfo(lowercaseAddress);
+      const ETHUSD: any = await fetchETHprice();
       const AllPost = await Promise.all(
         posts.map(async (post: any) => {
-          let donation = ethers.BigNumber.from("0");
+          let donation = 0;
           if (post.donations) {
             for (let i = 0; i < post.donations.length; i++) {
-              let amount = ethers.BigNumber.from(post.donations[i].amount);
-              donation = donation.add(amount);
+              let amount = ethers.utils.formatEther(post.donations[i].amount);
+              donation += parseFloat(amount);
             }
           }
           const ipfsData = await fetchData(post.authorAddress, post.content);
+          let USDValue: any = ETHUSD * donation;
           return {
             ...post,
             ...ipfsData,
-            donation: ethers.utils.formatUnits(donation, 18),
+            donation: USDValue,
           };
         })
       );
 
       const UserInfo = await Promise.all(
         users.map(async (user: any) => {
-          let recievedDonation = ethers.BigNumber.from("0");
-          let recievedAllocation = ethers.BigNumber.from("0");
+          let recievedDonation = 0;
+          let recievedAllocation = 0;
           let totalDonor = 0;
           if (user.recievedDonations) {
             for (let i = 0; i < user.recievedDonations.length; i++) {
-              let amount = ethers.BigNumber.from(
+              let amount = ethers.utils.formatEther(
                 user.recievedDonations[i].amount
               );
               totalDonor = totalDonor + 1;
-              recievedDonation = recievedDonation.add(amount);
+              recievedDonation += parseFloat(amount);
             }
           }
           if (user.allocation) {
             for (let i = 0; i < user.allocation.length; i++) {
-              let amount = ethers.BigNumber.from(user.allocation[i].amount);
-              recievedAllocation = recievedAllocation.add(amount);
+              let amount = ethers.utils.formatEther(user.allocation[i].amount);
+              recievedAllocation += parseFloat(amount);
             }
           }
+
+          let USDDonation: any = ETHUSD * recievedDonation;
+          let USDAllocation: any = ETHUSD * recievedAllocation;
+
           return {
             ...user,
-            totalRecievedDonation:
-              ethers.utils.formatUnits(recievedDonation, 18) || 0,
-            totalDonor: totalDonor || 0,
-            totalRecievedAllocation:
-              ethers.utils.formatUnits(recievedAllocation, 18) || 0,
+            totalRecievedDonation: USDDonation,
+            totalDonor: totalDonor,
+            totalRecievedAllocation: USDAllocation,
           };
         })
       );
-      console.log("UserInfo", UserInfo[0]);
-      console.log("AllPost", AllPost);
       setUserArticle(AllPost);
       setUser(UserInfo[0]);
     };

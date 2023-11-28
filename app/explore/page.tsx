@@ -5,9 +5,18 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { getAllData } from "@/lib/fetchData";
 import { Button } from "@/components/ui/button";
+import { fetchETHprice } from "@/lib/coingecko";
 
 export default function Explore() {
+  const [ETHUSD, setETHUSD] = useState<any>();
   const posts: any = use(getAllData());
+  useEffect(() => {
+    const fetch = async () => {
+      const ETHUSD: any = await fetchETHprice();
+      setETHUSD(ETHUSD);
+    };
+    fetch();
+  }, []);
 
   return (
     <div>
@@ -38,7 +47,7 @@ export default function Explore() {
               author={post?.author.id}
               Description={post.value}
               ImageUrl="https://picsum.photos/200/300"
-              donation={post.donation}
+              donation={post.donation * ETHUSD}
               roundId={post.associatedRound?.name}
             />
           </Link>

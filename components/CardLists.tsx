@@ -14,6 +14,7 @@ const CardLists = ({
   round,
 }: any) => {
   const addr = sliceAddress(author);
+  let amount = donation.toFixed(2);
   return (
     <div className="w-[400px] rounded-[15px] bg-white cursor-pointer shadow-lg">
       <AspectRatio ratio={18 / 9} className="bg-muted">
@@ -45,7 +46,7 @@ const CardLists = ({
         <div className="flex justify-between flex-wrap mt-[10px] gap-2">
           <div className="flex flex-col">
             <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] leading-[22px]">
-              Received Donation ${donation}
+              Received Donation ${amount}
             </h4>
           </div>
         </div>
