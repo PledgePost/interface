@@ -1,5 +1,5 @@
 
-## PledgePost: A Quadratic Funding Media Platform**
+## PledgePost: Quadratic Funding Media Platform
 
 <img width="1104" alt="Screenshot 2023-11-25 at 20 30 26" src="https://github.com/PledgePost/interface/assets/67859510/4623c0ae-540e-4a9d-ba95-365e4bad5bc1">
 
