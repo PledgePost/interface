@@ -41,7 +41,8 @@ There is a Pool that is the source for distributing funds for each Round, and th
 
 CntractAddress: 0xdDA61E11e796543dA1498F17257Ff4C94E80bcC0
 
-[Op-goerli](https://goerli-optimistic.etherscan.io/address/0xdDA61E11e796543dA1498F17257Ff4C94E80bcC0)
+[Op-goerli](https://goerli-optimism.etherscan.io/address/0xdDA61E11e796543dA1498F17257Ff4C94E80bcC0)
+
 
 
 ## Getting Started
