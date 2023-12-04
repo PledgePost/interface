@@ -144,7 +144,9 @@ export default function ArticlePage({ params }: any) {
   useEffect(() => {
     if (!data || !chain) return;
     if (isSuccess) {
-      showSuccessToast(`${chain?.blockExplorers?.etherscan}/tx/${data.hash}`);
+      showSuccessToast(
+        `${chain?.blockExplorers?.etherscan?.url}/tx/${data.hash}`
+      );
     } else {
       showErrorToast("Error donating to article");
     }

@@ -50,7 +50,9 @@ const Post = () => {
   };
   useEffect(() => {
     if (isSuccess && data && chain) {
-      showSuccessToast(`${chain.blockExplorers?.etherscan}/tx/${data.hash}`);
+      showSuccessToast(
+        `${chain.blockExplorers?.etherscan?.url}/tx/${data.hash}`
+      );
     }
   }, [chain, data, isSuccess]);
 

@@ -62,7 +62,9 @@ export default function ApplicationModal({ id, round }: any) {
   };
   useEffect(() => {
     if (!isSuccess || !data) return;
-    showSuccessToast(`${chain?.blockExplorers?.etherscan}/tx/${data.hash}`);
+    showSuccessToast(
+      `${chain?.blockExplorers?.etherscan?.url}/tx/${data.hash}`
+    );
   }, [chain, data, isSuccess]);
 
   return (
