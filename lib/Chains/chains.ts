@@ -36,7 +36,7 @@ export const mainnetChain: Chain = {
   token: "ETH",
   label: "Ethereum",
   shortName: "eth",
-  rpcUrl: "https://mainnet.infura.io/v3/{providerApiKey}",
+  rpcUrl: "https://mainnet.infura.io/v3/4ed233e4236e45d5ac1024b4c1daf682",
   blockExplorerUrl: "https://etherscan.io",
   color: "#DDDDDD",
   transactionServiceUrl: "https://safe-transaction-mainnet.safe.global",
