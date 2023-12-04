@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pledgepost.xyz"),
   title: {
     default: "PledgePost",
     template: "%s | PledgePost",

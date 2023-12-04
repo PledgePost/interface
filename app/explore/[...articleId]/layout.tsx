@@ -23,7 +23,13 @@ export async function generateMetadata({ params }: { params: Params }) {
     title: content.title,
     description: content.value,
     alternates: {
-      canonical: `https://pledgepost/explore/${authorAddress}/${articleId}/${cid}`,
+      canonical: `/explore/${authorAddress}/${articleId}/${cid}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: content.title,
+      description: content.value,
+      creator: "@PledgePost",
     },
   };
   return metadata;
