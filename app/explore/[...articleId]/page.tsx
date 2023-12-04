@@ -56,11 +56,11 @@ export default function ArticlePage({ params }: any) {
   const [donors, setDonors] = useState<any>(null);
   const [isDonated, setIsDonated] = useState<any>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [provider, setProvider] = useState<any>(null);
   const [estimatedAllocation, setEstimatedAllocation] = useState<any>(null);
   const { openConnectModal } = useConnectModal();
   const { address: currentAddress } = useAccount();
   const { chain } = useNetwork();
-  const provider = useDefaultProvider();
   useEffect(() => {
     if (!currentAddress || !provider) return;
     async function checkDonation() {
@@ -153,6 +153,9 @@ export default function ArticlePage({ params }: any) {
   }, [chain, data, isSuccess]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    let defaultProvider = useDefaultProvider();
+    setProvider(defaultProvider);
     async function fetchContent() {
       const result = await fetchData(params.articleId[0], params.articleId[2]);
       setContent(result);
