@@ -12,6 +12,7 @@ import {
   tahoWallet,
   zerionWallet,
   uniswapWallet,
+  safeWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
@@ -25,11 +26,11 @@ import {
 } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [optimism, polygonMumbai, optimismGoerli],
+  [optimismGoerli],
   [publicProvider()]
 );
 const appName: string = "PledgePost";
-const AppInfo = { appName: appName, appURL: "" };
+const AppInfo = { appName: appName, appURL: "https://pledgepost.xyz" };
 const projectId: string = process.env.NEXT_PUBLIC_PROJECT_ID as string;
 const { wallets } = getDefaultWallets({
   appName: appName,
@@ -44,9 +45,8 @@ const connectors = connectorsForWallets([
     wallets: [
       rabbyWallet({ chains }),
       ledgerWallet({ chains, projectId }),
-      tahoWallet({ chains }),
       zerionWallet({ chains, projectId }),
-      uniswapWallet({ chains, projectId }),
+      safeWallet({ chains }),
     ],
   },
 ]);

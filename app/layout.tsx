@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 export const metadata: Metadata = {
   title: "PledgePost",
-  description: "A Quadratic Funding Media Platform.",
+  description: "Quadratic Funding Media Platform.",
 };
 
 export default function RootLayout({
