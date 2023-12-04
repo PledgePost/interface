@@ -93,7 +93,7 @@ export const columns: ColumnDef<ArticleColumn>[] = [
             <DropdownMenuItem>Edit draft</DropdownMenuItem>
             <DropdownMenuSeparator />
             <Link
-              href={`/post/${author}/${article.articleId}/${article.content}`}
+              href={`/explore/${author}/${article.articleId}/${article.content}`}
             >
               <DropdownMenuItem>View on Explore</DropdownMenuItem>
             </Link>
