@@ -7,8 +7,15 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export const metadata: Metadata = {
-  title: "PledgePost",
-  description: "Quadratic Funding Media Platform.",
+  title: {
+    default: "PledgePost",
+    template: "%s | PledgePost",
+  },
+  description:
+    "PledgePost is protocol built for writers to publish their articles, collect donations, and receive extra funds based on Quadratic Funding, a democratic funding model based on the amount of each donation.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

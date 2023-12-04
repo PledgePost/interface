@@ -5,7 +5,6 @@ import polygonLogo from "../public/polygon-logo-colored.svg";
 import polygonToken from "../public/polygon-token.svg";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { use } from "react";
-import { BiconomySmartAccount } from "@biconomy/account";
 import { getAllRoundData } from "@/lib/fetchData";
 
 export default function Home() {

@@ -1,4 +1,5 @@
 "use client";
+import type { Metadata } from "next";
 import React, { use, cache, useState, useEffect, useCallback } from "react";
 import CardLists from "@/components/CardLists";
 import Link from "next/link";
@@ -6,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { getAllData } from "@/lib/fetchData";
 import { Button } from "@/components/ui/button";
 import { fetchETHprice } from "@/lib/coingecko";
+
 
 export default function Explore() {
   const [ETHUSD, setETHUSD] = useState<any>();
@@ -40,7 +42,7 @@ export default function Explore() {
         {posts.map((post: any, index: number) => (
           <Link
             key={index}
-            href={`/post/${post.author.id}/${post.articleId}/${post.content}`}
+            href={`/explore/${post.author.id}/${post.articleId}/${post.content}`}
           >
             <CardLists
               Title={post.title}
