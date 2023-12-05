@@ -28,6 +28,10 @@ import { useConnectModal } from "@rainbow-me/rainbowkit";
 import useDefaultProvider from "@/hooks/useDefaultProvider";
 import { ABIs as ABI } from "@/constants";
 import { fetchETHprice } from "@/lib/coingecko";
+import Image from "next/image";
+import { Content } from "@/types";
+// TODO: fix Image witdth and height
+
 const PledgeContract = {
   address: ABI.contractAddress as any,
   abi: ABI.abi,
@@ -43,12 +47,12 @@ async function fetchData(address: any, cid: string) {
   const res = await fetch(url, {
     cache: "force-cache",
   });
-  const content = await res.json();
+  const content: Content = await res.json();
   return content;
 }
 
 export default function ArticlePage({ params }: any) {
-  const [content, setContent] = useState<any>(null);
+  const [content, setContent] = useState<Content | undefined>(undefined);
   const [messages, setMessages] = useState<string>("");
   const [comments, setComments] = useState<Comment[] | undefined>(undefined);
   const [amount, setAmount] = useState<any>(null);
@@ -186,7 +190,14 @@ export default function ArticlePage({ params }: any) {
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
-      <h1 className="flex justify-center text-3xl font-bold mb-5">
+      <Image
+        className="flex justify-center mx-auto"
+        src={content?.coverImage || "https://picsum.photos/800/400"}
+        alt="cover image"
+        width={800}
+        height={400}
+      />
+      <h1 className="flex justify-center text-3xl font-bold my-5">
         {content?.title}
       </h1>
       <div className="flex flex-row gap-4 my-4 justify-center">
