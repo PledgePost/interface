@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
 import { toChecksumAddress } from "ethereumjs-util";
+import { Content } from "@/types";
 
 interface Params {
   articleId: string[];
-}
-interface Content {
-  title: string;
-  value: string;
-  currentAddress: any;
-  UNIXtimestamp: any;
 }
 
 export async function generateMetadata({ params }: { params: Params }) {
