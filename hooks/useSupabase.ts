@@ -1,14 +1,6 @@
 "use client";
+import { Draft } from "@/types";
 import { supabase } from "@/utils/supabase";
-
-export interface Comment {
-  id: number;
-  author: string;
-  article_id: number;
-  user: string;
-  message: string;
-  created_at: any;
-}
 
 export const getComments = async (author: string, article_id: number) => {
   const { data, error } = await supabase
@@ -34,4 +26,27 @@ export const insertComment = async (
     user: user,
     message: message,
   });
+};
+
+export const storeDraft = async (props: Draft) => {
+  const { data, error } = await supabase.from("drafts").insert({
+    author: props.author,
+    title: props.title,
+    content: props.content,
+    image: props.image,
+  });
+  if (error) {
+    throw error;
+  }
+  return data;
+};
+export const getDrafts = async (author: string) => {
+  const { data, error } = await supabase
+    .from("drafts")
+    .select("*")
+    .match({ author: author });
+  if (error) {
+    throw error;
+  }
+  return data;
 };

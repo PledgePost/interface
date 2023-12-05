@@ -16,7 +16,7 @@ import { ethers } from "ethers";
 import { SalesCard, SubscriptionCard } from "@/components/Card";
 import { GET_ARTICLES_BY_ID_AND_ADDRESS } from "@/lib/query";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
-import { Comment, getComments, insertComment } from "@/hooks/useSupabase";
+import { getComments, insertComment } from "@/hooks/useSupabase";
 import {
   useAccount,
   useContractRead,
@@ -29,7 +29,7 @@ import useDefaultProvider from "@/hooks/useDefaultProvider";
 import { ABIs as ABI } from "@/constants";
 import { fetchETHprice } from "@/lib/coingecko";
 import Image from "next/image";
-import { Content } from "@/types";
+import { Comment, Content } from "@/types";
 // TODO: fix Image witdth and height
 
 const PledgeContract = {
