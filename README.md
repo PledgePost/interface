@@ -27,11 +27,6 @@ We envision a world where contributions to collective intelligence, a vital publ
    - A detailed dashboard enables writers to draft, edit, and publish their articles.
    - It also provides insights into contribution amounts, donor counts, and comment statistics.
 
-### Core Components of PledgePost
-
-PledgePost consists of a core contract (PledgePost.sol) and a peripheral PoolContract.sol that is generated for each grant and a contract that mints ERC721NFT for each donation.
-For QuadraticFunding, MatchingFunds calculation and Distribution are calculated automatically
-There is a Pool that is the source for distributing funds for each Round, and the allocation is automatically calculated based on the amount of donations to each article. This allows for a more equitable distribution of funds and returns value to creators.
 
 ## Deployed contracts and links
 
