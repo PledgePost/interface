@@ -1,8 +1,6 @@
-
 ## PledgePost: Quadratic Funding Media Platform
 
 <img width="1104" alt="Screenshot 2023-11-25 at 20 30 26" src="https://github.com/PledgePost/interface/assets/67859510/4623c0ae-540e-4a9d-ba95-365e4bad5bc1">
-
 
 ## Description
 
@@ -39,11 +37,9 @@ There is a Pool that is the source for distributing funds for each Round, and th
 
 ### PledgePost.sol
 
-CntractAddress: 0xdDA61E11e796543dA1498F17257Ff4C94E80bcC0
+Proxy: 0xD62087Bf50dCd6dD87f96E21d1AD040bD9c99589
 
-[Op-goerli](https://goerli-optimism.etherscan.io/address/0xdDA61E11e796543dA1498F17257Ff4C94E80bcC0)
-
-
+[Op-goerli](https://goerli-optimism.etherscan.io/address/0xD62087Bf50dCd6dD87f96E21d1AD040bD9c99589)
 
 ## Getting Started
 
