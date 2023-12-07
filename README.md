@@ -27,14 +27,13 @@ We envision a world where contributions to collective intelligence, a vital publ
    - A detailed dashboard enables writers to draft, edit, and publish their articles.
    - It also provides insights into contribution amounts, donor counts, and comment statistics.
 
-
 ## Deployed contracts and links
 
 ### PledgePost.sol
 
-Proxy: 0xD62087Bf50dCd6dD87f96E21d1AD040bD9c99589
+Proxy: 0x28b202Ee6a2C7375194F00BAcECDC02c88508025
 
-[Op-goerli](https://goerli-optimism.etherscan.io/address/0xD62087Bf50dCd6dD87f96E21d1AD040bD9c99589)
+[Op-goerli](https://goerli-optimism.etherscan.io/address/0x28b202Ee6a2C7375194F00BAcECDC02c88508025)
 
 ## Getting Started
 
