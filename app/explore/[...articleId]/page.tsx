@@ -27,9 +27,9 @@ import { parseEther } from "viem";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import useDefaultProvider from "@/hooks/useDefaultProvider";
 import { ABIs as ABI } from "@/constants";
-import { fetchETHprice } from "@/lib/coingecko";
 import Image from "next/image";
 import { Comment, Content } from "@/types";
+import { StateContext } from "@/providers";
 // TODO: fix Image witdth and height
 
 const PledgeContract = {
@@ -63,6 +63,7 @@ export default function ArticlePage({ params }: any) {
   const provider: ethers.providers.JsonRpcProvider = useDefaultProvider();
   const [estimatedAllocation, setEstimatedAllocation] = useState<any>(null);
   const { openConnectModal } = useConnectModal();
+  const { ethPrice } = StateContext();
   const { address: currentAddress } = useAccount();
   const { chain } = useNetwork();
   useEffect(() => {
@@ -176,8 +177,8 @@ export default function ArticlePage({ params }: any) {
           );
           totalAmount += parseFloat(donationAmount);
         }
-        const ETHUSDC = await fetchETHprice();
-        const USDValue = totalAmount * ETHUSDC;
+
+        const USDValue = totalAmount * ethPrice;
         setDonation(USDValue);
         setDonors(article.donations.length);
       }

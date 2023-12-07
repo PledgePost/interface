@@ -1,10 +1,11 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { RainbowProviders } from "../providers/rainbowproviders";
 import Header from "../components/Header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { RainbowProviders } from "@/providers/rainbowprovider";
+import { StateProvider } from "@/providers";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pledgepost.xyz"),
@@ -28,9 +29,11 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <RainbowProviders>
-          <ToastContainer newestOnTop />
-          <Header />
-          {children}
+          <StateProvider>
+            <ToastContainer newestOnTop />
+            <Header />
+            {children}
+          </StateProvider>
         </RainbowProviders>
       </body>
     </html>

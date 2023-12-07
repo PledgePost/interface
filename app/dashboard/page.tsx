@@ -9,7 +9,7 @@ import { ethers } from "ethers";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { GET_ARTICLE_BY_ID, GET_USER_BY_ID } from "../../lib/query";
 import { useAccount } from "wagmi";
-import { fetchETHprice } from "@/lib/coingecko";
+import { StateContext } from "@/providers";
 
 const client = new ApolloClient({
   uri: "https://api.studio.thegraph.com/query/52298/pledgepost_opgoerli/version/latest",
@@ -19,6 +19,7 @@ const client = new ApolloClient({
 export default function Dashboard() {
   const [userArticle, setUserArticle] = useState<any>([]);
   const [user, setUser] = useState<any>({});
+  const { ethPrice } = StateContext();
   const { address: currentAddress } = useAccount();
   async function getArticleByAddress(address: string) {
     const response = await client.query({
@@ -52,7 +53,6 @@ export default function Dashboard() {
       const lowercaseAddress = currentAddress.toLowerCase();
       const posts: any = await getArticleByAddress(lowercaseAddress);
       const users = await getUserInfo(lowercaseAddress);
-      const ETHUSD: any = await fetchETHprice();
       const AllPost = await Promise.all(
         posts.map(async (post: any) => {
           let donation = 0;
@@ -63,7 +63,7 @@ export default function Dashboard() {
             }
           }
           const ipfsData = await fetchData(post.authorAddress, post.content);
-          let USDValue: any = ETHUSD * donation;
+          let USDValue: any = ethPrice * donation;
           return {
             ...post,
             ...ipfsData,
@@ -93,8 +93,8 @@ export default function Dashboard() {
             }
           }
 
-          let USDDonation: any = ETHUSD * recievedDonation;
-          let USDAllocation: any = ETHUSD * recievedAllocation;
+          let USDDonation: any = ethPrice * recievedDonation;
+          let USDAllocation: any = ethPrice * recievedAllocation;
 
           return {
             ...user,
