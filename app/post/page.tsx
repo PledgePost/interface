@@ -12,7 +12,12 @@ import { CIDString } from "web3.storage";
 import { useAccount, useContractWrite, useNetwork } from "wagmi";
 import { ABIs as ABI } from "@/constants";
 import { Content } from "@/types";
-
+import {
+  createApplication,
+  deployMicrograntsStrategy,
+} from "@/utils/microgrants";
+import { ProfileParams, createProfile } from "@/utils/registry";
+import { TApplicationMetadata, TNewApplication } from "@/types/alloTypes";
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
@@ -75,13 +80,47 @@ const Post = () => {
     setValue(e.target.value);
   };
   const handleSubmit = async () => {
+    if (!currentAddress) {
+      showErrorToast("Please connect your wallet");
+      return;
+    }
     try {
-      showDefaultToast("Uploading...");
       if (!title || !value) return;
+      showDefaultToast("Creating Profile for Article...");
       const files = makeFileObjects(obj, currentAddress);
       const cid: CIDString | undefined = await storeFiles(files);
+      let profileData: ProfileParams = {
+        pointer: cid,
+        owner: currentAddress,
+        members: [currentAddress], //TODO: let user add contributors
+      };
+      const profileId: any = await createProfile(profileData);
+      let applicationMetadata: TApplicationMetadata = {
+        name: title,
+        description: value,
+        base64Image: base64,
+      };
+      let applicationData: TNewApplication = {
+        ...applicationMetadata,
+        requestedAmount: BigInt(0),
+        recipientAddress: currentAddress,
+        profileId: profileId,
+      };
       showDefaultToast("Sending Transaction...");
-      write({ args: [cid] });
+      // const strategy: any = await deployMicrograntsStrategy(
+      //   "PleldgePost Grant",
+      //   profileId,
+      //   [currentAddress]
+      // );
+      // console.log("strategy", strategy);
+      showDefaultToast("Sending Transaction...");
+      // const recipientId: any = await createApplication(
+      //   applicationData,
+      //   chain?.id as number,
+      //   strategy.poolId //TODO: let user choose Round
+      // );
+      // console.log("recipientId", recipientId);
+      // write({ args: [cid] });
     } catch (e) {
       console.log(e);
       showErrorToast("Error Failed to Post");

@@ -50,7 +50,6 @@ export type TApplicationMetadata = {
   description: string;
   email?: string;
   base64Image: string;
-  articleCID?: string;
 };
 
 export type TNewApplication = TApplicationMetadata & {

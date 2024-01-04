@@ -160,7 +160,8 @@ export const getEventValues = (
   console.log("event", event);
 
   const eventTopic = getEventTopic(event);
-
+	console.log("logs", logs);
+	console.log("eventTopic", eventTopic);
   const log = logs.find(
     (log) => log.topics[0]?.toLowerCase() === eventTopic.toLowerCase()
   );

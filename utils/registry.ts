@@ -6,16 +6,16 @@ import { wagmiConfig } from "@/providers/rainbowprovider";
 import { getEventValues } from "@/utils/common";
 import { sendTransaction } from "@wagmi/core";
 
-interface Params {
-  pointer: string;
+export interface ProfileParams {
+  pointer: any;
   owner: string;
-  managers: string[];
+  members: string[];
 }
-export default async function createProfile({
+export async function createProfile({
   pointer,
   owner,
-  managers,
-}: Params) {
+  members,
+}: ProfileParams) {
   // Prepare the transaction arguments
   const createProfileArgs: CreateProfileArgs = {
     // random number to prevent nonce reuse, this is required.
@@ -26,7 +26,7 @@ export default async function createProfile({
       protocol: BigInt(1),
       pointer: pointer,
     },
-    members: managers,
+    members: members,
     owner: owner,
   };
   console.log("Creating profile with args: ", createProfileArgs);
@@ -52,6 +52,8 @@ export default async function createProfile({
 
   if (profileId === "0x") {
     throw new Error("Profile creation failed");
+  } else {
+    console.log("Profile created: ", profileId);
   }
 
   return profileId;
