@@ -16,19 +16,20 @@ import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import {
   polygon,
   optimism,
+  arbitrum,
   sepolia,
   goerli,
   optimismGoerli,
-  polygonMumbai,
+  arbitrumSepolia,
 } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [optimismGoerli],
+  [arbitrumSepolia],
   [publicProvider()]
 );
 const appName: string = "PledgePost";
 const AppInfo = { appName: appName, appURL: "https://pledgepost.xyz" };
-const projectId: string = process.env.NEXT_PUBLIC_PROJECT_ID as string;
+const projectId: string = process.env.NEXT_PUBLIC_PROJECT_ID!;
 const { wallets } = getDefaultWallets({
   appName: appName,
   projectId,
