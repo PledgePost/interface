@@ -7,15 +7,11 @@ import { getEventValues } from "@/utils/common";
 import { sendTransaction } from "@wagmi/core";
 
 interface Params {
-  client: any;
-  account: string;
   pointer: string;
   owner: string;
   managers: string[];
 }
 export default async function createProfile({
-  client,
-  account,
   pointer,
   owner,
   managers,

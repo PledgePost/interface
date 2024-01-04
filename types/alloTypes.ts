@@ -46,10 +46,11 @@ export type TProfile = {
 
 export type TApplicationMetadata = {
   name: string;
-  website: string;
+  website?: string;
   description: string;
-  email: string;
+  email?: string;
   base64Image: string;
+  articleCID?: string;
 };
 
 export type TNewApplication = TApplicationMetadata & {
