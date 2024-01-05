@@ -22,7 +22,7 @@ const allo = {
   abi: AlloABI,
 };
 const NATIVE = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".toLowerCase();
-const strategy = "0xF4Fb31B1D7e3e4Ecf188052E89Fc29300AE1277A";
+const strategy = "0xcA95F83a7b897a3f7Fb13cF377D76AB18372e358";
 
 const ManagerPage = () => {
   const { address } = useAccount();
@@ -66,8 +66,8 @@ const ManagerPage = () => {
         version: "1.0.0",
         ownerProfileId: profileId,
         registrationStartTime: Math.floor(new Date().getTime() / 1000) + 10,
-        registrationEndTime: Math.floor(new Date().getTime() / 1000) + 3000,
-        allocationStartTime: Math.floor(new Date().getTime() / 1000) + 5000,
+        registrationEndTime: Math.floor(new Date().getTime() / 1000) + 6000,
+        allocationStartTime: Math.floor(new Date().getTime() / 1000) + 6060,
         allocationEndTime: Math.floor(new Date().getTime() / 1000) + 10000,
         amount: BigInt(10000000000000000),
         manager: [address],

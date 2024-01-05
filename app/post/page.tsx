@@ -25,8 +25,8 @@ const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
 const strategy = {
-  address: "0xF4Fb31B1D7e3e4Ecf188052E89Fc29300AE1277A",
-  poolId: BigInt(89),
+  address: "0xcA95F83a7b897a3f7Fb13cF377D76AB18372e358",
+  poolId: BigInt(90),
 };
 
 const allo = {
@@ -56,7 +56,7 @@ const Post = () => {
   const { data, isLoading, isSuccess, write } = useContractWrite({
     address: allo.address,
     abi: allo.abi,
-    functionName: "registerRecipient",
+    functionName: "batchRegisterRecipient",
   });
 
   const handleCoverImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,8 +138,8 @@ const Post = () => {
       console.log("authorProfile", authorProfile);
 
       const registerRecipientData = {
-        registryAnchor: authorProfile?.anchor,
         recipientAddress: authorProfile?.owner,
+        registryAnchor: authorProfile?.anchor,
         metadata: {
           protocol: BigInt(1),
           pointer: authorProfile.metadataPointer,
@@ -148,12 +148,12 @@ const Post = () => {
 
       const encodeRegisterData = ethers.utils.defaultAbiCoder.encode(
         [
-          "tuple(address registryAnchor, address recipientAddress, tuple(uint256 protocol, string pointer) metadata)",
+          "tuple(address recipientAddress, address registryAnchor, tuple(uint256 protocol, string pointer) metadata)",
         ],
         [registerRecipientData]
       );
       write({
-        args: [strategy.poolId, encodeRegisterData],
+        args: [[strategy.poolId], [encodeRegisterData]],
         value: BigInt(0),
       });
     } catch (e) {
