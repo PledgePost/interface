@@ -25,8 +25,8 @@ const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
 const strategy = {
-  address: "0xcA95F83a7b897a3f7Fb13cF377D76AB18372e358",
-  poolId: BigInt(90),
+  address: "0x5CA1ED81795F5fE7174D8baA64c5d1B7bBB2b439",
+  poolId: BigInt(92),
 };
 
 const allo = {
@@ -138,8 +138,8 @@ const Post = () => {
       console.log("authorProfile", authorProfile);
 
       const registerRecipientData = {
-        recipientAddress: authorProfile?.owner,
         registryAnchor: authorProfile?.anchor,
+        recipientAddress: authorProfile?.owner,
         metadata: {
           protocol: BigInt(1),
           pointer: authorProfile.metadataPointer,
@@ -148,7 +148,7 @@ const Post = () => {
 
       const encodeRegisterData = ethers.utils.defaultAbiCoder.encode(
         [
-          "tuple(address recipientAddress, address registryAnchor, tuple(uint256 protocol, string pointer) metadata)",
+          "tuple(address registryAnchor, address recipientAddress, tuple(uint256 protocol, string pointer) metadata)",
         ],
         [registerRecipientData]
       );
