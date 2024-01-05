@@ -11,12 +11,14 @@ export interface ProfileParams {
   owner: `0x${string}` | undefined;
   members: [`0x${string}` | undefined];
 }
+
 export async function createProfile({
   pointer,
   owner,
   members,
 }: ProfileParams) {
   // Prepare the transaction arguments
+  // types CreateProfileArgs
   const createProfileArgs: CreateProfileArgs = {
     // random number to prevent nonce reuse, this is required.
     // NOTE: The profile ID id based on the provided nonce and the caller's address.
@@ -26,8 +28,8 @@ export async function createProfile({
       protocol: BigInt(1),
       pointer: pointer,
     },
-    members: members,
-    owner: owner,
+    members: [String(members)], // members: [`0x${string}` | undefined];
+    owner: String(owner), //  owner: `0x${string}` | undefined;
   };
   console.log("Creating profile with args: ", createProfileArgs);
 
