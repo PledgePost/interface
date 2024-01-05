@@ -18,9 +18,21 @@ import {
 } from "@/utils/microgrants";
 import { ProfileParams, createProfile } from "@/utils/registry";
 import { TApplicationMetadata, TNewApplication } from "@/types/alloTypes";
+import { AlloABI } from "@/abi/Allo";
+import { getProfileById } from "@/utils/request";
+import { chainConfig } from "@/utils/allo";
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
+const strategy = {
+  address: "0xF4Fb31B1D7e3e4Ecf188052E89Fc29300AE1277A",
+  poolId: BigInt(89),
+};
+
+const allo = {
+  address: process.env.NEXT_PUBLIC_ALLO_CONTRACT_ADDRESS as `0x${string}`,
+  abi: AlloABI,
+};
 
 const Post = () => {
   const [value, setValue] = useState(``);
@@ -36,10 +48,15 @@ const Post = () => {
   const { address: currentAddress } = useAccount();
   const { chain } = useNetwork();
 
+  // const { data, isLoading, isSuccess, write } = useContractWrite({
+  //   address: ABI.contractAddress as any,
+  //   abi: ABI.abi,
+  //   functionName: "postArticle",
+  // });
   const { data, isLoading, isSuccess, write } = useContractWrite({
-    address: ABI.contractAddress as any,
-    abi: ABI.abi,
-    functionName: "postArticle",
+    address: allo.address,
+    abi: allo.abi,
+    functionName: "registerRecipient",
   });
 
   const handleCoverImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +111,7 @@ const Post = () => {
         owner: currentAddress,
         members: [currentAddress], //TODO: let user add contributors
       };
-      const profileId: any = await createProfile(profileData);
+      const profileId: string = await createProfile(profileData);
       let applicationMetadata: TApplicationMetadata = {
         name: title,
         description: value,
@@ -104,15 +121,8 @@ const Post = () => {
         ...applicationMetadata,
         requestedAmount: BigInt(0),
         recipientAddress: currentAddress,
-        profileId: profileId,
+        profileId: `0x${profileId}`,
       };
-      showDefaultToast("Sending Transaction...");
-      // const strategy: any = await deployMicrograntsStrategy(
-      //   "PleldgePost Grant",
-      //   profileId,
-      //   [currentAddress]
-      // );
-      // console.log("strategy", strategy);
       showDefaultToast("Sending Transaction...");
       // const recipientId: any = await createApplication(
       //   applicationData,
@@ -121,6 +131,31 @@ const Post = () => {
       // );
       // console.log("recipientId", recipientId);
       // write({ args: [cid] });
+      const authorProfile = await getProfileById({
+        chainId: chainConfig.chain.toString(),
+        profileId: profileId,
+      });
+      console.log("authorProfile", authorProfile);
+
+      const registerRecipientData = {
+        registryAnchor: authorProfile?.anchor,
+        recipientAddress: authorProfile?.owner,
+        metadata: {
+          protocol: BigInt(1),
+          pointer: authorProfile.metadataPointer,
+        },
+      };
+
+      const encodeRegisterData = ethers.utils.defaultAbiCoder.encode(
+        [
+          "tuple(address registryAnchor, address recipientAddress, tuple(uint256 protocol, string pointer) metadata)",
+        ],
+        [registerRecipientData]
+      );
+      write({
+        args: [strategy.poolId, encodeRegisterData],
+        value: BigInt(0),
+      });
     } catch (e) {
       console.log(e);
       showErrorToast("Error Failed to Post");
@@ -128,6 +163,8 @@ const Post = () => {
   };
   useEffect(() => {
     if (isSuccess && data && chain) {
+      console.log(chain.blockExplorers?.default?.url);
+      console.log(chain.blockExplorers?.etherscan?.url);
       showSuccessToast(
         `${chain.blockExplorers?.etherscan?.url}/tx/${data.hash}`
       );
