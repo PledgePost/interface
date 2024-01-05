@@ -1,11 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { deployStrategy } from "@/utils/deployStrategy";
 import { AlloABI } from "@/abi/Allo";
-import { useAccount, useContractWrite } from "wagmi";
+import { useAccount, useContractWrite, useNetwork } from "wagmi";
 import { ethers } from "ethers";
 import { ProfileParams, createProfile } from "@/utils/registry";
+import { showSuccessToast } from "@/hooks/useNotification";
 export interface CreatePoolArgs {
   version: string;
   ownerProfileId: string;
@@ -21,9 +22,11 @@ const allo = {
   abi: AlloABI,
 };
 const NATIVE = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".toLowerCase();
+const strategy = "0xf5C3F19Ae7202Fb727146420b0498B2f74b75CdF";
 
 const ManagerPage = () => {
   const { address } = useAccount();
+  const { chain } = useNetwork();
   // async function deploy() {
   //   const strategy = await deployStrategy();
   //   return strategy;
@@ -38,11 +41,10 @@ const ManagerPage = () => {
     });
     return ownerProfileId;
   };
-  const strategy = "0xf5C3F19Ae7202Fb727146420b0498B2f74b75CdF";
 
   // profileId: "0xeaee9fcf238cf3bf7068ab46ad40b880a62b4afec9c02bcd5818ffed677c3d72";
 
-  const { data, isLoading, write } = useContractWrite({
+  const { data, isLoading, isSuccess, write } = useContractWrite({
     address: allo.address,
     abi: allo.abi,
     functionName: "createPoolWithCustomStrategy",
@@ -113,6 +115,13 @@ const ManagerPage = () => {
     });
     // poolId: 74
   }
+  useEffect(() => {
+    if (isSuccess && data && chain) {
+      showSuccessToast(
+        `${chain.blockExplorers?.etherscan?.url}/tx/${data.hash}`
+      );
+    }
+  }, [chain, data, isSuccess]);
   return (
     <div className="flex flex-row justify-center ">
       <Button
