@@ -8,8 +8,8 @@ import { sendTransaction } from "@wagmi/core";
 
 export interface ProfileParams {
   pointer: any;
-  owner: string;
-  members: string[];
+  owner: `0x${string}` | undefined;
+  members: [`0x${string}` | undefined];
 }
 export async function createProfile({
   pointer,
