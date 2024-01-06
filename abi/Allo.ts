@@ -16,6 +16,7 @@ export const AlloABI = [
   { inputs: [], name: "NONCE_NOT_AVAILABLE", type: "error" },
   { inputs: [], name: "NOT_APPROVED_STRATEGY", type: "error" },
   { inputs: [], name: "NOT_ENOUGH_FUNDS", type: "error" },
+  { inputs: [], name: "NOT_IMPLEMENTED", type: "error" },
   { inputs: [], name: "NOT_INITIALIZED", type: "error" },
   { inputs: [], name: "NOT_PENDING_OWNER", type: "error" },
   { inputs: [], name: "NewOwnerIsZeroAddress", type: "error" },

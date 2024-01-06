@@ -21,12 +21,13 @@ import { TApplicationMetadata, TNewApplication } from "@/types/alloTypes";
 import { AlloABI } from "@/abi/Allo";
 import { getProfileById } from "@/utils/request";
 import { chainConfig } from "@/utils/allo";
+import { wagmiConfig } from "@/providers/rainbowprovider";
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
 const strategy = {
-  address: "0x5CA1ED81795F5fE7174D8baA64c5d1B7bBB2b439",
-  poolId: BigInt(92),
+  address: "0xA4d4F03f9dc573E412e0e0de74d98955a3427670",
+  poolId: 102,
 };
 
 const allo = {
@@ -56,7 +57,7 @@ const Post = () => {
   const { data, isLoading, isSuccess, write } = useContractWrite({
     address: allo.address,
     abi: allo.abi,
-    functionName: "batchRegisterRecipient",
+    functionName: "registerRecipient",
   });
 
   const handleCoverImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,6 +113,7 @@ const Post = () => {
         members: [currentAddress], //TODO: let user add contributors
       };
       const profileId: string = await createProfile(profileData);
+
       let applicationMetadata: TApplicationMetadata = {
         name: title,
         description: value,
@@ -124,37 +126,25 @@ const Post = () => {
         profileId: `0x${profileId}`,
       };
       showDefaultToast("Sending Transaction...");
-      // const recipientId: any = await createApplication(
-      //   applicationData,
-      //   chain?.id as number,
-      //   strategy.poolId //TODO: let user choose Round
-      // );
-      // console.log("recipientId", recipientId);
-      // write({ args: [cid] });
+
       const authorProfile = await getProfileById({
         chainId: chainConfig.chain.toString(),
         profileId: profileId,
       });
       console.log("authorProfile", authorProfile);
 
-      const registerRecipientData = {
-        registryAnchor: authorProfile?.anchor,
-        recipientAddress: authorProfile?.owner,
-        metadata: {
-          protocol: BigInt(1),
-          pointer: authorProfile.metadataPointer,
-        },
-      };
-
       const encodeRegisterData = ethers.utils.defaultAbiCoder.encode(
+        ["address", "address", "tuple(uint256, string)"],
         [
-          "tuple(address registryAnchor, address recipientAddress, tuple(uint256 protocol, string pointer) metadata)",
-        ],
-        [registerRecipientData]
+          authorProfile?.anchor,
+          authorProfile?.owner,
+          [1, authorProfile.metadataPointer],
+        ]
       );
+      showDefaultToast("Sending Transaction...");
       write({
-        args: [[strategy.poolId], [encodeRegisterData]],
-        value: BigInt(0),
+        args: [strategy.poolId, encodeRegisterData],
+        value: BigInt(100000000000000),
       });
     } catch (e) {
       console.log(e);
@@ -163,8 +153,6 @@ const Post = () => {
   };
   useEffect(() => {
     if (isSuccess && data && chain) {
-      console.log(chain.blockExplorers?.default?.url);
-      console.log(chain.blockExplorers?.etherscan?.url);
       showSuccessToast(
         `${chain.blockExplorers?.etherscan?.url}/tx/${data.hash}`
       );

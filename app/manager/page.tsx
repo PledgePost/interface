@@ -22,7 +22,7 @@ const allo = {
   abi: AlloABI,
 };
 const NATIVE = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".toLowerCase();
-const strategy = "0xcA95F83a7b897a3f7Fb13cF377D76AB18372e358";
+const strategy = "0xA4d4F03f9dc573E412e0e0de74d98955a3427670";
 
 const ManagerPage = () => {
   const { address } = useAccount();
