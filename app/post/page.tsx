@@ -26,8 +26,8 @@ const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
 const strategy = {
-  address: "0xA4d4F03f9dc573E412e0e0de74d98955a3427670",
-  poolId: 102,
+  address: process.env.NEXT_PUBLIC_STRATEGY_CONTRACT_ADDRESS!,
+  poolId: process.env.NEXT_PUBLIC_POOL_ID,
 };
 
 const allo = {
@@ -125,8 +125,6 @@ const Post = () => {
         recipientAddress: currentAddress,
         profileId: `0x${profileId}`,
       };
-      showDefaultToast("Sending Transaction...");
-
       const authorProfile = await getProfileById({
         chainId: chainConfig.chain.toString(),
         profileId: profileId,
@@ -141,11 +139,11 @@ const Post = () => {
           [1, authorProfile.metadataPointer],
         ]
       );
-      showDefaultToast("Sending Transaction...");
       write({
         args: [strategy.poolId, encodeRegisterData],
         value: BigInt(100000000000000),
       });
+      showDefaultToast("Sending Transaction...");
     } catch (e) {
       console.log(e);
       showErrorToast("Error Failed to Post");

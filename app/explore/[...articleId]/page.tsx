@@ -30,12 +30,32 @@ import { ABIs as ABI } from "@/constants";
 import Image from "next/image";
 import { Comment, Content } from "@/types";
 import { StateContext } from "@/providers";
+import { AlloABI } from "@/abi/Allo";
+import {
+  // permit2 contract address
+  PERMIT2_ADDRESS,
+  // the type of permit that we need to sign
+  PermitTransferFrom,
+  // Witness type
+  Witness,
+  // this will help us get domain, types and values that we need to create a signature
+  SignatureTransfer,
+} from "@uniswap/permit2-sdk";
+import { wagmiConfig } from "@/providers/rainbowprovider";
 // TODO: fix Image witdth and height
+
+const NATIVE = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".toLowerCase();
+const permit2Address = "0x000000000022D473030F116dDEE9F6B43aC78BA3";
 
 const PledgeContract = {
   address: ABI.contractAddress as any,
   abi: ABI.abi,
 };
+const allo = {
+  address: process.env.NEXT_PUBLIC_ALLO_CONTRACT_ADDRESS as `0x${string}`,
+  abi: AlloABI,
+};
+
 const client = new ApolloClient({
   uri: "https://api.studio.thegraph.com/query/52298/pledgepost_opgoerli/version/latest",
   cache: new InMemoryCache(),
@@ -92,6 +112,16 @@ export default function ArticlePage({ params }: any) {
     ...PledgeContract,
     functionName: "donateToArticle",
   });
+  const {
+    data: allocateData,
+    isLoading: isLoadingAllocation,
+    isSuccess: isSuccessAllocation,
+    write: allocate,
+  } = useContractWrite({
+    ...allo,
+    functionName: "allocate",
+  });
+
   async function fetchComments() {
     const comments = await getComments(
       params.articleId[0],
@@ -124,11 +154,54 @@ export default function ArticlePage({ params }: any) {
     if (lowercaseAddress === params.articleId[0])
       return alert("You cannot donate to your own article");
     try {
+      const permit2Data = {
+        permit: {
+          permitted: {
+            token: NATIVE,
+            amount: BigInt(1e18),
+          },
+          nonce: 0,
+          deadline: Math.floor(new Date().getTime() / 1000) + 10000,
+        },
+        signature: "",
+      };
+      const data = ethers.utils.defaultAbiCoder.encode(
+        [
+          "address",
+          "tuple(tuple(tuple(address, uint256), uint256, uint256), string)",
+        ],
+        [
+          "0xB1F2d1a241AE813895102A8B7243803D10f70968",
+          [
+            [
+              [NATIVE, parseEther(amount)],
+              0,
+              Math.floor(new Date().getTime() / 1000) + 1000,
+            ],
+            "",
+          ],
+        ]
+      );
+      console.log("data", data);
+      // 0x192c88c5faff60bcdbb5bffb861a5f573141d9f461c4383f018e27b18986eab6 profile
+      // 0xB1F2d1a241AE813895102A8B7243803D10f70968 recipient
       showDefaultToast("Sending Transaction...");
-      write({
-        args: [params.articleId[0], params.articleId[1]],
+      // const { result } = await wagmiConfig.publicClient.simulateContract({
+      //   address: allo.address,
+      //   abi: allo.abi,
+      //   functionName: "allocate",
+      //   args: [process.env.NEXT_PUBLIC_POOL_ID, data],
+      //   value: parseEther(amount),
+      // });
+      // console.log("result", result);
+      allocate({
+        args: [103, data],
         value: parseEther(amount),
       });
+      // write({
+      //   args: [params.articleId[0], params.articleId[1]],
+      //   value: parseEther(amount),
+      // });
     } catch (e) {
       console.log("error: ", e);
       showErrorToast("Error donating to article");
