@@ -7,6 +7,7 @@ import { useAccount, useContractWrite, useNetwork } from "wagmi";
 import { ethers } from "ethers";
 import { ProfileParams, createProfile } from "@/utils/registry";
 import { showSuccessToast } from "@/hooks/useNotification";
+import { DonationVotingABI } from "@/abi/DonationVoting";
 export interface CreatePoolArgs {
   version: string;
   ownerProfileId: string;
@@ -22,7 +23,7 @@ const allo = {
   abi: AlloABI,
 };
 const NATIVE = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".toLowerCase();
-const strategy = "0xA4d4F03f9dc573E412e0e0de74d98955a3427670";
+const strategy = process.env.NEXT_PUBLIC_STRATEGY_CONTRACT_ADDRESS!;
 
 const ManagerPage = () => {
   const { address } = useAccount();
@@ -51,6 +52,37 @@ const ManagerPage = () => {
     functionName: "createPoolWithCustomStrategy",
   });
 
+  function buildStatusRow(recipientIndex: number, status: number) {
+    // calculate col index on bitmap
+    const colIndex = (recipientIndex % 64) * 4;
+
+    // initial row
+    let currentRow = 0;
+
+    // create a new row
+    let newRow = currentRow & ~(15 << colIndex);
+
+    // set specified status at specified position
+    let statusRow = newRow | (status << colIndex);
+
+    // Initialize ApplicationStatus object
+    const applicationStatus = {
+      index: recipientIndex,
+      statusRow: statusRow,
+    };
+
+    return applicationStatus;
+  }
+  const { write: reviewRecipient } = useContractWrite({
+    address: "0x23c4b10FF712CAaf7DA6A9c9eeDFa7C7739b7802",
+    abi: DonationVotingABI,
+    functionName: "reviewRecipients",
+    args: [[buildStatusRow(0, 2)], 0],
+  });
+  async function acceptRecipient() {
+    reviewRecipient();
+  }
+
   async function createPool() {
     // const profileId = await createOwnerProfile();
     /* 
@@ -66,8 +98,8 @@ const ManagerPage = () => {
         version: "1.0.0",
         ownerProfileId: profileId,
         registrationStartTime: Math.floor(new Date().getTime() / 1000) + 10,
-        registrationEndTime: Math.floor(new Date().getTime() / 1000) + 6000,
-        allocationStartTime: Math.floor(new Date().getTime() / 1000) + 6060,
+        registrationEndTime: Math.floor(new Date().getTime() / 1000) + 300,
+        allocationStartTime: Math.floor(new Date().getTime() / 1000) + 310,
         allocationEndTime: Math.floor(new Date().getTime() / 1000) + 10000,
         amount: BigInt(10000000000000000),
         manager: [address],
@@ -119,7 +151,6 @@ const ManagerPage = () => {
     } catch (e) {
       console.log(e);
     }
-    // poolId: 84
   }
   useEffect(() => {
     if (isSuccess && data && chain) {
@@ -136,6 +167,13 @@ const ManagerPage = () => {
         }}
       >
         Create Pool
+      </Button>
+      <Button
+        onClick={() => {
+          acceptRecipient();
+        }}
+      >
+        Accept Recipient
       </Button>
     </div>
   );
