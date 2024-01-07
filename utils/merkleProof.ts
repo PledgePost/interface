@@ -37,9 +37,9 @@ export async function getMerkleProof({
   }
   // console.log(tree.verify(proof, leaf, root));
   const distributionsWithProof = distributions.map((distribution, index) => ({
-    ...distribution,
     index,
-    merkleproof: proof[index],
+    ...distribution,
+    merkleProof: proof[index],
   }));
 
   return {
