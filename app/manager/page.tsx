@@ -8,6 +8,9 @@ import { ethers } from "ethers";
 import { ProfileParams, createProfile } from "@/utils/registry";
 import { showSuccessToast } from "@/hooks/useNotification";
 import { DonationVotingABI } from "@/abi/DonationVoting";
+import { Distribution, getMerkleProof } from "@/utils/merkleProof";
+import { buildStatusRow } from "@/utils/buildStatusRow";
+import { wagmiConfig } from "@/providers/rainbowprovider";
 export interface CreatePoolArgs {
   version: string;
   ownerProfileId: string;
@@ -23,7 +26,8 @@ const allo = {
   abi: AlloABI,
 };
 const NATIVE = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".toLowerCase();
-const strategy = process.env.NEXT_PUBLIC_STRATEGY_CONTRACT_ADDRESS!;
+const strategy = process.env
+  .NEXT_PUBLIC_STRATEGY_CONTRACT_ADDRESS as `0x${string}`;
 
 const ManagerPage = () => {
   const { address } = useAccount();
@@ -47,43 +51,30 @@ const ManagerPage = () => {
     "0xeaee9fcf238cf3bf7068ab46ad40b880a62b4afec9c02bcd5818ffed677c3d72";
 
   const { data, isLoading, isSuccess, write } = useContractWrite({
-    address: allo.address,
-    abi: allo.abi,
+    ...allo,
     functionName: "createPoolWithCustomStrategy",
   });
-
-  function buildStatusRow(recipientIndex: number, status: number) {
-    // calculate col index on bitmap
-    const colIndex = (recipientIndex % 64) * 4;
-
-    // initial row
-    let currentRow = 0;
-
-    // create a new row
-    let newRow = currentRow & ~(15 << colIndex);
-
-    // set specified status at specified position
-    let statusRow = newRow | (status << colIndex);
-
-    // Initialize ApplicationStatus object
-    const applicationStatus = {
-      index: recipientIndex,
-      statusRow: statusRow,
-    };
-
-    return applicationStatus;
-  }
   const { write: reviewRecipient } = useContractWrite({
     address: "0x23c4b10FF712CAaf7DA6A9c9eeDFa7C7739b7802",
     abi: DonationVotingABI,
     functionName: "reviewRecipients",
     args: [[buildStatusRow(0, 2)], 0],
   });
+  const { write: updateDistribution } = useContractWrite({
+    address: strategy,
+    abi: DonationVotingABI,
+    functionName: "updateDistribution",
+  });
+  const { write: distribute } = useContractWrite({
+    ...allo,
+    functionName: "distribute",
+  });
+
   async function acceptRecipient() {
     reviewRecipient();
   }
 
-  async function createPool() {
+  async function handleCreatePool() {
     // const profileId = await createOwnerProfile();
     /* 
 		 * block.timestamp < _registrationStartTime ||
@@ -152,18 +143,60 @@ const ManagerPage = () => {
       console.log(e);
     }
   }
+  async function handleDistribute() {
+    const recipientId = "0xb1f2d1a241ae813895102a8b7243803d10f70968";
+    const distributions: Distribution[] = [
+      {
+        recipientId: recipientId,
+        amount: BigInt(10000000000000000),
+      },
+      // { recipientId: "0x456", amount: BigInt(200) },
+    ];
+    const { root, distributionsWithProof } = await getMerkleProof({
+      distributions: distributions,
+    });
+
+    console.log("distributionsWithProof", distributionsWithProof);
+    const encodedMerkleRoot = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32"],
+      [`0x${root}`]
+    );
+
+    // updateDistribution({
+    //   args: [encodedMerkleRoot, [BigInt(1), "Distribution"]],
+    // });
+    setTimeout(() => {}, 5000);
+    const encodedDistributionsData = ethers.utils.defaultAbiCoder.encode(
+      ["tuple(uint256, address, uint256, bytes32[])[]"],
+      [
+        distributionsWithProof.map((distribution) => [
+          distribution.index,
+          distribution.recipientId,
+          distribution.amount,
+          distribution.merkleProof,
+        ]),
+      ]
+    );
+    distribute({
+      args: [
+        103,
+        distributionsWithProof.map((distribution) => distribution.recipientId),
+        encodedDistributionsData,
+      ],
+    });
+  }
+  console.log(chain?.blockExplorers);
+
   useEffect(() => {
     if (isSuccess && data && chain) {
-      showSuccessToast(
-        `${chain.blockExplorers?.etherscan?.url}/tx/${data.hash}`
-      );
+      showSuccessToast(`${chain.blockExplorers?.default?.url}/tx/${data.hash}`);
     }
   }, [chain, data, isSuccess]);
   return (
     <div className="flex flex-row justify-center ">
       <Button
         onClick={() => {
-          createPool();
+          handleDistribute();
         }}
       >
         Create Pool
@@ -180,3 +213,16 @@ const ManagerPage = () => {
 };
 
 export default ManagerPage;
+
+/**
+flow 
+- updateDistribution() on strategy
+- distribute() on Allo 
+    /// @notice Stores the details of the distribution.
+    struct Distribution {
+        uint256 index;
+        address recipientId;
+        uint256 amount;
+        bytes32[] merkleProof;
+    }
+ */
