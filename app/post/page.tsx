@@ -135,7 +135,7 @@ const Post = () => {
         ["address", "address", "tuple(uint256, string)"],
         [
           authorProfile?.anchor,
-          authorProfile?.owner,
+          currentAddress,
           [1, authorProfile.metadataPointer],
         ]
       );

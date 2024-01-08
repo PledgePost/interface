@@ -103,13 +103,13 @@ const ManagerPage = () => {
         registrationStartTime: Math.floor(new Date().getTime() / 1000) + 10,
         registrationEndTime: Math.floor(new Date().getTime() / 1000) + 600,
         allocationStartTime: Math.floor(new Date().getTime() / 1000) + 601,
-        allocationEndTime: Math.floor(new Date().getTime() / 1000) + 1800,
+        allocationEndTime: Math.floor(new Date().getTime() / 1000) + 3000,
         amount: BigInt(100000000000000000),
         manager: [address],
       };
 
       const requiredParams = {
-        useRegistryAnchor: false,
+        useRegistryAnchor: true,
         metadataRequired: true,
         registrationStartTime: BigInt(initData.registrationStartTime),
         registrationEndTime: BigInt(initData.registrationEndTime),
@@ -158,9 +158,9 @@ const ManagerPage = () => {
   }
   async function handleDistribute() {
     const distributions: any = [
-      ["0xD65F00BDe12037768374A1dFA6B486D1c4bC0a58", BigInt(1000000000000000)],
-      ["0xc3593524e2744e547f013e17e6b0776bc27fc614", BigInt(100000000000000)],
-      ["0x801e9290a7ffE40aA21e386467bB526f46aC62af", BigInt(100000000000000)],
+      ["0x0c9001ea8a934Be6Dfa5eeC49DcFC52Cdb4C2f4c", BigInt(1000000000000000)], // index1
+      ["0x517E2D669e58C37eBEFFDEbb049c7b1203A4b4E8", BigInt(100000000000000)], // index2
+      ["0x11769dA1be8352B2A876aB85Fe449021800E37D6", BigInt(100000000000000)], // index3
     ];
     const { root, distributionsWithProof } = await getMerkleProof({
       distributions: distributions,

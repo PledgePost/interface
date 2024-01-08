@@ -15,6 +15,13 @@ import { Label } from "@/components/ui/label";
 
 import { Textarea } from "@/components/ui/textarea";
 import { DatePicker } from "../DatePicker";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 interface Props {
   startDate: Date | undefined;
@@ -27,6 +34,8 @@ interface Props {
   setAllocationEndDate: any;
   setName: any;
   setDescription: any;
+  amount: number | undefined;
+  setAmount: any;
   handleCreateRound: () => void;
 }
 
@@ -36,6 +45,9 @@ export function RoundCard({ props }: { props: Props }) {
   };
   const handleDescription = (e: any) => {
     props.setDescription(e.target.value);
+  };
+  const handleAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
+    props.setAmount(e.target.value);
   };
   return (
     <Card>
@@ -71,6 +83,28 @@ export function RoundCard({ props }: { props: Props }) {
               setDate={props.setAllocationEndDate}
             />
           </div>
+        </div>
+
+        <div className="flex flex-row gap-4">
+          <Input
+            placeholder="Matching Amount"
+            value={props.amount}
+            onChange={(e) => handleAmount(e)}
+          />
+          <Select /*onValueChange={(value) => handleToken(value)}*/>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Token" />
+            </SelectTrigger>
+
+            <SelectContent>
+              {/* {TokenConfig.map((token, index) => ( */}
+              <SelectItem value={"ETH"} /*key={index} value={token.address}*/>
+                {/* {token.symbol} */}
+                ETH
+              </SelectItem>
+              {/* ))} */}
+            </SelectContent>
+          </Select>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="roundname">Round name</Label>

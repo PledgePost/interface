@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useAccount, useContractWrite, useNetwork } from "wagmi";
 
@@ -12,6 +12,7 @@ import { RoundCard } from "@/components/Round/RoundCard";
 import { AlloABI } from "@/abi/Allo";
 import { CreatePoolArgs } from "../page";
 import { createProfile } from "@/utils/registry";
+import { parseEther } from "viem";
 
 const allo = {
   address: process.env.NEXT_PUBLIC_ALLO_CONTRACT_ADDRESS as `0x${string}`,
@@ -26,6 +27,7 @@ const CreateRound = () => {
   const [startDate, setStartDate] = React.useState<Date>();
   const [endDate, setEndDate] = React.useState<Date>();
   const [allocationStartDate, setAllocationStartDate] = React.useState<Date>();
+  const [amount, setAmount] = useState<number | undefined>();
   const [allocationEndDate, setAllocationEndDate] = React.useState<Date>();
   const [name, setName] = React.useState<string>();
   const [description, setDescription] = React.useState<string>();
@@ -57,6 +59,7 @@ const CreateRound = () => {
       !allocationStartDate ||
       !allocationEndDate ||
       !name ||
+      !amount ||
       !description
     )
       return alert("Please fill all fields");
@@ -73,16 +76,15 @@ const CreateRound = () => {
       version: "1.0.0",
       ownerProfileId: profileId,
       registrationStartTime: Math.floor(new Date().getTime() / 1000) + 10,
-      registrationEndTime: Math.floor(endDate.getTime() / 1000) + 600,
-      allocationStartTime:
-        Math.floor(allocationStartDate.getTime() / 1000) + 601,
-      allocationEndTime: Math.floor(allocationEndDate.getTime() / 1000) + 1800,
-      amount: BigInt(100000000000000000),
+      registrationEndTime: Math.floor(endDate.getTime() / 1000),
+      allocationStartTime: Math.floor(allocationStartDate.getTime() / 1000),
+      allocationEndTime: Math.floor(allocationEndDate.getTime() / 1000),
+      amount: parseEther(amount.toString()),
       manager: [address],
     };
 
     const requiredParams = {
-      useRegistryAnchor: false,
+      useRegistryAnchor: true,
       metadataRequired: true,
       registrationStartTime: BigInt(initData.registrationStartTime),
       registrationEndTime: BigInt(initData.registrationEndTime),
@@ -152,6 +154,8 @@ const CreateRound = () => {
           allocationEndDate,
           setAllocationStartDate,
           setAllocationEndDate,
+          amount,
+          setAmount,
           setName,
           setDescription,
           handleCreateRound,
