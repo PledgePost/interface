@@ -1,3 +1,4 @@
+import { Distribution } from "@/app/manager/page";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 
 // takes distribution data
@@ -14,7 +15,7 @@ export async function getMerkleProof({ distributions }: { distributions: [] }) {
   console.log("merkleroot", root);
 
   // Generate the Merkle proof
-  const distributionsWithProof = [];
+  const distributionsWithProof: Distribution[] = [];
 
   for (let i = 0; i < distributions.length; i++) {
     const index = i;
@@ -27,13 +28,12 @@ export async function getMerkleProof({ distributions }: { distributions: [] }) {
       distributions[i],
       proof
     );
-
+    console.log("verified", verified);
     distributionsWithProof.push({
       index,
       recipientId,
       amount,
       proof,
-      verified,
     });
   }
 

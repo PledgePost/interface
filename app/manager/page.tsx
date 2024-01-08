@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { deployStrategy } from "@/utils/deployStrategy";
 import { AlloABI } from "@/abi/Allo";
 import { useAccount, useContractWrite, useNetwork } from "wagmi";
 import { ethers } from "ethers";
@@ -10,7 +9,7 @@ import { showSuccessToast } from "@/hooks/useNotification";
 import { DonationVotingABI } from "@/abi/DonationVoting";
 import { getMerkleProof } from "@/utils/merkleProof";
 import { buildStatusRow } from "@/utils/buildStatusRow";
-import { wagmiConfig } from "@/providers/rainbowprovider";
+
 export interface CreatePoolArgs {
   version: string;
   ownerProfileId: string;
@@ -21,6 +20,14 @@ export interface CreatePoolArgs {
   amount: bigint | undefined;
   manager: [`0x${string}` | undefined];
 }
+
+export interface Distribution {
+  index: number;
+  recipientId: `0x${string}`;
+  amount: bigint;
+  proof: string[];
+}
+
 const allo = {
   address: process.env.NEXT_PUBLIC_ALLO_CONTRACT_ADDRESS as `0x${string}`,
   abi: AlloABI,
@@ -34,10 +41,6 @@ const strategy = {
 const ManagerPage = () => {
   const { address } = useAccount();
   const { chain } = useNetwork();
-  // async function deploy() {
-  //   const strategy = await deployStrategy();
-  //   return strategy;
-  // }
 
   const createOwnerProfile = async () => {
     if (!address) return;
@@ -158,18 +161,6 @@ const ManagerPage = () => {
       ["0xD65F00BDe12037768374A1dFA6B486D1c4bC0a58", BigInt(1000000000000000)],
       ["0xc3593524e2744e547f013e17e6b0776bc27fc614", BigInt(100000000000000)],
       ["0x801e9290a7ffE40aA21e386467bB526f46aC62af", BigInt(100000000000000)],
-      // {
-      //   recipientId: "0xD65F00BDe12037768374A1dFA6B486D1c4bC0a58",
-      //   amount: BigInt(100000000000000000),
-      // },
-      // {
-      //   recipientId: "0xc3593524e2744e547f013e17e6b0776bc27fc614",
-      //   amount: BigInt(10000000000000000),
-      // },
-      // {
-      //   recipientId: "0x801e9290a7ffE40aA21e386467bB526f46aC62af",
-      //   amount: BigInt(10000000000000000),
-      // },
     ];
     const { root, distributionsWithProof } = await getMerkleProof({
       distributions: distributions,
@@ -180,34 +171,38 @@ const ManagerPage = () => {
       args: [root, [BigInt(1), "Distribution"]],
     });
     setTimeout(() => {}, 5000);
-
-    const encodedDistributionsData = ethers.utils.defaultAbiCoder.encode(
-      ["tuple(uint256, address, uint256, bytes32[])[]"],
-      [
-        distributionsWithProof.map((distribution) => [
-          distribution.index,
-          distribution.recipientId,
-          distribution.amount,
-          distribution.proof,
-        ]),
-      ]
-    );
-    const decodedDistributionsData = ethers.utils.defaultAbiCoder.decode(
+    /**
+     *struct Distribution {
+        uint256 index;
+        address recipientId;
+        uint256 amount;
+        bytes32[] merkleProof;
+			}
+     */
+    const encodedDistributionsData: string =
+      ethers.utils.defaultAbiCoder.encode(
+        ["tuple(uint256, address, uint256, bytes32[])[]"],
+        [
+          distributionsWithProof.map((distribution) => [
+            distribution.index,
+            distribution.recipientId,
+            distribution.amount,
+            distribution.proof,
+          ]),
+        ]
+      );
+    const decodedDistributionsData: any = ethers.utils.defaultAbiCoder.decode(
       ["tuple(uint256, address, uint256, bytes32[])[]"],
       encodedDistributionsData
     );
     console.log("decodedDistributionsData", decodedDistributionsData);
-    console.log(
-      "recipientId: ",
-      distributionsWithProof.map((distribution) => distribution.recipientId)
+    const recipientIds: `0x${string}`[] = distributionsWithProof.map(
+      (distribution) => distribution.recipientId
     );
+    console.log("recipientIds", recipientIds);
 
     distribute({
-      args: [
-        strategy.poolId,
-        distributionsWithProof.map((distribution) => distribution.recipientId),
-        encodedDistributionsData,
-      ],
+      args: [strategy.poolId, recipientIds, encodedDistributionsData],
     });
   }
 
@@ -244,16 +239,3 @@ const ManagerPage = () => {
 };
 
 export default ManagerPage;
-
-/**
-flow 
-- updateDistribution() on strategy
-- distribute() on Allo 
-    /// @notice Stores the details of the distribution.
-    struct Distribution {
-        uint256 index;
-        address recipientId;
-        uint256 amount;
-        bytes32[] merkleProof;
-    }
- */
