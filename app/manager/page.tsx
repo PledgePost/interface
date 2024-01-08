@@ -8,7 +8,7 @@ import { ethers } from "ethers";
 import { ProfileParams, createProfile } from "@/utils/registry";
 import { showSuccessToast } from "@/hooks/useNotification";
 import { DonationVotingABI } from "@/abi/DonationVoting";
-import { Distribution, getMerkleProof } from "@/utils/merkleProof";
+import { getMerkleProof } from "@/utils/merkleProof";
 import { buildStatusRow } from "@/utils/buildStatusRow";
 import { wagmiConfig } from "@/providers/rainbowprovider";
 export interface CreatePoolArgs {
@@ -26,8 +26,10 @@ const allo = {
   abi: AlloABI,
 };
 const NATIVE = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".toLowerCase();
-const strategy = process.env
-  .NEXT_PUBLIC_STRATEGY_CONTRACT_ADDRESS as `0x${string}`;
+const strategy = {
+  address: process.env.NEXT_PUBLIC_STRATEGY_CONTRACT_ADDRESS as `0x${string}`,
+  poolId: process.env.NEXT_PUBLIC_POOL_ID,
+};
 
 const ManagerPage = () => {
   const { address } = useAccount();
@@ -47,21 +49,17 @@ const ManagerPage = () => {
     return ownerProfileId;
   };
 
-  const profileId =
-    "0xeaee9fcf238cf3bf7068ab46ad40b880a62b4afec9c02bcd5818ffed677c3d72";
-
   const { data, isLoading, isSuccess, write } = useContractWrite({
     ...allo,
     functionName: "createPoolWithCustomStrategy",
   });
   const { write: reviewRecipient } = useContractWrite({
-    address: "0x23c4b10FF712CAaf7DA6A9c9eeDFa7C7739b7802",
+    address: strategy.address,
     abi: DonationVotingABI,
     functionName: "reviewRecipients",
-    args: [[buildStatusRow(0, 2)], 0],
   });
   const { write: updateDistribution } = useContractWrite({
-    address: strategy,
+    address: strategy.address,
     abi: DonationVotingABI,
     functionName: "updateDistribution",
   });
@@ -71,11 +69,20 @@ const ManagerPage = () => {
   });
 
   async function acceptRecipient() {
-    reviewRecipient();
+    // reviewRecipient({
+    //   args: [[buildStatusRow(0, 2)], 4],
+    // });
+    setTimeout(() => {}, 5000);
+    reviewRecipient({
+      args: [[buildStatusRow(2, 2)], 4],
+    });
+    setTimeout(() => {}, 5000);
+    reviewRecipient({
+      args: [[buildStatusRow(3, 2)], 4],
+    });
   }
 
   async function handleCreatePool() {
-    // const profileId = await createOwnerProfile();
     /* 
 		 * block.timestamp < _registrationStartTime ||
       _registrationStartTime < _registrationEndTime ||
@@ -83,22 +90,24 @@ const ManagerPage = () => {
       _allocationStartTime < _allocationEndTime ||
       _registrationEndTime < _allocationEndTime;
 		*/
+    const profileId = await createOwnerProfile();
+    // "0xeaee9fcf238cf3bf7068ab46ad40b880a62b4afec9c02bcd5818ffed677c3d72";
 
     try {
       const initData: CreatePoolArgs = {
         version: "1.0.0",
         ownerProfileId: profileId,
         registrationStartTime: Math.floor(new Date().getTime() / 1000) + 10,
-        registrationEndTime: Math.floor(new Date().getTime() / 1000) + 300,
-        allocationStartTime: Math.floor(new Date().getTime() / 1000) + 310,
-        allocationEndTime: Math.floor(new Date().getTime() / 1000) + 10000,
-        amount: BigInt(10000000000000000),
+        registrationEndTime: Math.floor(new Date().getTime() / 1000) + 600,
+        allocationStartTime: Math.floor(new Date().getTime() / 1000) + 601,
+        allocationEndTime: Math.floor(new Date().getTime() / 1000) + 1800,
+        amount: BigInt(100000000000000000),
         manager: [address],
       };
 
       const requiredParams = {
         useRegistryAnchor: false,
-        metadataRequired: false,
+        metadataRequired: true,
         registrationStartTime: BigInt(initData.registrationStartTime),
         registrationEndTime: BigInt(initData.registrationEndTime),
         allocationStartTime: BigInt(initData.allocationStartTime),
@@ -119,7 +128,7 @@ const ManagerPage = () => {
       };
       const initializeParams = {
         ownerProfileId: initData.ownerProfileId,
-        strategy: `0x${strategy}`,
+        strategy: `0x${strategy.address}`,
         requiredParams: encodedParams,
         token: NATIVE,
         amount: initData.amount,
@@ -127,10 +136,11 @@ const ManagerPage = () => {
         managers: initData.manager,
       };
       console.log("initializeParams", initializeParams);
+      setTimeout(() => {}, 5000);
       write({
         args: [
           initData.ownerProfileId,
-          strategy,
+          strategy.address,
           encodedParams,
           NATIVE,
           initData.amount,
@@ -144,28 +154,33 @@ const ManagerPage = () => {
     }
   }
   async function handleDistribute() {
-    const recipientId = "0xb1f2d1a241ae813895102a8b7243803d10f70968";
-    const distributions: Distribution[] = [
-      {
-        recipientId: recipientId,
-        amount: BigInt(10000000000000000),
-      },
-      // { recipientId: "0x456", amount: BigInt(200) },
+    const distributions: any = [
+      ["0xD65F00BDe12037768374A1dFA6B486D1c4bC0a58", BigInt(1000000000000000)],
+      ["0xc3593524e2744e547f013e17e6b0776bc27fc614", BigInt(100000000000000)],
+      ["0x801e9290a7ffE40aA21e386467bB526f46aC62af", BigInt(100000000000000)],
+      // {
+      //   recipientId: "0xD65F00BDe12037768374A1dFA6B486D1c4bC0a58",
+      //   amount: BigInt(100000000000000000),
+      // },
+      // {
+      //   recipientId: "0xc3593524e2744e547f013e17e6b0776bc27fc614",
+      //   amount: BigInt(10000000000000000),
+      // },
+      // {
+      //   recipientId: "0x801e9290a7ffE40aA21e386467bB526f46aC62af",
+      //   amount: BigInt(10000000000000000),
+      // },
     ];
     const { root, distributionsWithProof } = await getMerkleProof({
       distributions: distributions,
     });
-
     console.log("distributionsWithProof", distributionsWithProof);
-    const encodedMerkleRoot = ethers.utils.defaultAbiCoder.encode(
-      ["bytes32"],
-      [`0x${root}`]
-    );
 
-    // updateDistribution({
-    //   args: [encodedMerkleRoot, [BigInt(1), "Distribution"]],
-    // });
+    updateDistribution({
+      args: [root, [BigInt(1), "Distribution"]],
+    });
     setTimeout(() => {}, 5000);
+
     const encodedDistributionsData = ethers.utils.defaultAbiCoder.encode(
       ["tuple(uint256, address, uint256, bytes32[])[]"],
       [
@@ -173,19 +188,28 @@ const ManagerPage = () => {
           distribution.index,
           distribution.recipientId,
           distribution.amount,
-          distribution.merkleProof,
+          distribution.proof,
         ]),
       ]
     );
+    const decodedDistributionsData = ethers.utils.defaultAbiCoder.decode(
+      ["tuple(uint256, address, uint256, bytes32[])[]"],
+      encodedDistributionsData
+    );
+    console.log("decodedDistributionsData", decodedDistributionsData);
+    console.log(
+      "recipientId: ",
+      distributionsWithProof.map((distribution) => distribution.recipientId)
+    );
+
     distribute({
       args: [
-        103,
+        strategy.poolId,
         distributionsWithProof.map((distribution) => distribution.recipientId),
         encodedDistributionsData,
       ],
     });
   }
-  console.log(chain?.blockExplorers);
 
   useEffect(() => {
     if (isSuccess && data && chain) {
@@ -193,10 +217,10 @@ const ManagerPage = () => {
     }
   }, [chain, data, isSuccess]);
   return (
-    <div className="flex flex-row justify-center ">
+    <div className="flex flex-row justify-center">
       <Button
         onClick={() => {
-          handleDistribute();
+          handleCreatePool();
         }}
       >
         Create Pool
@@ -207,6 +231,13 @@ const ManagerPage = () => {
         }}
       >
         Accept Recipient
+      </Button>
+      <Button
+        onClick={() => {
+          handleDistribute();
+        }}
+      >
+        Distribute
       </Button>
     </div>
   );

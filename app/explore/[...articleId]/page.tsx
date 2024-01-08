@@ -171,7 +171,8 @@ export default function ArticlePage({ params }: any) {
           "tuple(tuple(tuple(address, uint256), uint256, uint256), string)",
         ],
         [
-          "0xB1F2d1a241AE813895102A8B7243803D10f70968",
+          // recipientId as address
+          "0x801e9290a7ffE40aA21e386467bB526f46aC62af",
           [
             [
               [NATIVE, parseEther(amount)],
@@ -195,7 +196,7 @@ export default function ArticlePage({ params }: any) {
       // });
       // console.log("result", result);
       allocate({
-        args: [103, data],
+        args: [process.env.NEXT_PUBLIC_POOL_ID, data],
         value: parseEther(amount),
       });
       // write({
@@ -225,6 +226,7 @@ export default function ArticlePage({ params }: any) {
       showSuccessToast(
         `${chain?.blockExplorers?.etherscan?.url}/tx/${data.hash}`
       );
+      console.log("data", data);
     } else {
       showErrorToast("Error donating to article");
     }
