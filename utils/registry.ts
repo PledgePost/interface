@@ -8,12 +8,14 @@ import { sendTransaction } from "@wagmi/core";
 
 export interface ProfileParams {
   pointer: any;
+  name: string;
   owner: `0x${string}` | undefined;
   members: [`0x${string}` | undefined];
 }
 
 export async function createProfile({
   pointer,
+  name,
   owner,
   members,
 }: ProfileParams) {
@@ -23,7 +25,7 @@ export async function createProfile({
     // random number to prevent nonce reuse, this is required.
     // NOTE: The profile ID id based on the provided nonce and the caller's address.
     nonce: Math.floor(Math.random() * 10000),
-    name: "PledgePost Profile",
+    name: name,
     metadata: {
       protocol: BigInt(1),
       pointer: pointer,

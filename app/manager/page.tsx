@@ -46,6 +46,7 @@ const ManagerPage = () => {
     if (!address) return;
     const ownerProfileId = await createProfile({
       pointer: "PledgePostDonationTransferStrategy",
+      name: "PledgePost Owner Profile",
       owner: address,
       members: [address],
     });

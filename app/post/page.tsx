@@ -109,11 +109,11 @@ const Post = () => {
       const cid: CIDString | undefined = await storeFiles(files);
       let profileData: ProfileParams = {
         pointer: cid,
+        name: "PledgePost Profile",
         owner: currentAddress,
         members: [currentAddress], //TODO: let user add contributors
       };
       const profileId: string = await createProfile(profileData);
-
       let applicationMetadata: TApplicationMetadata = {
         name: title,
         description: value,
@@ -130,7 +130,7 @@ const Post = () => {
         profileId: profileId,
       });
       console.log("authorProfile", authorProfile);
-
+      0x06aa005386f53ba7b980c61e0d067cabc7602a62;
       const encodeRegisterData = ethers.utils.defaultAbiCoder.encode(
         ["address", "address", "tuple(uint256, string)"],
         [
