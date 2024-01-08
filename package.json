@@ -47,7 +47,6 @@
     "keccak256": "^1.0.6",
     "lokijs": "^1.5.12",
     "lucide-react": "^0.279.0",
-    "merkletreejs": "^0.3.11",
     "next": "^14.0.4",
     "next-themes": "^0.2.1",
     "pino-pretty": "^10.2.0",
