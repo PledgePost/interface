@@ -35,6 +35,37 @@ const allo = {
   abi: AlloABI,
 };
 
+async function getPosts() {
+  try {
+    const res = await fetch("https://alloscan.spec.dev/graphql/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `query GetTransactions {
+					alloTransactions {
+						hash
+						fromAddress
+						toAddress
+						functionName
+						functionArgs
+						status
+						blockHash
+						blockNumber
+						blockTimestamp
+						chainId
+					}
+				}`,
+      }),
+    }).then((res) => res.json());
+    console.log("res", res);
+    return res.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 const Post = () => {
   const [value, setValue] = useState(``);
   const [title, setTitle] = useState("");
@@ -59,6 +90,10 @@ const Post = () => {
     abi: allo.abi,
     functionName: "registerRecipient",
   });
+  async function getPostData() {
+    const post = await getPosts();
+    console.log("Fetched Post", post);
+  }
 
   const handleCoverImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -145,7 +180,7 @@ const Post = () => {
       });
       showDefaultToast("Sending Transaction...");
     } catch (e) {
-      console.log(e);
+      console.log("Error: ", e);
       showErrorToast("Error Failed to Post");
     }
   };
@@ -156,6 +191,10 @@ const Post = () => {
       );
     }
   }, [chain, data, isSuccess]);
+
+  useEffect(() => {
+    getPostData();
+  }, []);
 
   useEffect(() => {
     const object: Content = {

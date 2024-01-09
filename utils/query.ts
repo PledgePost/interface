@@ -1,6 +1,19 @@
 import { gql } from "graphql-request";
 
-export const graphqlEndpoint = process.env.NEXT_PUBLIC_GRAPHQL_URL || "";
+export const graphqlEndpoint = process.env.NEXT_PUBLIC_GRAPHQL_URL!;
+
+export const getAllocatedsQuery = gql`
+  query allocateds {
+    recipientId
+    status
+    sender
+    contractName
+    contractAddress
+    blockHash
+    blockNumber
+    blockTimestamp
+  }
+`;
 
 export const checkIfRecipientIsIndexedQuery = gql`
   query checkIfRecipientIsIndexedQuery(

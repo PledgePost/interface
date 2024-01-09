@@ -1,0 +1,110 @@
+type Allocated @entity(immutable: true) {
+  id: Bytes!
+  recipientId: Bytes! # address
+  amount: BigInt! # uint256
+  token: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type BatchPayoutSuccessful @entity(immutable: true) {
+  id: Bytes!
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Distributed @entity(immutable: true) {
+  id: Bytes!
+  recipientId: Bytes! # address
+  recipientAddress: Bytes! # address
+  amount: BigInt! # uint256
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type DistributionUpdated @entity(immutable: true) {
+  id: Bytes!
+  merkleRoot: Bytes! # bytes32
+  metadata_protocol: BigInt! # uint256
+  metadata_pointer: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type FundsDistributed @entity(immutable: true) {
+  id: Bytes!
+  amount: BigInt! # uint256
+  grantee: Bytes! # address
+  token: Bytes! # address
+  recipientId: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Initialized @entity(immutable: true) {
+  id: Bytes!
+  poolId: BigInt! # uint256
+  data: Bytes! # bytes
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type PoolActive @entity(immutable: true) {
+  id: Bytes!
+  active: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RecipientStatusUpdated @entity(immutable: true) {
+  id: Bytes!
+  rowIndex: BigInt! # uint256
+  fullRow: BigInt! # uint256
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Registered @entity(immutable: true) {
+  id: Bytes!
+  recipientId: Bytes! # address
+  data: Bytes! # bytes
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TimestampsUpdated @entity(immutable: true) {
+  id: Bytes!
+  registrationStartTime: BigInt! # uint64
+  registrationEndTime: BigInt! # uint64
+  allocationStartTime: BigInt! # uint64
+  allocationEndTime: BigInt! # uint64
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type UpdatedRegistration @entity(immutable: true) {
+  id: Bytes!
+  recipientId: Bytes! # address
+  data: Bytes! # bytes
+  sender: Bytes! # address
+  status: Int! # uint8
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
