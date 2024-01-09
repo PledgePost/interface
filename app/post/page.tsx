@@ -10,18 +10,12 @@ import {
 import dynamic from "next/dynamic";
 import { CIDString } from "web3.storage";
 import { useAccount, useContractWrite, useNetwork } from "wagmi";
-import { ABIs as ABI } from "@/constants";
 import { Content } from "@/types";
-import {
-  createApplication,
-  deployMicrograntsStrategy,
-} from "@/utils/microgrants";
 import { ProfileParams, createProfile } from "@/utils/registry";
 import { TApplicationMetadata, TNewApplication } from "@/types/alloTypes";
 import { AlloABI } from "@/abi/Allo";
 import { getProfileById } from "@/utils/request";
 import { chainConfig } from "@/utils/allo";
-import { wagmiConfig } from "@/providers/rainbowprovider";
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
@@ -34,37 +28,6 @@ const allo = {
   address: process.env.NEXT_PUBLIC_ALLO_CONTRACT_ADDRESS as `0x${string}`,
   abi: AlloABI,
 };
-
-async function getPosts() {
-  try {
-    const res = await fetch("https://alloscan.spec.dev/graphql/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: `query GetTransactions {
-					alloTransactions {
-						hash
-						fromAddress
-						toAddress
-						functionName
-						functionArgs
-						status
-						blockHash
-						blockNumber
-						blockTimestamp
-						chainId
-					}
-				}`,
-      }),
-    }).then((res) => res.json());
-    console.log("res", res);
-    return res.data;
-  } catch (error) {
-    console.error(error);
-  }
-}
 
 const Post = () => {
   const [value, setValue] = useState(``);
@@ -80,21 +43,11 @@ const Post = () => {
   const { address: currentAddress } = useAccount();
   const { chain } = useNetwork();
 
-  // const { data, isLoading, isSuccess, write } = useContractWrite({
-  //   address: ABI.contractAddress as any,
-  //   abi: ABI.abi,
-  //   functionName: "postArticle",
-  // });
   const { data, isLoading, isSuccess, write } = useContractWrite({
     address: allo.address,
     abi: allo.abi,
     functionName: "registerRecipient",
   });
-  async function getPostData() {
-    const post = await getPosts();
-    console.log("Fetched Post", post);
-  }
-
   const handleCoverImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const file: File | null = e.target.files[0];
@@ -191,10 +144,6 @@ const Post = () => {
       );
     }
   }, [chain, data, isSuccess]);
-
-  useEffect(() => {
-    getPostData();
-  }, []);
 
   useEffect(() => {
     const object: Content = {
