@@ -1,4 +1,4 @@
-export function buildStatusRow(recipientIndex: number, status: number) {
+export function buildStatusRow(recipientIndex: number, newStatus: number) {
   // calculate col index on bitmap
   const colIndex = (recipientIndex % 64) * 4;
 
@@ -9,7 +9,7 @@ export function buildStatusRow(recipientIndex: number, status: number) {
   let newRow = currentRow & ~(15 << colIndex);
 
   // set specified status at specified position
-  let statusRow = newRow | (status << colIndex);
+  let statusRow = newRow | (newStatus << colIndex);
 
   // Initialize ApplicationStatus object
   const applicationStatus = {

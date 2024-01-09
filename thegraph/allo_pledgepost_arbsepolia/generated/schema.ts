@@ -1371,3 +1371,280 @@ export class UpdatedRegistration extends Entity {
     this.set("transactionHash", Value.fromBytes(value));
   }
 }
+
+export class Article extends Entity {
+  constructor(id: Bytes) {
+    super();
+    this.set("id", Value.fromBytes(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save Article entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.BYTES,
+        `Entities of type Article must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`,
+      );
+      store.set("Article", id.toBytes().toHexString(), this);
+    }
+  }
+
+  static loadInBlock(id: Bytes): Article | null {
+    return changetype<Article | null>(
+      store.get_in_block("Article", id.toHexString()),
+    );
+  }
+
+  static load(id: Bytes): Article | null {
+    return changetype<Article | null>(store.get("Article", id.toHexString()));
+  }
+
+  get id(): Bytes {
+    let value = this.get("id");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set id(value: Bytes) {
+    this.set("id", Value.fromBytes(value));
+  }
+
+  get address(): Bytes {
+    let value = this.get("address");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set address(value: Bytes) {
+    this.set("address", Value.fromBytes(value));
+  }
+
+  get recipientId(): RegisteredLoader {
+    return new RegisteredLoader(
+      "Article",
+      this.get("id")!.toBytes().toHexString(),
+      "recipientId",
+    );
+  }
+
+  get allocation(): AllocatedLoader {
+    return new AllocatedLoader(
+      "Article",
+      this.get("id")!.toBytes().toHexString(),
+      "allocation",
+    );
+  }
+
+  get distribution(): DistributedLoader {
+    return new DistributedLoader(
+      "Article",
+      this.get("id")!.toBytes().toHexString(),
+      "distribution",
+    );
+  }
+
+  get fundsDistributed(): FundsDistributedLoader {
+    return new FundsDistributedLoader(
+      "Article",
+      this.get("id")!.toBytes().toHexString(),
+      "fundsDistributed",
+    );
+  }
+
+  get updatedRegistration(): UpdatedRegistrationLoader {
+    return new UpdatedRegistrationLoader(
+      "Article",
+      this.get("id")!.toBytes().toHexString(),
+      "updatedRegistration",
+    );
+  }
+}
+
+export class User extends Entity {
+  constructor(id: Bytes) {
+    super();
+    this.set("id", Value.fromBytes(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save User entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.BYTES,
+        `Entities of type User must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`,
+      );
+      store.set("User", id.toBytes().toHexString(), this);
+    }
+  }
+
+  static loadInBlock(id: Bytes): User | null {
+    return changetype<User | null>(
+      store.get_in_block("User", id.toHexString()),
+    );
+  }
+
+  static load(id: Bytes): User | null {
+    return changetype<User | null>(store.get("User", id.toHexString()));
+  }
+
+  get id(): Bytes {
+    let value = this.get("id");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set id(value: Bytes) {
+    this.set("id", Value.fromBytes(value));
+  }
+
+  get sender(): RegisteredLoader {
+    return new RegisteredLoader(
+      "User",
+      this.get("id")!.toBytes().toHexString(),
+      "sender",
+    );
+  }
+
+  get articles(): ArticleLoader {
+    return new ArticleLoader(
+      "User",
+      this.get("id")!.toBytes().toHexString(),
+      "articles",
+    );
+  }
+
+  get donated(): AllocatedLoader {
+    return new AllocatedLoader(
+      "User",
+      this.get("id")!.toBytes().toHexString(),
+      "donated",
+    );
+  }
+
+  get fundsDistributed(): FundsDistributedLoader {
+    return new FundsDistributedLoader(
+      "User",
+      this.get("id")!.toBytes().toHexString(),
+      "fundsDistributed",
+    );
+  }
+}
+
+export class RegisteredLoader extends Entity {
+  _entity: string;
+  _field: string;
+  _id: string;
+
+  constructor(entity: string, id: string, field: string) {
+    super();
+    this._entity = entity;
+    this._id = id;
+    this._field = field;
+  }
+
+  load(): Registered[] {
+    let value = store.loadRelated(this._entity, this._id, this._field);
+    return changetype<Registered[]>(value);
+  }
+}
+
+export class AllocatedLoader extends Entity {
+  _entity: string;
+  _field: string;
+  _id: string;
+
+  constructor(entity: string, id: string, field: string) {
+    super();
+    this._entity = entity;
+    this._id = id;
+    this._field = field;
+  }
+
+  load(): Allocated[] {
+    let value = store.loadRelated(this._entity, this._id, this._field);
+    return changetype<Allocated[]>(value);
+  }
+}
+
+export class DistributedLoader extends Entity {
+  _entity: string;
+  _field: string;
+  _id: string;
+
+  constructor(entity: string, id: string, field: string) {
+    super();
+    this._entity = entity;
+    this._id = id;
+    this._field = field;
+  }
+
+  load(): Distributed[] {
+    let value = store.loadRelated(this._entity, this._id, this._field);
+    return changetype<Distributed[]>(value);
+  }
+}
+
+export class FundsDistributedLoader extends Entity {
+  _entity: string;
+  _field: string;
+  _id: string;
+
+  constructor(entity: string, id: string, field: string) {
+    super();
+    this._entity = entity;
+    this._id = id;
+    this._field = field;
+  }
+
+  load(): FundsDistributed[] {
+    let value = store.loadRelated(this._entity, this._id, this._field);
+    return changetype<FundsDistributed[]>(value);
+  }
+}
+
+export class UpdatedRegistrationLoader extends Entity {
+  _entity: string;
+  _field: string;
+  _id: string;
+
+  constructor(entity: string, id: string, field: string) {
+    super();
+    this._entity = entity;
+    this._id = id;
+    this._field = field;
+  }
+
+  load(): UpdatedRegistration[] {
+    let value = store.loadRelated(this._entity, this._id, this._field);
+    return changetype<UpdatedRegistration[]>(value);
+  }
+}
+
+export class ArticleLoader extends Entity {
+  _entity: string;
+  _field: string;
+  _id: string;
+
+  constructor(entity: string, id: string, field: string) {
+    super();
+    this._entity = entity;
+    this._id = id;
+    this._field = field;
+  }
+
+  load(): Article[] {
+    let value = store.loadRelated(this._entity, this._id, this._field);
+    return changetype<Article[]>(value);
+  }
+}

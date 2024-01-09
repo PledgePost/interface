@@ -73,9 +73,9 @@ const ManagerPage = () => {
   });
 
   async function acceptRecipient() {
-    // reviewRecipient({
-    //   args: [[buildStatusRow(0, 2)], 4],
-    // });
+    reviewRecipient({
+      args: [[buildStatusRow(1, 2)], 4],
+    });
     setTimeout(() => {}, 5000);
     reviewRecipient({
       args: [[buildStatusRow(2, 2)], 4],
@@ -84,6 +84,9 @@ const ManagerPage = () => {
     reviewRecipient({
       args: [[buildStatusRow(3, 2)], 4],
     });
+    console.log(buildStatusRow(1, 1));
+    console.log(buildStatusRow(2, 1));
+    console.log(buildStatusRow(3, 1));
   }
 
   async function handleCreatePool() {
