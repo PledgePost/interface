@@ -164,3 +164,22 @@ export const ALLO_GET_ARTICLES = `
     }
   }
 `;
+export const ALLO_GET_ARTICLE = `
+query AlloGetArticle ($id: Bytes!) {
+	articles (where: {id: $id}) {
+		id
+		address {
+			id
+		}
+		allocation {
+			amount
+		}
+		fundsDistributed {
+			amount
+		}
+		registerd {
+			data
+		}
+	}
+}
+`;

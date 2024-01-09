@@ -8,14 +8,12 @@ import {
   showErrorToast,
   showSuccessToast,
 } from "@/hooks/useNotification";
-import { toChecksumAddress } from "ethereumjs-util";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Pre } from "@/components/RichEditor";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { SalesCard, SubscriptionCard } from "@/components/Card";
-import { GET_ARTICLES_BY_ID_AND_ADDRESS } from "@/lib/query";
-import { ApolloClient, InMemoryCache } from "@apollo/client";
+
 import { getComments, insertComment } from "@/hooks/useSupabase";
 import {
   useAccount,
@@ -26,92 +24,96 @@ import {
 import { parseEther } from "viem";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import useDefaultProvider from "@/hooks/useDefaultProvider";
-import { ABIs as ABI } from "@/constants";
 import Image from "next/image";
-import { Comment, Content } from "@/types";
-import { StateContext } from "@/providers";
+import { Comment } from "@/types";
 import { AlloABI } from "@/abi/Allo";
-import {
-  // permit2 contract address
-  PERMIT2_ADDRESS,
-  // the type of permit that we need to sign
-  PermitTransferFrom,
-  // Witness type
-  Witness,
-  // this will help us get domain, types and values that we need to create a signature
-  SignatureTransfer,
-} from "@uniswap/permit2-sdk";
-import { wagmiConfig } from "@/providers/rainbowprovider";
+import { ALLO_GET_ARTICLE } from "@/lib/query";
+import { fetchData } from "@/lib/fetchData";
+import { calculateAmount } from "@/lib/calculate";
+import { Skeleton } from "@/components/ui/skeleton";
 // TODO: fix Image witdth and height
 
 const NATIVE = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".toLowerCase();
-const permit2Address = "0x000000000022D473030F116dDEE9F6B43aC78BA3";
+// const permit2Address = "0x000000000022D473030F116dDEE9F6B43aC78BA3";
 
-const PledgeContract = {
-  address: ABI.contractAddress as any,
-  abi: ABI.abi,
-};
 const allo = {
   address: process.env.NEXT_PUBLIC_ALLO_CONTRACT_ADDRESS as `0x${string}`,
   abi: AlloABI,
 };
 
-const client = new ApolloClient({
-  uri: "https://api.studio.thegraph.com/query/52298/pledgepost_opgoerli/version/latest",
-  cache: new InMemoryCache(),
-});
-
-async function fetchData(address: any, cid: string) {
-  const checksumAddress = toChecksumAddress(address);
-  const url = `https://ipfs.io/ipfs/${cid}/pledgepost:${checksumAddress}`;
-  const res = await fetch(url, {
-    cache: "force-cache",
-  });
-  const content: Content = await res.json();
-  return content;
+async function getAlloArticle(id: string) {
+  const response = await fetch(
+    "https://api.studio.thegraph.com/query/63008/allo_pledgepost_arbsepolia/version/latest",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: ALLO_GET_ARTICLE,
+        variables: { id: id },
+      }),
+    }
+  ).then((res) => res.json());
+  console.log("response", response);
+  return response.data?.articles[0];
 }
 
 export default function ArticlePage({ params }: any) {
-  const [content, setContent] = useState<Content | undefined>(undefined);
   const [messages, setMessages] = useState<string>("");
   const [comments, setComments] = useState<Comment[] | undefined>(undefined);
   const [amount, setAmount] = useState<any>(null);
-  const [donation, setDonation] = useState<any>(null);
-  const [donors, setDonors] = useState<any>(null);
   const [isDonated, setIsDonated] = useState<any>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const provider: ethers.providers.JsonRpcProvider = useDefaultProvider();
   const [estimatedAllocation, setEstimatedAllocation] = useState<any>(null);
   const { openConnectModal } = useConnectModal();
-  const { ethPrice } = StateContext();
   const { address: currentAddress } = useAccount();
   const { chain } = useNetwork();
+  const [article, setArticle] = useState<any>([]);
   useEffect(() => {
-    if (!currentAddress || !provider) return;
-    async function checkDonation() {
-      const contract = new ethers.Contract(
-        ABI.contractAddress,
-        ABI.abi,
-        provider
+    const decoder = ethers.utils.defaultAbiCoder;
+    async function getPost() {
+      setIsLoading(true);
+      let data = await getAlloArticle(params.articleId[1]);
+      console.log("data", data);
+      let decodedRegisterData = decoder.decode(
+        ["bytes", "uint256"],
+        data.registerd.data
       );
-      const data = await contract.checkOwner(
-        currentAddress,
-        params.articleId[0],
-        params.articleId[1]
+
+      let decodedRegisterParams = decoder.decode(
+        ["address", "address", "tuple(uint256, string)"],
+        decodedRegisterData[0]
       );
-      setIsDonated(data);
+      let IPFS = await fetchData(
+        decodedRegisterParams[1],
+        decodedRegisterParams[2][1]
+      );
+      let donation = calculateAmount(data.alllocation);
+      let donors = 0;
+      if (data.alllocation) {
+        donors = data.alllocation.length;
+      }
+      let distributed = calculateAmount(data.distributed);
+      data = {
+        ...data,
+        ...IPFS,
+        recipientId: decodedRegisterParams[0],
+        authorAddress: decodedRegisterParams[1],
+        content: decodedRegisterParams[2][1],
+        recipientIndex: BigNumber.from(decodedRegisterData[1]).toNumber(),
+        donation,
+        donors,
+        distributed,
+      };
+      setArticle(data);
+      console.log("data", data);
+      setIsLoading(false);
     }
-    checkDonation();
-  }, [currentAddress, params.articleId, provider]);
-  const {
-    data,
-    isLoading: isLoadingTx,
-    isSuccess,
-    write,
-  } = useContractWrite({
-    ...PledgeContract,
-    functionName: "donateToArticle",
-  });
+    getPost();
+  }, [params.articleId]);
+
   const {
     data: allocateData,
     isLoading: isLoadingAllocation,
@@ -122,6 +124,7 @@ export default function ArticlePage({ params }: any) {
     functionName: "allocate",
   });
 
+  // TODO: fix supabase structure
   async function fetchComments() {
     const comments = await getComments(
       params.articleId[0],
@@ -151,20 +154,20 @@ export default function ArticlePage({ params }: any) {
     if (!currentAddress) return alert("Please connect wallet");
     if (!amount) return alert("Please enter amount");
     let lowercaseAddress = currentAddress.toLowerCase();
-    if (lowercaseAddress === params.articleId[0])
+    if (currentAddress === article.authorAddress)
       return alert("You cannot donate to your own article");
     try {
-      const permit2Data = {
-        permit: {
-          permitted: {
-            token: NATIVE,
-            amount: BigInt(1e18),
-          },
-          nonce: 0,
-          deadline: Math.floor(new Date().getTime() / 1000) + 10000,
-        },
-        signature: "",
-      };
+      // const permit2Data = {
+      //   permit: {
+      //     permitted: {
+      //       token: NATIVE,
+      //       amount: BigInt(1e18),
+      //     },
+      //     nonce: 0,
+      //     deadline: Math.floor(new Date().getTime() / 1000) + 10000,
+      //   },
+      //   signature: "",
+      // };
       const data = ethers.utils.defaultAbiCoder.encode(
         [
           "address",
@@ -172,114 +175,50 @@ export default function ArticlePage({ params }: any) {
         ],
         [
           // recipientId as address
-          "0x801e9290a7ffE40aA21e386467bB526f46aC62af",
+          article.recipientId,
           [
             [
-              [NATIVE, parseEther(amount)],
-              0,
-              Math.floor(new Date().getTime() / 1000) + 1000,
+              // SignatureTransfer.PermitTransferFrom
+              [NATIVE, parseEther(amount)], // token, amount
+              0, // nonce
+              Math.floor(new Date().getTime() / 1000) + 1000, // deadline
             ],
-            "",
+            "", // signature, Native doesn't need signature
           ],
         ]
       );
-      console.log("data", data);
-      // 0x192c88c5faff60bcdbb5bffb861a5f573141d9f461c4383f018e27b18986eab6 profile
-      // 0xB1F2d1a241AE813895102A8B7243803D10f70968 recipient
       showDefaultToast("Sending Transaction...");
-      // const { result } = await wagmiConfig.publicClient.simulateContract({
-      //   address: allo.address,
-      //   abi: allo.abi,
-      //   functionName: "allocate",
-      //   args: [process.env.NEXT_PUBLIC_POOL_ID, data],
-      //   value: parseEther(amount),
-      // });
-      // console.log("result", result);
+
       allocate({
         args: [process.env.NEXT_PUBLIC_POOL_ID, data],
         value: parseEther(amount),
       });
-      // write({
-      //   args: [params.articleId[0], params.articleId[1]],
-      //   value: parseEther(amount),
-      // });
     } catch (e) {
       console.log("error: ", e);
       showErrorToast("Error donating to article");
     }
   };
-  async function getArticleByIdandAddress(address: any, id: any) {
-    const response = await client.query({
-      query: GET_ARTICLES_BY_ID_AND_ADDRESS,
-      variables: {
-        authorAddress: address,
-        articleId: id,
-      },
-      fetchPolicy: "no-cache",
-    });
-    if (!response || !response.data || !response.data.articles) return;
-    return response.data.articles[0];
-  }
-  useEffect(() => {
-    if (!data || !chain) return;
-    if (isSuccess) {
-      showSuccessToast(
-        `${chain?.blockExplorers?.etherscan?.url}/tx/${data.hash}`
-      );
-      console.log("data", data);
-    } else {
-      showErrorToast("Error donating to article");
-    }
-  }, [chain, data, isSuccess]);
-
-  useEffect(() => {
-    async function fetchContent() {
-      const result = await fetchData(params.articleId[0], params.articleId[2]);
-      setContent(result);
-      return result;
-    }
-    const fetchArticleInfo = async () => {
-      const lowercaseAddress = params.articleId[0].toLowerCase();
-      const article = await getArticleByIdandAddress(
-        lowercaseAddress,
-        params.articleId[1]
-      );
-      if (article.donations.length > 0) {
-        let totalAmount = 0;
-        for (let i = 0; i < article.donations.length; i++) {
-          let donationAmount = ethers.utils.formatEther(
-            article.donations[i].amount
-          );
-          totalAmount += parseFloat(donationAmount);
-        }
-
-        const USDValue = totalAmount * ethPrice;
-        setDonation(USDValue);
-        setDonors(article.donations.length);
-      }
-    };
-
-    fetchContent();
-    fetchComments();
-    fetchArticleInfo();
-  }, [params.articleId]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-10">
-      <Image
-        className="flex justify-center mx-auto"
-        src={content?.coverImage || "https://picsum.photos/800/400"}
-        alt="cover image"
-        width={800}
-        height={400}
-      />
+      {isLoading ? (
+        <Skeleton className="w-[800px] h-[400px] flex justify-center mx-auto" />
+      ) : (
+        <Image
+          className="flex justify-center mx-auto"
+          src={article.coverImage}
+          alt="cover image"
+          width={800}
+          height={400}
+        />
+      )}
       <h1 className="flex justify-center text-3xl font-bold my-5">
-        {content?.title}
+        {article.title}
       </h1>
       <div className="flex flex-row gap-4 my-4 justify-center">
         <SalesCard
           title="Recieved Donation"
-          amount={donation || 0}
+          amount={article.donation || 0}
           isLoading={isLoading}
         />
         <SalesCard
@@ -289,7 +228,7 @@ export default function ArticlePage({ params }: any) {
         />
         <SubscriptionCard
           title="Contributors"
-          amount={donors || 0}
+          amount={article.donors || 0}
           isLoading={isLoading}
         />
       </div>
@@ -300,7 +239,7 @@ export default function ArticlePage({ params }: any) {
             remarkPlugins={[remarkGfm]}
             components={{ pre: Pre }}
           >
-            {content?.value}
+            {article.value}
           </ReactMarkdown>
         </div>
         <div className="w-1/4 bg-white p-5 rounded shadow gap-4">
@@ -329,7 +268,7 @@ export default function ArticlePage({ params }: any) {
                 handleSend={handleComment}
                 handleClick={handleDonate}
                 isDonated={isDonated}
-                loadingTx={isLoadingTx}
+                loadingTx={isLoadingAllocation}
               />
             )}
           </div>
