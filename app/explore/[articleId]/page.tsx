@@ -28,7 +28,7 @@ import Image from "next/image";
 import { Comment } from "@/types";
 import { AlloABI } from "@/abi/Allo";
 import { ALLO_GET_ARTICLE } from "@/lib/query";
-import { fetchData } from "@/lib/fetchData";
+import { fetchData, getAlloArticle } from "@/lib/fetchData";
 import { calculateAmount } from "@/lib/calculate";
 import { Skeleton } from "@/components/ui/skeleton";
 // TODO: fix Image witdth and height
@@ -40,24 +40,6 @@ const allo = {
   address: process.env.NEXT_PUBLIC_ALLO_CONTRACT_ADDRESS as `0x${string}`,
   abi: AlloABI,
 };
-
-async function getAlloArticle(id: string) {
-  const response = await fetch(
-    "https://api.studio.thegraph.com/query/63008/allo_pledgepost_arbsepolia/version/latest",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: ALLO_GET_ARTICLE,
-        variables: { id: id },
-      }),
-    }
-  ).then((res) => res.json());
-  console.log("response", response);
-  return response.data?.articles[0];
-}
 
 export default function ArticlePage({ params }: any) {
   const [messages, setMessages] = useState<string>("");
@@ -75,7 +57,7 @@ export default function ArticlePage({ params }: any) {
     const decoder = ethers.utils.defaultAbiCoder;
     async function getPost() {
       setIsLoading(true);
-      let data = await getAlloArticle(params.articleId[1]);
+      let data = await getAlloArticle(params.articleId);
       console.log("data", data);
       let decodedRegisterData = decoder.decode(
         ["bytes", "uint256"],
@@ -125,30 +107,30 @@ export default function ArticlePage({ params }: any) {
   });
 
   // TODO: fix supabase structure
-  async function fetchComments() {
-    const comments = await getComments(
-      params.articleId[0],
-      params.articleId[1]
-    );
-    setComments(comments);
-  }
+  // async function fetchComments() {
+  //   const comments = await getComments(
+  //     params.articleId[0],
+  //     params.articleId[1]
+  //   );
+  //   setComments(comments);
+  // }
 
-  async function handleComment() {
-    if (!currentAddress || messages === "") return;
-    try {
-      await insertComment(
-        params.articleId[0],
-        params.articleId[1],
-        currentAddress,
-        messages
-      );
-      setMessages("");
-      await fetchComments();
-    } catch (e) {
-      console.log("error: ", e);
-      showErrorToast("Error posting comment");
-    }
-  }
+  // async function handleComment() {
+  //   if (!currentAddress || messages === "") return;
+  //   try {
+  //     await insertComment(
+  //       params.articleId[0],
+  //       params.articleId[1],
+  //       currentAddress,
+  //       messages
+  //     );
+  //     setMessages("");
+  //     await fetchComments();
+  //   } catch (e) {
+  //     console.log("error: ", e);
+  //     showErrorToast("Error posting comment");
+  //   }
+  // }
 
   const handleDonate = async () => {
     if (!currentAddress) return alert("Please connect wallet");
@@ -265,7 +247,7 @@ export default function ArticlePage({ params }: any) {
                 messages={messages}
                 setMessages={setMessages}
                 setAmount={setAmount}
-                handleSend={handleComment}
+                // handleSend={handleComment}
                 handleClick={handleDonate}
                 isDonated={isDonated}
                 loadingTx={isLoadingAllocation}

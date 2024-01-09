@@ -89,10 +89,7 @@ export default function Explore() {
       )}
       <div className="flex flex-wrap gap-[26px] md:p-12 p-4 justify-center">
         {articles.map((article: any, recipientIndex: number) => (
-          <Link
-            key={recipientIndex}
-            href={`/explore/${article.authorAddress}/${article.recipientId}/${article.content}`}
-          >
+          <Link key={recipientIndex} href={`/explore/${article.recipientId}`}>
             <CardLists
               Title={article.title}
               author={article.authorAddress}

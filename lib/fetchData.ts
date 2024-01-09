@@ -1,7 +1,12 @@
 import { cache } from "react";
 import { ethers } from "ethers";
 import { toChecksumAddress } from "ethereumjs-util";
-import { GET_ALL_ROUNDS, GET_ARTICLE, GET_ARTICLE_BY_ID } from "./query";
+import {
+  ALLO_GET_ARTICLE,
+  GET_ALL_ROUNDS,
+  GET_ARTICLE,
+  GET_ARTICLE_BY_ID,
+} from "./query";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 const client = new ApolloClient({
@@ -98,3 +103,20 @@ export const getAllRoundData = cache(async () => {
   console.log("AllRound :>> ", AllRound);
   return AllRound;
 });
+
+export async function getAlloArticle(id: string) {
+  const response = await fetch(
+    "https://api.studio.thegraph.com/query/63008/allo_pledgepost_arbsepolia/version/latest",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: ALLO_GET_ARTICLE,
+        variables: { id: id },
+      }),
+    }
+  ).then((res) => res.json());
+  return response.data?.articles[0];
+}
