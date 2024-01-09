@@ -1426,11 +1426,11 @@ export class Article extends Entity {
     this.set("address", Value.fromBytes(value));
   }
 
-  get recipientId(): RegisteredLoader {
+  get registerd(): RegisteredLoader {
     return new RegisteredLoader(
       "Article",
       this.get("id")!.toBytes().toHexString(),
-      "recipientId",
+      "registerd",
     );
   }
 
@@ -1508,11 +1508,11 @@ export class User extends Entity {
     this.set("id", Value.fromBytes(value));
   }
 
-  get sender(): RegisteredLoader {
+  get registerd(): RegisteredLoader {
     return new RegisteredLoader(
       "User",
       this.get("id")!.toBytes().toHexString(),
-      "sender",
+      "registerd",
     );
   }
 
