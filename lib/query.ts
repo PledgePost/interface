@@ -144,3 +144,23 @@ export const GET_ALL_ROUNDS = gql`
     }
   }
 `;
+
+export const ALLO_GET_ARTICLES = `
+  query AlloGetArticles {
+    articles {
+      id
+      address {
+        id
+      }
+      allocation {
+        amount
+      }
+      fundsDistributed {
+        amount
+      }
+      registerd {
+        data
+      }
+    }
+  }
+`;
