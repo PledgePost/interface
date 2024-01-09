@@ -27,10 +27,10 @@ import useDefaultProvider from "@/hooks/useDefaultProvider";
 import Image from "next/image";
 import { Comment } from "@/types";
 import { AlloABI } from "@/abi/Allo";
-import { ALLO_GET_ARTICLE } from "@/lib/query";
 import { fetchData, getAlloArticle } from "@/lib/fetchData";
 import { calculateAmount } from "@/lib/calculate";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StateContext } from "@/providers";
 // TODO: fix Image witdth and height
 
 const NATIVE = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".toLowerCase();
@@ -48,10 +48,10 @@ export default function ArticlePage({ params }: any) {
   const [isDonated, setIsDonated] = useState<any>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const provider: ethers.providers.JsonRpcProvider = useDefaultProvider();
-  const [estimatedAllocation, setEstimatedAllocation] = useState<any>(null);
   const { openConnectModal } = useConnectModal();
   const { address: currentAddress } = useAccount();
   const { chain } = useNetwork();
+  const { ethPrice } = StateContext();
   const [article, setArticle] = useState<any>([]);
   useEffect(() => {
     const decoder = ethers.utils.defaultAbiCoder;
@@ -135,21 +135,9 @@ export default function ArticlePage({ params }: any) {
   const handleDonate = async () => {
     if (!currentAddress) return alert("Please connect wallet");
     if (!amount) return alert("Please enter amount");
-    let lowercaseAddress = currentAddress.toLowerCase();
     if (currentAddress === article.authorAddress)
       return alert("You cannot donate to your own article");
     try {
-      // const permit2Data = {
-      //   permit: {
-      //     permitted: {
-      //       token: NATIVE,
-      //       amount: BigInt(1e18),
-      //     },
-      //     nonce: 0,
-      //     deadline: Math.floor(new Date().getTime() / 1000) + 10000,
-      //   },
-      //   signature: "",
-      // };
       const data = ethers.utils.defaultAbiCoder.encode(
         [
           "address",
@@ -200,13 +188,13 @@ export default function ArticlePage({ params }: any) {
       <div className="flex flex-row gap-4 my-4 justify-center">
         <SalesCard
           title="Recieved Donation"
-          amount={article.donation || 0}
+          amount={article.donation * ethPrice || 0}
           isLoading={isLoading}
         />
         <SalesCard
-          title="Estimated Matching"
+          title="Matched Funds"
           isLoading={isLoading}
-          amount={estimatedAllocation || 0}
+          amount={article.distributed * ethPrice || 0}
         />
         <SubscriptionCard
           title="Contributors"
