@@ -28,7 +28,7 @@ import Image from "next/image";
 import { Comment } from "@/types";
 import { AlloABI } from "@/abi/Allo";
 import { fetchData, getAlloArticle } from "@/lib/fetchData";
-import { calculateAmount } from "@/lib/calculate";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { StateContext } from "@/providers";
 // TODO: fix Image witdth and height
@@ -58,12 +58,10 @@ export default function ArticlePage({ params }: any) {
     async function getPost() {
       setIsLoading(true);
       let data = await getAlloArticle(params.articleId);
-      console.log("data", data);
       let decodedRegisterData = decoder.decode(
         ["bytes", "uint256"],
         data.registerd.data
       );
-
       let decodedRegisterParams = decoder.decode(
         ["address", "address", "tuple(uint256, string)"],
         decodedRegisterData[0]
@@ -72,12 +70,15 @@ export default function ArticlePage({ params }: any) {
         decodedRegisterParams[1],
         decodedRegisterParams[2][1]
       );
-      let donation = calculateAmount(data.alllocation);
+      let donation = 0;
       let donors = 0;
-      if (data.alllocation) {
-        donors = data.alllocation.length;
+      if (data.allocation.length > 0) {
+        donors = data.allocation.length;
+        for (let d = 0; d < data.allocation.length; d++) {
+          let amount = ethers.utils.formatEther(data.allocation[d].amount);
+          donation += parseFloat(amount);
+        }
       }
-      let distributed = calculateAmount(data.distributed);
       data = {
         ...data,
         ...IPFS,
@@ -87,7 +88,6 @@ export default function ArticlePage({ params }: any) {
         recipientIndex: BigNumber.from(decodedRegisterData[1]).toNumber(),
         donation,
         donors,
-        distributed,
       };
       setArticle(data);
       console.log("data", data);

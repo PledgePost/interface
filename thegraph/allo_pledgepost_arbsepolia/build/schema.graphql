@@ -113,15 +113,15 @@ type Article @entity {
   id: Bytes!
   address: User!
   registerd: Registered! @derivedFrom(field: "recipientId")
-  allocation: Allocated @derivedFrom(field: "recipientId")
+  allocation: [Allocated!] @derivedFrom(field: "recipientId")
   distribution: Distributed @derivedFrom(field: "recipientId")
   fundsDistributed: FundsDistributed @derivedFrom(field: "recipientId")
-  updatedRegistration: UpdatedRegistration @derivedFrom(field: "recipientId")
+  updatedRegistration: [UpdatedRegistration!] @derivedFrom(field: "recipientId")
 }
 
 type User @entity {
   id: Bytes!
-  registerd: Registered! @derivedFrom(field: "sender")
+  registerd: [Registered!] @derivedFrom(field: "sender")
   articles: [Article!] @derivedFrom(field: "address")
   donated: [Allocated!] @derivedFrom(field: "sender")
   fundsDistributed: [FundsDistributed!] @derivedFrom(field: "grantee")

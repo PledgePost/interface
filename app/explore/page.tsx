@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { StateContext } from "@/providers";
 import { ALLO_GET_ARTICLES } from "@/lib/query";
 import { BigNumber, ethers } from "ethers";
-import { calculateAmount } from "@/lib/calculate";
 
 async function getAlloArticles() {
   const response = await fetch(
@@ -49,8 +48,13 @@ export default function Explore() {
           decodedRegisterParams[1],
           decodedRegisterParams[2][1]
         );
-        let donation = calculateAmount(data[i].alllocation);
-        let distributed = calculateAmount(data[i].distributed);
+        let donation = 0;
+        if (data[i].allocation.length > 0) {
+          for (let d = 0; d < data[i].allocation.length; d++) {
+            let amount = ethers.utils.formatEther(data[i].allocation[d].amount);
+            donation += parseFloat(amount);
+          }
+        }
         data[i] = {
           ...data[i],
           ...IPFS,
@@ -59,7 +63,6 @@ export default function Explore() {
           content: decodedRegisterParams[2][1],
           recipientIndex: BigNumber.from(decodedRegisterData[1]).toNumber(),
           donation,
-          distributed,
         };
       }
       setArticles(data);
