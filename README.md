@@ -1,5 +1,7 @@
 ## PledgePost: Quadratic Funding Media Platform
 
+deployed strategy(Arb-Sepolia): [0x491D557fb2888403365CA68e354cF8DD35FCf907](https://sepolia.arbiscan.io/address/0x491d557fb2888403365ca68e354cf8dd35fcf907)
+
 <img width="1104" alt="Screenshot 2023-11-25 at 20 30 26" src="https://github.com/PledgePost/interface/assets/67859510/4623c0ae-540e-4a9d-ba95-365e4bad5bc1">
 
 ## WTF is PledgePost?
