@@ -3,7 +3,7 @@ import { getAlloArticle } from "@/lib/fetchData";
 
 // TODO: metadata for explore page, share
 export async function generateMetadata({ params }: any) {
-  const recipientId: string = params.articleId;
+  const recipientId: `0x${string}` = params.articleId;
   const article = await getAlloArticle(recipientId);
   const metadata: Metadata = {
     title: article.title,

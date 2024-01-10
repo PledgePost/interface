@@ -22,12 +22,12 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
-export default function ArticleBoard({ data, columns }: any) {
+export default function ArticleBoard({ columns, data }: any) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
-    data,
     columns,
+    data,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
@@ -35,7 +35,6 @@ export default function ArticleBoard({ data, columns }: any) {
       sorting,
     },
   });
-
   return (
     <div className="rounded-md border">
       <Table>

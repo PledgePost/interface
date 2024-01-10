@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import { toChecksumAddress } from "ethereumjs-util";
 import {
   ALLO_GET_ARTICLE,
+  ALLO_USER_INFO,
   GET_ALL_ROUNDS,
   GET_ARTICLE,
   GET_ARTICLE_BY_ID,
@@ -104,7 +105,7 @@ export const getAllRoundData = cache(async () => {
   return AllRound;
 });
 
-export async function getAlloArticle(id: string) {
+export async function getAlloArticle(id: `0x${string}` | undefined) {
   const response = await fetch(
     "https://api.studio.thegraph.com/query/63008/allo_pledgepost_arbsepolia/version/latest",
     {
@@ -119,4 +120,20 @@ export async function getAlloArticle(id: string) {
     }
   ).then((res) => res.json());
   return response.data?.articles[0];
+}
+export async function getAlloUserInfo(id: `0x${string}` | undefined) {
+  const response = await fetch(
+    "https://api.studio.thegraph.com/query/63008/allo_pledgepost_arbsepolia/version/latest",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: ALLO_USER_INFO,
+        variables: { id: id },
+      }),
+    }
+  ).then((res) => res.json());
+  return response.data?.users[0];
 }

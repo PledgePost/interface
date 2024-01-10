@@ -183,3 +183,25 @@ query AlloGetArticle ($id: Bytes!) {
 	}
 }
 `;
+export const ALLO_USER_INFO = `
+query AlloGetUser ($id: Bytes!) {
+	users (where: {id: $id}) {
+		id
+		articles {
+      id
+      address {
+        id
+      }
+      allocation {
+        amount
+      }
+      fundsDistributed {
+        amount
+      }
+      registerd {
+        data
+      }
+    }
+	}
+}
+`;

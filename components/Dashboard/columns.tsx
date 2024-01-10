@@ -1,7 +1,6 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { toChecksumAddress } from "ethereumjs-util";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,73 +13,73 @@ import {
 import Link from "next/link";
 import ApplicationModal from "./ApplicationModal";
 import { ethers } from "ethers";
+
 export type ArticleColumn = {
-  articleId: string;
-  author: {
-    id?: string;
-  };
-  authorAddress: string;
+  recipientId: `0x${string}`;
+  authorAddress: `0x${string}`;
   content: string;
+  donation: number;
+  recipientIndex: number;
   title: string;
-  status: string;
-  associatedRound: {
-    id?: string;
-    name: string;
-  };
+  value: string;
 };
 export type AnalyticsColumn = {
-  articleId: string;
-  title: string;
+  recipientId: `0x${string}`;
+  authorAddress: `0x${string}`;
+  content: string;
   donation: number;
-  matchingAmount: number;
-  comments: number;
-  allocation: any;
+  totalDonation: number;
+  recipientIndex: number;
+  title: string;
+  value: string;
+  fundDistributed: number;
+  comments?: number;
 };
 
 export const columns: ColumnDef<ArticleColumn>[] = [
   {
-    accessorKey: "articleId",
-    header: "ArticleId",
+    accessorKey: "recipientIndex",
+    header: "Article ID",
   },
   {
     accessorKey: "title",
     header: "Title",
   },
-  {
-    accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <div className="text-center">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Round Status
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      const article = row.original;
-      return (
-        <>
-          {article.associatedRound?.id ? (
-            <div className=" font-normal text-center">
-              {`Round${article.associatedRound?.id}: ${article.associatedRound.name}`}
-            </div>
-          ) : (
-            <div className=" font-normal text-center">No Round</div>
-          )}
-        </>
-      );
-    },
-  },
+  // TODO: manage status
+  // {
+  //   accessorKey: "status",
+  //   header: ({ column }) => {
+  //     return (
+  //       <div className="text-center">
+  //         <Button
+  //           variant="ghost"
+  //           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+  //         >
+  //           Round Status
+  //           <ArrowUpDown className="ml-2 h-4 w-4" />
+  //         </Button>
+  //       </div>
+  //     );
+  //   },
+  //   cell: ({ row }) => {
+  //     const article = row.original;
+  //     return (
+  //       <>
+  //         {article.associatedRound?.id ? (
+  //           <div className=" font-normal text-center">
+  //             {`Round${article.associatedRound?.id}: ${article.associatedRound.name}`}
+  //           </div>
+  //         ) : (
+  //           <div className=" font-normal text-center">No Round</div>
+  //         )}
+  //       </>
+  //     );
+  //   },
+  // },
   {
     id: "actions",
     cell: ({ row }) => {
       const article = row.original;
-      const author = toChecksumAddress(article.authorAddress);
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -93,12 +92,14 @@ export const columns: ColumnDef<ArticleColumn>[] = [
             <DropdownMenuItem>Edit draft</DropdownMenuItem>
             <DropdownMenuSeparator />
             <Link
-              href={`/explore/${author}/${article.articleId}/${article.content}`}
+              href={`/explore/${article.recipientId}`}
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <DropdownMenuItem>View on Explore</DropdownMenuItem>
             </Link>
             <Link
-              href={`https://${article.content}.ipfs.dweb.link/pledgepost:${author}`}
+              href={`https://${article.content}.ipfs.dweb.link/pledgepost:${article.authorAddress}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -109,24 +110,8 @@ export const columns: ColumnDef<ArticleColumn>[] = [
       );
     },
   },
-  {
-    id: "apply",
-    cell: ({ row }) => {
-      const article = row.original;
-      return (
-        <ApplicationModal
-          id={article.articleId}
-          round={article.associatedRound?.id}
-        />
-      );
-    },
-  },
 ];
 export const analyticsColumn: ColumnDef<AnalyticsColumn>[] = [
-  {
-    accessorKey: "articleId",
-    header: "ArticleId",
-  },
   {
     accessorKey: "title",
     header: "Title",
@@ -148,16 +133,14 @@ export const analyticsColumn: ColumnDef<AnalyticsColumn>[] = [
     },
     cell: ({ row }) => {
       const article = row.original;
-      const formattedDonation: any = parseFloat(
-        article.donation.toString()
-      ).toFixed(2);
+      const formattedDonation: any = article.donation?.toFixed(2);
       return (
         <div className="text-center font-medium">${formattedDonation}</div>
       );
     },
   },
   {
-    accessorKey: "matchingAmount",
+    accessorKey: "fundDistributed",
     header: ({ column }) => {
       return (
         <div className="text-center">
@@ -173,18 +156,10 @@ export const analyticsColumn: ColumnDef<AnalyticsColumn>[] = [
     },
     cell: ({ row }) => {
       const article = row.original;
-      if (!article.allocation[0]?.amount)
-        return <div className="text-center font-medium">$0</div>;
-      const allocated = ethers.utils.formatUnits(
-        article.allocation[0]?.amount,
-        18
-      );
-      const formattedMatchingAmount: any = parseFloat(
-        allocated.toString()
-      ).toFixed(2);
+      const formattedMatchingAmount: any = article.fundDistributed?.toFixed(2);
       return (
         <div className="text-center font-medium">
-          ${formattedMatchingAmount}
+          ${formattedMatchingAmount || 0}
         </div>
       );
     },
@@ -201,6 +176,10 @@ export const analyticsColumn: ColumnDef<AnalyticsColumn>[] = [
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
+    },
+    cell: ({ row }) => {
+      const article = row.original;
+      return <div className="text-center font-medium">{article.comments}</div>;
     },
   },
 ];
