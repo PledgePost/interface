@@ -1,11 +1,5 @@
 "use client";
-import { ethers } from "ethers";
 import Image from "next/image";
-import polygonLogo from "../public/polygon-logo-colored.svg";
-import polygonToken from "../public/polygon-token.svg";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { use } from "react";
-import { getAllRoundData } from "@/lib/fetchData";
 
 export default function Home() {
   return (
