@@ -8,7 +8,11 @@ import { ProfileParams, createProfile } from "@/utils/registry";
 import { showSuccessToast } from "@/hooks/useNotification";
 import { DonationVotingABI } from "@/abi/DonationVoting";
 import { getMerkleProof } from "@/utils/merkleProof";
-import { buildStatusRow } from "@/utils/buildStatusRow";
+import {
+  buildStatusRow,
+  decimalToBinary,
+  updateStatusColumn,
+} from "@/utils/buildStatusRow";
 
 export interface CreatePoolArgs {
   version: string;
@@ -71,24 +75,57 @@ const ManagerPage = () => {
     ...allo,
     functionName: "distribute",
   });
+  const { write: updatePool } = useContractWrite({
+    address: strategy.address,
+    abi: DonationVotingABI,
+    functionName: "updatePoolTimestamps",
+  });
 
   async function acceptRecipient() {
-    reviewRecipient({
-      args: [[buildStatusRow(0, 2)], 4],
-    });
-    // setTimeout(() => {}, 5000);
+    // TODO: fix reveiwRecipient issue
+    // only this recipient will be accepted
     // reviewRecipient({
-    //   args: [[buildStatusRow(2, 2)], 4],
+    //   args: [[buildStatusRow(0, 2)], 4],
     // });
-    // setTimeout(() => {}, 5000);
+    console.log(buildStatusRow(0, 2));
+    console.log(buildStatusRow(1, 2));
+    console.log(buildStatusRow(2, 2));
+    // const currentRow = 0b10101010; // Replace with the actual current row value
+    // const recipientIndex = 2; // Replace with the actual recipient index
+    // // const status = decimalToBinary(2); // Replace with the actual status
+    // // console.log("status", status);
+    // // const updatedRow = updateStatusColumn(currentRow, recipientIndex, status);
+    // // console.log("Updated Row:", updatedRow); // Log the binary representation of the updated row
     // reviewRecipient({
-    //   args: [[buildStatusRow(3, 2)], 4],
+    //   args: [
+    //     [
+    //       { index: 0, statusRow: 2 },
+    //       { index: 1, statusRow: 32 },
+    //       {
+    //         index: 2,
+    //         statusRow: 512,
+    //       },
+    //     ],
+    //     4,
+    //   ],
     // });
-    console.log(buildStatusRow(1, 1));
-    console.log(buildStatusRow(2, 1));
-    console.log(buildStatusRow(3, 1));
   }
-
+  async function updatePoolTimestamps() {
+    updatePool({
+      args: [
+        Math.floor(new Date().getTime() / 1000) + 10,
+        Math.floor(new Date().getTime() / 1000) + 20,
+        Math.floor(new Date().getTime() / 1000) + 30,
+        1704944545,
+      ],
+    });
+  }
+  /**
+   * 1704699214
+   * 1704726000
+   * 1704812400
+   * 1704944545
+   */
   async function handleCreatePool() {
     /* 
 		 * block.timestamp < _registrationStartTime ||
@@ -98,8 +135,6 @@ const ManagerPage = () => {
       _registrationEndTime < _allocationEndTime;
 		*/
     const profileId = await createOwnerProfile();
-    // "0xeaee9fcf238cf3bf7068ab46ad40b880a62b4afec9c02bcd5818ffed677c3d72";
-
     try {
       const initData: CreatePoolArgs = {
         version: "1.0.0",
@@ -237,6 +272,13 @@ const ManagerPage = () => {
         }}
       >
         Distribute
+      </Button>
+      <Button
+        onClick={() => {
+          updatePoolTimestamps();
+        }}
+      >
+        Update Pool Timestamps
       </Button>
     </div>
   );
