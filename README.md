@@ -37,6 +37,14 @@ PledgePost is using DonationVoting strategy to distribute funds to writers. This
 4. **Dashboard Features**:
    - A detailed dashboard enables writers to draft, edit, and publish their articles.
    - It also provides insights into contribution amounts, donor counts, and comment statistics.
+
+## Disclaimer
+I was stuck to reviewRecipient, ref [here](https://github.com/allo-protocol/allo-v2/discussions/457). Due to this issue, only first article has accepted and being able to recieve donation.
+
+to fix those issue, I [commited](https://github.com/tnkshuuhei/allo-v2/commit/8e42353879448f9192b34d4cf0ff76d8002c9c5c) and rewrote strategy code.
+
+
+
 ## Getting Started
 
 setup frontend
