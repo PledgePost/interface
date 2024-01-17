@@ -1,6 +1,6 @@
 "use client";
 import { ethers } from "ethers";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { makeFileObjects, storeFiles } from "@/hooks/useweb3Storage";
 import {
   showDefaultToast,
@@ -16,6 +16,8 @@ import { TApplicationMetadata, TNewApplication } from "@/types/alloTypes";
 import { AlloABI } from "@/abi/Allo";
 import { getProfileById } from "@/utils/request";
 import { chainConfig } from "@/utils/allo";
+import { useEthersProvider } from "@/hooks/useEthers";
+import { lookupAddress } from "@/hooks/useENS";
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
@@ -53,8 +55,6 @@ const Post = () => {
       const file: File | null = e.target.files[0];
       const blob = await readAsBlob(file);
       const base64 = await readAsBase64(file);
-      console.log("base64", base64);
-      console.log("blob", blob);
       setCoverImage(base64);
     }
   };
@@ -90,8 +90,10 @@ const Post = () => {
       showErrorToast("Please connect your wallet");
       return;
     }
+    const ensName = await lookupAddress(currentAddress);
+    console.log("ensName", ensName);
+    if (!title || !value || !base64) return alert("Please fill out all fields");
     try {
-      if (!title || !value) return;
       showDefaultToast("Creating Profile for Article...");
       const files = makeFileObjects(obj, currentAddress);
       const cid: CIDString | undefined = await storeFiles(files);
@@ -118,7 +120,7 @@ const Post = () => {
         profileId: profileId,
       });
       console.log("authorProfile", authorProfile);
-      0x06aa005386f53ba7b980c61e0d067cabc7602a62;
+
       const encodeRegisterData = ethers.utils.defaultAbiCoder.encode(
         ["address", "address", "tuple(uint256, string)"],
         [
