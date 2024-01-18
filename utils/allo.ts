@@ -5,7 +5,7 @@ export const chainConfig = {
   chain: 421614,
   rpc: "https://arbitrum-sepolia.blockpi.network/v1/rpc/public",
   // chain: 420,
-  // rpc: "https://optimism-goerli.infura.io/v3/cf4f68a2648c42159c880252a44f923b",
+  // rpc: `https://optimism-goerli.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID!}`,
 };
 // Create a new Allo instance
 export const allo = new Allo(chainConfig);
