@@ -16,7 +16,6 @@ import { TApplicationMetadata, TNewApplication } from "@/types/alloTypes";
 import { AlloABI } from "@/abi/Allo";
 import { getProfileById } from "@/utils/request";
 import { chainConfig } from "@/utils/allo";
-import { useEthersProvider } from "@/hooks/useEthers";
 import { lookupAddress } from "@/hooks/useENS";
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
@@ -34,7 +33,6 @@ const allo = {
 const Post = () => {
   const [value, setValue] = useState(``);
   const [title, setTitle] = useState("");
-  const [obj, setObj] = useState({});
   const [coverImage, setCoverImage] = useState<any>();
   const [blob, setBlob] = useState<any>();
   const [base64, setBase64] = useState<any>();
@@ -95,7 +93,16 @@ const Post = () => {
     if (!title || !value || !base64) return alert("Please fill out all fields");
     try {
       showDefaultToast("Creating Profile for Article...");
-      const files = makeFileObjects(obj, currentAddress);
+      let date = Math.floor(new Date().getTime() / 1000);
+      const newObject: Content = {
+        coverImage,
+        title,
+        value,
+        currentAddress,
+        UNIXtimestamp: date,
+        ensName,
+      };
+      const files = makeFileObjects(newObject, currentAddress);
       const cid: CIDString | undefined = await storeFiles(files);
       let profileData: ProfileParams = {
         pointer: cid,
@@ -146,17 +153,6 @@ const Post = () => {
       );
     }
   }, [chain, data, isSuccess]);
-
-  useEffect(() => {
-    const object: Content = {
-      coverImage,
-      title,
-      value,
-      currentAddress,
-      UNIXtimestamp,
-    };
-    setObj(object);
-  }, [title, value, currentAddress, UNIXtimestamp, coverImage]);
 
   return (
     <div className="flex justify-center">

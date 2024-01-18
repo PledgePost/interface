@@ -10,10 +10,11 @@ const CardLists = ({
   Description,
   ImageUrl,
   author,
+  ens,
   donation,
   round,
 }: any) => {
-  const addr = sliceAddress(author);
+  let addr = ens ? ens : sliceAddress(author);
   let amount = donation.toFixed(2);
   return (
     <div className="w-[400px] rounded-[15px] bg-white cursor-pointer shadow-lg">
