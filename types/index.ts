@@ -3,7 +3,7 @@ export interface Content {
   title: string;
   value: string;
   currentAddress: any;
-  ensName?: string | undefined;
+  ensName?: any;
   UNIXtimestamp: any;
 }
 export interface Comment {

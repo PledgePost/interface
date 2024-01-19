@@ -14,6 +14,7 @@ import {
 
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import {
+  mainnet,
   polygon,
   optimism,
   arbitrum,
