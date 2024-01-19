@@ -31,6 +31,10 @@ import { fetchData, getAlloArticle } from "@/lib/fetchData";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { StateContext } from "@/providers";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import sliceAddress from "@/utils/sliceAddress";
+import { dateConvert } from "@/utils/dateConvert";
+import Link from "next/link";
 // TODO: fix Image witdth and height
 
 const NATIVE = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".toLowerCase();
@@ -82,8 +86,10 @@ export default function ArticlePage({ params }: any) {
       data = {
         ...data,
         ...IPFS,
+        dateConverted: dateConvert(data.registerd.blockTimestamp),
         recipientId: decodedRegisterParams[0],
         authorAddress: decodedRegisterParams[1],
+        addr: sliceAddress(decodedRegisterParams[1]),
         content: decodedRegisterParams[2][1],
         recipientIndex: BigNumber.from(decodedRegisterData[1]).toNumber(),
         donation,
@@ -178,13 +184,11 @@ export default function ArticlePage({ params }: any) {
           className="flex justify-center mx-auto"
           src={article.coverImage}
           alt="cover image"
-          width={800}
-          height={400}
+          width={600}
+          height={300}
         />
       )}
-      <h1 className="flex justify-center text-3xl font-bold my-5">
-        {article.title}
-      </h1>
+
       <div className="flex flex-row gap-4 my-4 justify-center">
         <SalesCard
           title="Recieved Donation"
@@ -202,17 +206,42 @@ export default function ArticlePage({ params }: any) {
           isLoading={isLoading}
         />
       </div>
-      <div className="flex flex-row gap-4">
-        <div className="w-3/4 bg-white p-5 rounded shadow">
-          <ReactMarkdown
-            className="markdown overflow-auto"
-            remarkPlugins={[remarkGfm]}
-            components={{ pre: Pre }}
-          >
-            {article.value}
-          </ReactMarkdown>
+      <div className="flex md:flex-row flex-col gap-4">
+        <div className="md:w-3/4 bg-white p-10 rounded shadow flex flex-col gap-4">
+          <h1 className="flex flex-row flex-wrap text-3xl font-bold">
+            {article.title}
+          </h1>
+          <div className="flex flex-row gap-4 items-center">
+            <Link
+              href={`/user/${article.authorAddress}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-row gap-2 items-center cursor-pointer"
+            >
+              <Avatar>
+                <AvatarImage
+                  src={article.avatar || "https://picsum.photos/500/300"}
+                />
+              </Avatar>
+              <p className="text-[20px] font-medium">
+                {article.ensName ? article.ensName : article.addr}
+              </p>
+            </Link>
+            <p className="text-[#808191] text-[14px]">
+              {article.dateConverted}
+            </p>
+          </div>
+          <div>
+            <ReactMarkdown
+              className="markdown overflow-auto"
+              remarkPlugins={[remarkGfm]}
+              components={{ pre: Pre }}
+            >
+              {article.value}
+            </ReactMarkdown>
+          </div>
         </div>
-        <div className="w-1/4 bg-white p-5 rounded shadow gap-4">
+        <div className="md:w-1/4 bg-white p-5 rounded shadow gap-4">
           <div className="flex justify-center font-semibold p-2">Comments</div>
           <div>
             {comments?.length === 0 ? (

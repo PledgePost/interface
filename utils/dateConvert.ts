@@ -1,6 +1,6 @@
 export function dateFromISO(isoString: string): string {
   const date = new Date(isoString);
-  const timestamp = date.getTime() / 1000; // JavaScriptのDateはミリ秒単位なので、秒単位に変換
+  const timestamp = date.getTime() / 1000; // convert to seconds
   return dateConvert(timestamp);
 }
 
