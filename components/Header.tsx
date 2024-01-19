@@ -24,7 +24,6 @@ const Header = () => {
                 <Link
                   href="/"
                   className="block py-2 pr-4 pl-3 text-gray-700 bg-primary-700 lg:bg-transparent lg:text-primary-700 lg:p-0 "
-                  aria-current="page"
                 >
                   Home
                 </Link>
@@ -33,7 +32,6 @@ const Header = () => {
                 <Link
                   href="/explore"
                   className="block py-2 pr-4 pl-3 text-gray-700 bg-primary-700 lg:bg-transparent lg:text-primary-700 lg:p-0 "
-                  aria-current="page"
                 >
                   Explore
                 </Link>
