@@ -179,6 +179,7 @@ query AlloGetArticle ($id: Bytes!) {
 		}
 		registerd {
 			data
+			blockTimestamp
 		}
 	}
 }

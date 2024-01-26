@@ -1,6 +1,6 @@
 "use client";
 import { ethers } from "ethers";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { makeFileObjects, storeFiles } from "@/hooks/useweb3Storage";
 import {
   showDefaultToast,
@@ -9,13 +9,21 @@ import {
 } from "@/hooks/useNotification";
 import dynamic from "next/dynamic";
 import { CIDString } from "web3.storage";
-import { useAccount, useContractWrite, useNetwork } from "wagmi";
+import {
+  useAccount,
+  useContractWrite,
+  useEnsAddress,
+  useEnsAvatar,
+  useEnsName,
+  useNetwork,
+} from "wagmi";
 import { Content } from "@/types";
 import { ProfileParams, createProfile } from "@/utils/registry";
 import { TApplicationMetadata, TNewApplication } from "@/types/alloTypes";
 import { AlloABI } from "@/abi/Allo";
 import { getProfileById } from "@/utils/request";
 import { chainConfig } from "@/utils/allo";
+import { normalize } from "viem/ens";
 const RichEditor = dynamic(() => import("@/components/RichEditor"), {
   ssr: false,
 });
@@ -32,16 +40,17 @@ const allo = {
 const Post = () => {
   const [value, setValue] = useState(``);
   const [title, setTitle] = useState("");
-  const [obj, setObj] = useState({});
   const [coverImage, setCoverImage] = useState<any>();
   const [blob, setBlob] = useState<any>();
   const [base64, setBase64] = useState<any>();
 
-  let timestamp = new Date();
-  let unix = timestamp.getTime();
-  let UNIXtimestamp = Math.floor(unix / 1000);
   const { address: currentAddress } = useAccount();
   const { chain } = useNetwork();
+  const ensName = useEnsName({
+    address: normalize(currentAddress as string) as `0x${string}`,
+    chainId: 1,
+  });
+  const ensAvatar = useEnsAvatar({ name: ensName.data, chainId: 1 });
 
   const { data, isLoading, isSuccess, write } = useContractWrite({
     address: allo.address,
@@ -53,8 +62,6 @@ const Post = () => {
       const file: File | null = e.target.files[0];
       const blob = await readAsBlob(file);
       const base64 = await readAsBase64(file);
-      console.log("base64", base64);
-      console.log("blob", blob);
       setCoverImage(base64);
     }
   };
@@ -90,10 +97,20 @@ const Post = () => {
       showErrorToast("Please connect your wallet");
       return;
     }
+    if (!title || !value || !base64) return alert("Please fill out all fields");
     try {
-      if (!title || !value) return;
       showDefaultToast("Creating Profile for Article...");
-      const files = makeFileObjects(obj, currentAddress);
+      let date = Math.floor(new Date().getTime() / 1000);
+      const newObject = {
+        coverImage,
+        title,
+        value,
+        currentAddress,
+        UNIXtimestamp: date,
+        ensName: ensName.data,
+        avatar: ensAvatar.data,
+      };
+      const files = makeFileObjects(newObject, currentAddress);
       const cid: CIDString | undefined = await storeFiles(files);
       let profileData: ProfileParams = {
         pointer: cid,
@@ -118,7 +135,7 @@ const Post = () => {
         profileId: profileId,
       });
       console.log("authorProfile", authorProfile);
-      0x06aa005386f53ba7b980c61e0d067cabc7602a62;
+
       const encodeRegisterData = ethers.utils.defaultAbiCoder.encode(
         ["address", "address", "tuple(uint256, string)"],
         [
@@ -144,17 +161,6 @@ const Post = () => {
       );
     }
   }, [chain, data, isSuccess]);
-
-  useEffect(() => {
-    const object: Content = {
-      coverImage,
-      title,
-      value,
-      currentAddress,
-      UNIXtimestamp,
-    };
-    setObj(object);
-  }, [title, value, currentAddress, UNIXtimestamp, coverImage]);
 
   return (
     <div className="flex justify-center">

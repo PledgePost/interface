@@ -7,7 +7,7 @@ const privateKey = process.env.NEXT_PUBLIC_PRIVATE_KEY!;
 
 export async function deployStrategy() {
   const provider = new ethers.providers.JsonRpcProvider(
-    "https://arbitrum-sepolia.infura.io/v3/cf4f68a2648c42159c880252a44f923b"
+    `https://optimism-goerli.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_ID!}`
   );
   console.log("provider: ", provider);
   const wallet = new ethers.Wallet(privateKey, provider);

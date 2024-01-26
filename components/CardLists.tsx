@@ -10,16 +10,18 @@ const CardLists = ({
   Description,
   ImageUrl,
   author,
+  ens,
+  avatar,
   donation,
   round,
 }: any) => {
-  const addr = sliceAddress(author);
+  let addr = ens ? ens : sliceAddress(author);
   let amount = donation.toFixed(2);
   return (
     <div className="w-[400px] rounded-[15px] bg-white cursor-pointer shadow-lg">
       <AspectRatio ratio={18 / 9} className="bg-muted">
         <Image
-          src="https://picsum.photos/500/300"
+          src={ImageUrl || "https://picsum.photos/500/300"}
           alt="Photo by Drew Beamer"
           fill
           className="rounded-md object-cover"
@@ -52,7 +54,7 @@ const CardLists = ({
         </div>
         <div className="flex items-center mt-[10px] gap-[12px]">
           <Avatar>
-            <AvatarImage src={ImageUrl} />
+            <AvatarImage src={avatar || "https://picsum.photos/500/300"} />
             <AvatarFallback></AvatarFallback>
           </Avatar>
           <p className="flex-1 font-epilogue font-semibold text-[14px] truncate">

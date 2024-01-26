@@ -96,6 +96,8 @@ export default function Explore() {
             <CardLists
               Title={article.title}
               author={article.authorAddress}
+              ens={article.ensName}
+              avatar={article.avatar}
               Description={article.value}
               ImageUrl={article.coverImage}
               donation={article.donation * ethPrice}
