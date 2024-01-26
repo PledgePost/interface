@@ -12,6 +12,7 @@ import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { Badge } from "./ui/badge";
 import Image from "next/image";
+import { marked } from "marked";
 
 // TODO: display image in markdown
 export default function RichEditor({
@@ -23,6 +24,13 @@ export default function RichEditor({
   handleImage,
   handleSubmit,
 }: any) {
+  marked.setOptions({
+    gfm: true,
+    breaks: true,
+  });
+
+  const htmlText = marked.parse(value);
+
   return (
     <div className="w-full mx-4 md:w-3/4 bg-white shadow-lg rounded-lg overflow-hidden md:px-16 md:py-12">
       <div className="items-center p-4 flex flex-col gap-4">
@@ -32,7 +40,13 @@ export default function RichEditor({
             onChange={(e) => handleImage(e)}
           >
             {image ? (
-              <Image src={image} alt="cover image" width={800} height={400} />
+              <Image
+                className="flex justify-center mx-auto"
+                src={image}
+                alt="cover image"
+                width={600}
+                height={300}
+              />
             ) : (
               <label className="flex flex-col items-center justify-center md:w-[600px] md:h-[300px] border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -96,13 +110,16 @@ export default function RichEditor({
             />
           </TabsContent>
           <TabsContent value="preview">
-            <ReactMarkdown
+            <article className="prose lg:prose-lg p-4">
+              <div dangerouslySetInnerHTML={{ __html: htmlText }} />
+            </article>
+            {/* <ReactMarkdown
               className="markdown md:h-[500px] overflow-auto"
               remarkPlugins={[remarkGfm]}
               components={{ pre: Pre }}
             >
               {value}
-            </ReactMarkdown>
+            </ReactMarkdown> */}
           </TabsContent>
         </Tabs>
         <div className="flex justify-between p-4">

@@ -35,6 +35,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import sliceAddress from "@/utils/sliceAddress";
 import { dateConvert } from "@/utils/dateConvert";
 import Link from "next/link";
+import { marked } from "marked";
 // TODO: fix Image witdth and height
 
 const NATIVE = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".toLowerCase();
@@ -57,6 +58,11 @@ export default function ArticlePage({ params }: any) {
   const { chain } = useNetwork();
   const { ethPrice } = StateContext();
   const [article, setArticle] = useState<any>([]);
+  marked.setOptions({
+    gfm: true,
+    breaks: true,
+  });
+
   useEffect(() => {
     const decoder = ethers.utils.defaultAbiCoder;
     async function getPost() {
@@ -83,9 +89,11 @@ export default function ArticlePage({ params }: any) {
           donation += parseFloat(amount);
         }
       }
+      const htmlText = marked.parse(IPFS.value);
       data = {
         ...data,
         ...IPFS,
+        htmlText,
         dateConverted: dateConvert(data.registerd.blockTimestamp),
         recipientId: decodedRegisterParams[0],
         authorAddress: decodedRegisterParams[1],
@@ -232,13 +240,16 @@ export default function ArticlePage({ params }: any) {
             </p>
           </div>
           <div>
-            <ReactMarkdown
+            {/* <ReactMarkdown
               className="markdown overflow-auto"
               remarkPlugins={[remarkGfm]}
               components={{ pre: Pre }}
             >
               {article.value}
-            </ReactMarkdown>
+            </ReactMarkdown> */}
+            <article className="prose lg:prose-lg">
+              <div dangerouslySetInnerHTML={{ __html: article.htmlText }} />
+            </article>
           </div>
         </div>
         <div className="md:w-1/4 bg-white p-5 rounded shadow gap-4">
