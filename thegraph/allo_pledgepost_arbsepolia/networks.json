@@ -1,0 +1,8 @@
+{
+  "arbitrum-sepolia": {
+    "DonationVotingMerkleDistributionDirectTransferStrategy": {
+      "address": "0x491D557fb2888403365CA68e354cF8DD35FCf907",
+      "startBlock": 5624575
+    }
+  }
+}

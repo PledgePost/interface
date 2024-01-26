@@ -4,8 +4,8 @@ export const ChainConfig = {
     token: "ETH",
     label: "Optimism",
     shortName: "opt",
-    rpcUrl:
-      "https://optimism-mainnet.infura.io/v3/cf4f68a2648c42159c880252a44f923b",
+    rpcUrl: `https://optimism-mainnet.infura.io/v3/${process.env
+      .NEXT_PUBLIC_INFURA_ID!}`,
     blockExplorerUrl: "https://optimistic.etherscan.io",
   },
   420: {
@@ -13,8 +13,8 @@ export const ChainConfig = {
     token: "gETH",
     label: "Optimism Goerli",
     shortName: "opt",
-    rpcUrl:
-      "https://optimism-goerli.infura.io/v3/cf4f68a2648c42159c880252a44f923b",
+    rpcUrl: `https://optimism-goerli.infura.io/v3/${process.env
+      .NEXT_PUBLIC_INFURA_ID!}`,
     blockExplorerUrl: "https://goerli-optimistic.etherscan.io",
   },
 };

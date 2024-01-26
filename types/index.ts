@@ -3,6 +3,7 @@ export interface Content {
   title: string;
   value: string;
   currentAddress: any;
+  ensName?: any;
   UNIXtimestamp: any;
 }
 export interface Comment {

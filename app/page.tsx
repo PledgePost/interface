@@ -1,58 +1,51 @@
 "use client";
-import { ethers } from "ethers";
 import Image from "next/image";
-import polygonLogo from "../public/polygon-logo-colored.svg";
-import polygonToken from "../public/polygon-token.svg";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { use } from "react";
-import { getAllRoundData } from "@/lib/fetchData";
 
 export default function Home() {
-  const rounds = use(getAllRoundData());
-
   return (
-    <div className="flex flex-wrap gap-[26px] md:p-12 p-4">
-      {rounds.length === 0 ? (
-        <p className="font-epilogue font-semibold text-[14px] leading-[30px] text-[#818183]">
-          No round available
-        </p>
-      ) : (
+    <div className="flex md:flex-row flex-col justify-center lg:p-12 p-4">
+      <Image
+        className="mx-auto w-1/2 flex justify-center items-center"
+        src={
+          "https://github.com/PledgePost/interface/assets/67859510/4623c0ae-540e-4a9d-ba95-365e4bad5bc1"
+        }
+        alt="PledgePost Diagram"
+        width={800}
+        height={800}
+      />
+      <div className="md:w-1/2 p-4 mx-auto flex flex-col justify-center gap-4">
         <>
-          {rounds.map((round: any, index: number) => (
-            <div
-              key={index}
-              className="rounded-[15px] bg-white cursor-pointer shadow-lg"
-            >
-              <div className="w-[400px] ">
-                <Image
-                  src={polygonLogo}
-                  alt="roundImage"
-                  className="w-full h-[158px] object-contain rounded-[15px] p-2"
-                  priority
-                />
-              </div>
-              <div className="flex flex-col p-4">
-                <div className="flex items-center mt-[10px] gap-[12px]">
-                  <Avatar>
-                    <AvatarImage src="/polygon-token.svg" />
-                    <AvatarFallback></AvatarFallback>
-                  </Avatar>
-                  <h3 className="font-epilogue font-semibold text-[16px] text-black text-left leading-[26px] truncate">
-                    {round.name}
-                  </h3>
-                </div>
-                <div className="flex justify-between flex-wrap mt-[10px] gap-2">
-                  <div className="flex flex-col">
-                    <h4 className="font-epilogue font-semibold text-[14px] text-[#808191] leading-[22px]">
-                      Start: {round.startDate} - End: {round.endDate}
-                    </h4>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+          <h1 className=" font-extrabold">WTF is PledgePost?</h1>
+          <p className="text-gray-500">
+            PledgePost is a platform where writers can publish articles, collect
+            donations, and receive additional funding for their contributions
+            through Quadratic Funding. We envision a world where contributions
+            to collective knowledge, an important public good, are fairly
+            rewarded, and the main goal of PledgePost is not only to promote
+            open knowledge sharing, but also to ensure that it is incentivized
+            and respected. Our platform will ensure that writers are fairly
+            rewarded for their invaluable role in enriching our collective
+            knowledge.
+          </p>
         </>
-      )}
+        <>
+          <h1 className=" font-extrabold">How PledgePost works?</h1>
+          <p className="text-gray-500">
+            PledgePost is built on top of Allo Protocol by Gitcoin, which is a
+            set of smart contracts that collectively offer an advanced framework
+            for fund management, fee handling, and governance.
+          </p>
+          <p className="text-gray-500">
+            PledgePost is using
+            DonationVotingMerkleDistributionDirectTransferStrategy to distribute
+            funds to writers. This strategy is based on the idea of Quadratic
+            Funding, which is a mechanism for funding public goods like Gitcoin
+            does. It is a matching fund that matches the square of the sum of
+            the square roots of the contributions, in our case it is donations
+            for the articles posted through PledgePost.
+          </p>
+        </>
+      </div>
     </div>
   );
 }

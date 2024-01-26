@@ -11,7 +11,7 @@ export async function getEthPrice() {
 const stateContext = createContext<any>(null);
 
 export const StateProvider = ({ children }: { children: React.ReactNode }) => {
-  const [ethPrice, setEthPrice] = useState(0);
+  const [ethPrice, setEthPrice] = useState<number>();
 
   useEffect(() => {
     async function fetchETHprice() {

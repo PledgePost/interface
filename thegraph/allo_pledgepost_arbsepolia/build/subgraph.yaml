@@ -1,0 +1,56 @@
+specVersion: 0.0.5
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum
+    name: DonationVotingMerkleDistributionDirectTransferStrategy
+    network: arbitrum-sepolia
+    source:
+      address: "0x491D557fb2888403365CA68e354cF8DD35FCf907"
+      abi: DonationVotingMerkleDistributionDirectTransferStrategy
+      startBlock: 5624575
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Article
+        - User
+        - Allocated
+        - BatchPayoutSuccessful
+        - Distributed
+        - DistributionUpdated
+        - FundsDistributed
+        - Initialized
+        - PoolActive
+        - RecipientStatusUpdated
+        - Registered
+        - TimestampsUpdated
+        - UpdatedRegistration
+      abis:
+        - name: DonationVotingMerkleDistributionDirectTransferStrategy
+          file: DonationVotingMerkleDistributionDirectTransferStrategy/abis/DonationVotingMerkleDistributionDirectTransferStrategy.json
+      eventHandlers:
+        - event: Allocated(indexed address,uint256,address,address)
+          handler: handleAllocated
+        - event: BatchPayoutSuccessful(indexed address)
+          handler: handleBatchPayoutSuccessful
+        - event: Distributed(indexed address,address,uint256,address)
+          handler: handleDistributed
+        - event: DistributionUpdated(bytes32,(uint256,string))
+          handler: handleDistributionUpdated
+        - event: FundsDistributed(uint256,address,indexed address,indexed address)
+          handler: handleFundsDistributed
+        - event: Initialized(uint256,bytes)
+          handler: handleInitialized
+        - event: PoolActive(bool)
+          handler: handlePoolActive
+        - event: RecipientStatusUpdated(indexed uint256,uint256,address)
+          handler: handleRecipientStatusUpdated
+        - event: Registered(indexed address,bytes,address)
+          handler: handleRegistered
+        - event: TimestampsUpdated(uint64,uint64,uint64,uint64,address)
+          handler: handleTimestampsUpdated
+        - event: UpdatedRegistration(indexed address,bytes,address,uint8)
+          handler: handleUpdatedRegistration
+      file: DonationVotingMerkleDistributionDirectTransferStrategy/DonationVotingMerkleDistributionDirectTransferStrategy.wasm

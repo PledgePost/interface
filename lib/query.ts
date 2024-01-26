@@ -144,3 +144,65 @@ export const GET_ALL_ROUNDS = gql`
     }
   }
 `;
+
+export const ALLO_GET_ARTICLES = `
+  query AlloGetArticles {
+    articles {
+      id
+      address {
+        id
+      }
+      allocation {
+        amount
+      }
+      fundsDistributed {
+        amount
+      }
+      registerd {
+        data
+      }
+    }
+  }
+`;
+export const ALLO_GET_ARTICLE = `
+query AlloGetArticle ($id: Bytes!) {
+	articles (where: {id: $id}) {
+		id
+		address {
+			id
+		}
+		allocation {
+			amount
+		}
+		fundsDistributed {
+			amount
+		}
+		registerd {
+			data
+			blockTimestamp
+		}
+	}
+}
+`;
+export const ALLO_USER_INFO = `
+query AlloGetUser ($id: Bytes!) {
+	users (where: {id: $id}) {
+		id
+		articles {
+      id
+      address {
+        id
+      }
+      allocation {
+        amount
+      }
+      fundsDistributed {
+        amount
+      }
+      registerd {
+        data
+      }
+    }
+	}
+}
+`;
